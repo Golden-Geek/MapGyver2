@@ -196,6 +196,15 @@
 - Prior CI 38814598276 is now fully green at 1345f17: Windows Debug/Release,
   Linux/macOS, plan and quality-gate; all ten pre-wire contracts. New wire and
   restoration code has local eleven-contract results, not hosted results yet.
+- Wire/restoration committed as beca81ae2fca82b4d4fc64f1c8a87edf0297080b.
+  Clean Windows Debug/Release 11/11 passed with exact SHA/dirty=false; retained
+  M02-C04-local.json includes parsed JUnit and independent schema validator
+  command/provenance/hashes. No new native runtime dependency was added.
+  Next: push code/evidence, inspect hosted results, then implement independent
+  M03.C01 reliable control envelopes, authored snapshots/subscriptions and Windows
+  named-pipe service. M01 remains unqualified, so dependent milestone completion
+  is still disallowed. Renderer application/frame and durable save outcomes must
+  stay separate from authored acceptance; never fabricate an applied GPU frame.
 
 ## Build/hardware commands
 
