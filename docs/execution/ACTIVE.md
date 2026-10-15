@@ -89,6 +89,31 @@
   Final Debug/Release each pass 7/7 CTest, including nested keep-alive and ID
   collision rollback. Next: commit, clean-source/hosted evidence. No decoder readiness or
   SDK shutdown is claimed by these portable logical ownership tests.
+- C01 ownership code 4d1efdb0b3f57c26e5a83438d5a2eb4d429e130c is now pushed.
+  Clean local Debug/Release 7/7 reruns pass; hosted checks pending. Prior
+  definitions/window CI 38797212248 is fully green at fe7f107.
+- Current next slice M02.C02: arbitrary surfaces/groups/layouts and many-to-many
+  projection patches. Surface content owns a unique logical placement lease to
+  a video output of a composition instance; shared canvases use explicit shared
+  instance leases. Calibration is a separate patch object from content binding.
+  Continuous layouts require the same composition instance/output, with explicit
+  UV chart/seam metadata; independent layouts allow distinct content. No physical
+  continuity/unfolding or scanout synchronization is inferred from metadata.
+  Keep desired output bindings (including unknown adapters) as configured data.
+  Default logical project should own root composition/input slot, one surface,
+  one logical output and a four-corner patch. Native binding/qualification stays
+  separate. Use stable geometry/control-point IDs and portable finite numbers.
+- C01 ownership CI 38800642307 is fully green at 4d1efdb on Windows/Linux/macOS,
+  all seven contracts. C01 portable functional outcomes implemented; M02 remains
+  unqualified behind M01 physical/device/performance gates.
+- M02.C02 is now implemented: immutable stage snapshots, surfaces/groups,
+  explicit UV charts/seams, independent/continuous layouts, many-to-many patches,
+  separate canvas/desired-mode/calibration ownership and logical default project.
+  Debug/Release each pass 8/8 CTest. Stage tests cover 1/3/37 surfaces and preserve
+  calibration through content/mode changes. Test-only map-key lifetime crash was
+  fixed (owned ID); no checks weakened. Unknown adapters/formats remain configured.
+  Next: final review, commit/push C02, clean-source and hosted evidence, then
+  M02.C03 typed registry/transaction/undo-redo with combined model validation.
 - Continue independent authorized work around unavailable hardware/legal gates;
   do not mark dependent milestones complete or fake missing hardware success.
 

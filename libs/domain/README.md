@@ -35,6 +35,29 @@ It is not a render-thread data source. Command-driven definition editing must
 reconcile scoped instance ownership and publish separately compiled immutable
 render state; definition rename/reorder must preserve live IDs and transport.
 
-Canonical parameter descriptors/commands, surface/projector calibration and
-persistence are subsequent M02 slices; no empty backend/plugin abstractions are
+Canonical parameter descriptors/commands, advanced mapping and persistence
+are subsequent slices; no empty backend/plugin abstractions are
 added here. Unit model evidence remains separate from M01 hardware qualification.
+
+StageSnapshot validates arbitrary surfaces, groups, explicit UV charts/seams and
+many-to-many projection patches against the source-instance pool. Surfaces consume
+video composition ports through distinct ownership leases. Continuous layouts
+deliberately share one composition instance/output; independent layouts can use
+different content. Geometric points/topology use stable IDs rather than indices.
+Coordinates remain explicit: surface-local, surface UV, composition UV and
+projector pixels. Degenerate/duplicate faces and invalid homography quads are
+rejected. Mesh warps remain distinct from convex four-corner homographies.
+
+Composition canvases own logical size/format/colour/alpha declarations. Output
+targets own desired persistent adapter bindings/modes; patches own calibration
+and its reference resolution. Changing content or desired output mode does not
+rescale/rewrite calibration. Unknown adapters/formats stay configured without
+claiming runtime support. Stage/geometry capacities are configurable resource
+policies, not a special surface/projector count.
+
+make_default_project creates a root composition with a content input/default
+slot and Program canvas, one surface, one logical output and one four-corner
+patch. A project-owned root lease keeps logical source ownership independent of
+surface consumers. This is logical startup; native binding/frames are not implied.
+The command owner must validate the combined instance/stage candidate before
+publishing edits, including dependent-reference deletion and definition changes.

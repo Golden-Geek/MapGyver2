@@ -108,6 +108,11 @@ void validate(const Definitions& definitions) {
         for (const auto& port : composition.inputs) port_ids.insert(port.id);
         for (const auto& port : composition.outputs)
             require(port_ids.insert(port.id).second, ErrorCode::duplicate_id, "Composition input/output identities overlap", {id,port.id});
+        for (const auto& [port,canvas] : composition.canvases) {
+            require(find_port(composition.outputs,port,id).kind == StreamKind::video,ErrorCode::type_mismatch,"Only video output ports own canvases",{id,port});
+            require(canvas.width > 0 && canvas.height > 0,ErrorCode::invalid_definition,"Canvas dimensions must be positive",{id,port});
+            name(canvas.pixel_format,id); name(canvas.colour_space,id); name(canvas.alpha,id);
+        }
         std::map<Id,Id> shared_assets;
         for (const auto& layer : composition.layers) {
             require(layer_ids.insert(layer.id).second, ErrorCode::duplicate_id, "Duplicate layer identity", {id,layer.id});
@@ -162,6 +167,7 @@ void validate(const Definitions& definitions) {
     }
 }
 }
+void validate_display_name(std::string_view value, const Id& owner) { name(value,owner); }
 DefinitionSnapshot::DefinitionSnapshot(Definitions definitions) {
     validate(definitions);
     definitions_ = std::make_shared<const Definitions>(std::move(definitions));

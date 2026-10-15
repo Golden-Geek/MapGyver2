@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 #include <compare>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <optional>
@@ -21,7 +22,7 @@ public:
 private:
     std::string value_;
 };
-enum class ErrorCode { invalid_id, duplicate_id, invalid_name, invalid_port, missing_reference, type_mismatch, dependency_cycle, invalid_definition, capacity_exceeded, invalid_transport };
+enum class ErrorCode { invalid_id, duplicate_id, invalid_name, invalid_port, missing_reference, type_mismatch, dependency_cycle, invalid_definition, capacity_exceeded, invalid_transport, invalid_geometry, invalid_layout };
 class ModelError : public std::runtime_error {
 public:
     ModelError(ErrorCode code, std::string message, std::vector<Id> involved = {});
@@ -31,6 +32,7 @@ private:
     ErrorCode code_;
     std::vector<Id> involved_;
 };
+void validate_display_name(std::string_view value, const Id& owner);
 enum class StreamKind { video, audio, number, boolean, text, trigger };
 struct Port {
     Id id;
@@ -75,12 +77,22 @@ struct Layer {
     std::optional<Id> shared_group;
     bool operator==(const Layer&) const = default;
 };
+struct Canvas {
+    std::uint32_t width = 1920, height = 1080;
+    std::string pixel_format = "rgba8-unorm";
+    std::string colour_space = "srgb";
+    std::string alpha = "straight";
+    bool operator==(const Canvas&) const = default;
+};
 struct Composition {
     Id id;
     std::string name;
     std::vector<Port> inputs;
     std::vector<Port> outputs;
     std::vector<Layer> layers;
+    // Logical video output sizes/formats remain independent of projector modes.
+    // Missing configuration is authored/unprepared, not a claimed render format.
+    std::map<Id,Canvas> canvases{};
     bool operator==(const Composition&) const = default;
 };
 struct Definitions {
