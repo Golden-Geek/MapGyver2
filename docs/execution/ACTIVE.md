@@ -156,6 +156,14 @@
   Initial dotted action IDs correctly failed validation and
   were fixed without changing the ID contract. Next: commit, clean/hosted evidence,
   then wire/type descriptors and capability-preserving round-trip coverage.
+- Registry committed locally as 0fcfaa0a2e6d105f4a28eecb170770b79c5e5c38.
+  Clean Windows Debug/Release 10/10 wrappers pass, dirty=false; evidence retained
+  in M02-C03-registry-local.json. Source CI 38812032068 Windows Debug has now
+  passed; Release/quality-gate pending. Push queued tested slices once it finishes.
+  Next implementation: portable wire codecs/schema for typed descriptors and
+  commands, capability-preserving model round trips with strict reference/ID/
+  rational/topology/cycle/capacity validation, then M03 service integration.
+  Do not claim an OSCQuery implementation from in-process inventory tests.
 
 ## Build/hardware commands
 
