@@ -229,6 +229,26 @@
   rejection, bounded length-prefixed frames/IO deadlines, real separate-process
   tests including slow peers, partial frames, lost-ack reconnect and service
   restart. Preserve outstanding source CI rather than routine docs cancellation.
+- Current M03.C01 native slice: engine --serve/--pipe-name, private Windows
+  overlapped byte-pipe adapter, protected current-user DACL, remote rejection flag,
+  first-instance ownership, 16 peers, bounded frames (1 MiB/4 MiB), five-second
+  partial/handshake and two-second write deadlines, completed-IO cancellation
+  before buffer reuse. Independent Python SDK clients exercise the actual engine.
+  Debug 13/13 passed with 12 real IPC phases, including actual DACL readback,
+  lost-ack/resume, readonly/revision checks, push notifications, partial frames,
+  real buffer stalls, cancelled large reply replay, recycling/handle counts and
+  owned process restart. First collision assertion expected Win32=5, but the full
+  native instance pool returned 231; a separate controlled SDK probe confirms
+  first-instance access denial with a spare slot and busy with a full pool.
+  Source/SDK assertions were preserved with those explicit verified error classes.
+  CLI invalid/unsupported tests added; final Debug/Release reruns next.
+- Prior core CI 38820881149 is fully green at 9ac7a11, all native Windows
+  Debug/Release and Linux/macOS portable jobs plus plan/quality-gate (12 contracts).
+  Native pipe slice final local Debug/Release wrappers pass 13 contracts and
+  12 independent real IPC phases. Native cancellation verifies completed events
+  before releasing buffers; never treats a cancellation request as completion.
+  Next: final review/commit, clean source/build/IPC evidence, push, then M03.C02
+  OSC/OSCQuery discovery and network adapters with the same validated service.
 
 ## Build/hardware commands
 

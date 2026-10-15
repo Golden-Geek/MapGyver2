@@ -33,8 +33,9 @@ public:
     [[nodiscard]] Connection connect(std::string_view hello);
     void disconnect(const Id& session);
     [[nodiscard]] Json handle(const Id& connection_session,std::string_view request);
-    // Transport asks only for a subscribed session. Cursor advances after the
-    // client receives the returned event batch; a lost cursor can be replayed.
+    // Transport asks only for a subscribed session. It advances its send cursor
+    // after a complete write; the client retains its actually received cursor
+    // for reconnect. Kernel write completion is not proof of client receipt.
     [[nodiscard]] std::optional<Json> notifications(const Id& session,std::uint64_t after_event) const;
     [[nodiscard]] std::shared_ptr<const mapgyver::control::ProjectState> snapshot() const;
     [[nodiscard]] std::uint64_t revision() const;

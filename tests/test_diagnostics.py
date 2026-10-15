@@ -103,12 +103,22 @@ class Diagnostics(unittest.TestCase):
         for flags in [("--json",), ("--no-gpu",), ("--bogus",), ("--version", "--json"),
                       ("--version", "--diagnose"), ("--help", "--version"),
                       ("--diagnose", "--diagnose"), ("--diagnose", "--no-gpu", "--no-gpu"),
-                      ("--diagnose", "unexpected-file")]:
+                      ("--diagnose", "unexpected-file"), ("--serve",), ("--pipe-name",),
+                      ("--pipe-name", "unused"), ("--serve", "--pipe-name", "../invalid"),
+                      ("--serve", "--pipe-name", "one", "--pipe-name", "two"),
+                      ("--serve", "--pipe-name", "one", "--diagnose")]:
             with self.subTest(flags=flags):
                 result = self.run_cli(*flags)
                 self.assertEqual(result.returncode, 2)
                 self.assertEqual(result.stdout, "")
                 self.assertIn("Usage:", result.stderr)
+
+    if sys.platform != "win32":
+        def test_windows_control_transport_reports_unavailable(self):
+            result = self.run_cli("--serve", "--pipe-name", "portable-check")
+            self.assertEqual(result.returncode, 3)
+            self.assertEqual(result.stdout, "")
+            self.assertIn("unavailable on this platform", result.stderr)
 
     def test_schema_rejects_false_types_and_missing_identity(self):
         schema = json.loads((args.source / "schemas/diagnostics-v1.schema.json").read_text(encoding="utf-8"))

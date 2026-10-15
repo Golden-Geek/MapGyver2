@@ -73,8 +73,9 @@ subscribe carries afterEvent:null for a full snapshot, or the last received even
 cursor for journal recovery. The journal has entry and batch caps. Notifications
 carry authored/ownership changes and cursors; fetch a new snapshot to inspect
 changed model/registry values. A journal gap returns resyncRequired with the
-complete current snapshot. The transport advances its delivery cursor only after
-successful delivery; clients retain their last received cursor across reconnects.
+complete current snapshot. The transport advances its send cursor after a complete
+write. Kernel write completion does not prove application receipt; clients retain
+their actually received cursor across reconnects and explicitly resubscribe.
 Repeated polling with the same cursor repeats a batch. No per-client unbounded
 event queue is created. unsubscribe stops notifications.
 
@@ -92,5 +93,6 @@ and savedRevision null. They never claim a render frame or durable save. M04/M12
 must supply actual runtime/durable outcomes. Current tests exercise the real
 portable controller/session code, including an injected control clock; these are
 not IPC, native-clock, network, GPU or process-launch evidence. The Windows
-named-pipe adapter, generated envelope schema and live engine integration are
-the next C01 slice; OSCQuery/HTTP/WebSocket/editor remain later M03 work.
+[named-pipe adapter](../../adapters/windows/PIPE_CONTROL.md) now connects the real
+engine with separate-process SDK tests. Generated envelope schema and
+OSCQuery/HTTP/WebSocket/editor remain later M03 work.

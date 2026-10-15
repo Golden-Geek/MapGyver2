@@ -1,10 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include <mapgyver/build_info.hpp>
+#include <mapgyver/protocol/service.hpp>
+#ifdef _WIN32
+#include "adapters/windows/pipe_service.hpp"
+#endif
 #include <nlohmann/json.hpp>
 #include <bit>
 #include <climits>
 #include <iostream>
+#include <optional>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 
 namespace {
@@ -12,6 +18,7 @@ constexpr std::string_view usage =
     "MapGyver native engine\n"
     "Usage: mapgyver-engine --version\n"
     "       mapgyver-engine --diagnose [--json] [--no-gpu]\n"
+    "       mapgyver-engine --serve --pipe-name <stable-id> (Windows)\n"
     "       mapgyver-engine --help\n";
 
 nlohmann::json diagnose(bool no_gpu) {
@@ -42,23 +49,32 @@ nlohmann::json diagnose(bool no_gpu) {
 
 int main(int argc, char** argv) {
     try {
-        bool version = false, diagnostic = false, json = false, no_gpu = false, help = false;
+        bool version = false, diagnostic = false, json = false, no_gpu = false, help = false, serve = false;
+        std::optional<std::string> pipe_name;
         for (int index = 1; index < argc; ++index) {
             const std::string_view arg{argv[index]};
+            if (arg == "--pipe-name") {
+                if (pipe_name || index+1 >= argc) {std::cerr << "Missing or repeated pipe name\n" << usage; return 2;}
+                pipe_name = argv[++index];
+                try {static_cast<void>(mapgyver::domain::Id{*pipe_name});}
+                catch (const mapgyver::domain::ModelError&) {std::cerr << "Invalid pipe name\n" << usage; return 2;}
+                continue;
+            }
             bool* flag = nullptr;
             if (arg == "--version") flag = &version;
             else if (arg == "--diagnose") flag = &diagnostic;
             else if (arg == "--json") flag = &json;
             else if (arg == "--no-gpu") flag = &no_gpu;
             else if (arg == "--help") flag = &help;
+            else if (arg == "--serve") flag = &serve;
             if (flag == nullptr || *flag) {
                 std::cerr << "Invalid or repeated argument: " << arg << '\n' << usage;
                 return 2;
             }
             *flag = true;
         }
-        const auto modes = static_cast<int>(version) + static_cast<int>(diagnostic) + static_cast<int>(help);
-        if ((argc > 1 && modes != 1) || ((json || no_gpu) && !diagnostic)) {
+        const auto modes = static_cast<int>(version) + static_cast<int>(diagnostic) + static_cast<int>(help) + static_cast<int>(serve);
+        if ((argc > 1 && modes != 1) || ((json || no_gpu) && !diagnostic) || (pipe_name.has_value() != serve)) {
             std::cerr << "Choose one command; --json and --no-gpu require --diagnose.\n" << usage;
             return 2;
         }
@@ -67,6 +83,20 @@ int main(int argc, char** argv) {
         } else if (version) {
             const auto build = mapgyver::build_info();
             std::cout << build.product << ' ' << build.version << '\n';
+        } else if (serve) {
+#ifdef _WIN32
+            mapgyver::protocol::ControlService service{mapgyver::control::ProjectController{mapgyver::domain::make_default_project()}};
+            mapgyver::windows::serve_named_pipe(service,*pipe_name,[](const std::string& endpoint) {
+                const auto build = mapgyver::build_info();
+                auto ready = mapgyver::windows::pipe_capabilities();
+                ready.update({{"event","control_ready"},{"transport","windows_named_pipe"},{"endpoint",endpoint},
+                    {"sourceRevision",build.revision.empty() ? nlohmann::json(nullptr) : nlohmann::json(build.revision)},
+                    {"sourceDirty",build.dirty.has_value() ? nlohmann::json(*build.dirty) : nlohmann::json(nullptr)}});
+                std::cout << ready.dump() << '\n' << std::flush;
+            });
+#else
+            std::cerr << "Windows named-pipe control transport is unavailable on this platform\n"; return 3;
+#endif
         } else {
             const auto report = diagnose(no_gpu);
             if (json) std::cout << report.dump(2) << '\n';
@@ -83,7 +113,7 @@ int main(int argc, char** argv) {
         if (!std::cout) throw std::runtime_error("Could not write diagnostic output");
         return 0;
     } catch (const std::exception& error) {
-        std::cerr << "Diagnostic failure: " << error.what() << '\n';
+        std::cerr << "Engine failure: " << error.what() << '\n';
         return 1;
     }
 }
