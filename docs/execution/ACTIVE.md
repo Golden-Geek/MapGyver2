@@ -66,6 +66,17 @@
   not select a renderer, depend on native SDK types or qualify M02 ahead of M01.
   Preserve backlog dependency order for completion; continue authorized model
   implementation without substituting docs/tests for missing hardware evidence.
+- CI 38793706815 is now green at 2f8b189 (worker/frame sets). Window code c50228c
+  and evidence dcf804e are tested/committed locally, queued for the next push.
+- Current M02.C01 first vertical slice is implemented: portable immutable
+  definition snapshots, stable IDs, typed asset/composition ports, input slots,
+  explicit local sharing declarations and iterative graph cycle validation.
+  Debug/Release windows-local each pass 6/6 CTest. New code is under
+  libs/domain with tests/domain/test_definitions.cpp and progress/M02.md.
+  This slice has no live source/transport ownership yet; C01 remains partial.
+  Next: commit/push the tested definitions slice with
+  queued M01 work, collect hosted evidence, then implement scoped instance state.
+  The chosen instance boundaries/next contracts are in libs/domain/README.md.
 - Continue independent authorized work around unavailable hardware/legal gates;
   do not mark dependent milestones complete or fake missing hardware success.
 

@@ -100,7 +100,7 @@
       "id": "M02",
       "title": "Domain model and parameter registry",
       "track": "windows-v1",
-      "status": "planned",
+      "status": "in_progress",
       "depends_on": [
         "M01"
       ],
