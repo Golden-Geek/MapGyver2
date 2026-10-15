@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 cmake_minimum_required(VERSION 3.31)
 project(MapGyver VERSION 0.1.0 LANGUAGES CXX)
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build configuration" FORCE)
+endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -50,3 +53,19 @@ foreach(owned_target mapgyver_core mapgyver_engine)
   endif()
 endforeach()
 install(TARGETS mapgyver_engine RUNTIME DESTINATION bin)
+if(BUILD_TESTING)
+  add_test(NAME diagnostics.contract
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_diagnostics.py"
+      --engine "$<TARGET_FILE:mapgyver_engine>" --source "${CMAKE_CURRENT_SOURCE_DIR}"
+      --configuration "$<CONFIG>")
+  add_test(NAME build.source-identity
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_build_metadata.py"
+      --script "${CMAKE_CURRENT_SOURCE_DIR}/tools/build_metadata.py")
+  add_test(NAME build.feature-rejection
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_configuration.py"
+      --source "${CMAKE_CURRENT_SOURCE_DIR}" --cmake "${CMAKE_COMMAND}" --generator "${CMAKE_GENERATOR}")
+  add_test(NAME planning.contract
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/validate_plan.py")
+  set_tests_properties(diagnostics.contract build.source-identity planning.contract PROPERTIES TIMEOUT 30)
+  set_tests_properties(build.feature-rejection PROPERTIES TIMEOUT 150)
+endif()

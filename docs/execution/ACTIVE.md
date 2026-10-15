@@ -12,7 +12,9 @@
 
 1. M00.C01 complete locally: pinned C++20 build/core/manifests/SPDX provenance;
    Debug and Release build and executable smoke passed. Hash recorded next slice.
-2. M00.C02 pending: versioned diagnostic CLI and meaningful CTest contracts.
+2. M00.C02 complete locally: diagnostic schema/CLI and four meaningful CTest
+   contracts pass in Debug and Release; source identity, invalid commands,
+   capability reasons and negative feature configuration are covered.
 3. M00.C03 pending: native Windows Debug/Release and Linux/macOS portable CI,
    fail-closed quality gate, logs and exact environment/source identity.
 4. M00.C04 pending: fresh-checkout reproduction, progress evidence, checkpoint
@@ -26,6 +28,7 @@
 
 - `python tools/validate_plan.py`: passed at baseline (20 milestones / 80 slices /
   34 scenarios). This validates the planning contract, not application behavior.
+- M00.C01: `90faf2a`, pushed; local Debug/Release build and banner smoke passed.
 - Local M00: `python tools/ci/bootstrap.py --triplet x64-windows`,
   `cmake --preset windows-local`, build Debug/Release, CTest for each with
   `--output-on-failure --no-tests=error`.
