@@ -134,6 +134,16 @@
   Next: commit/push tested prerequisite, then central transactions/typed registry.
 - Continue independent authorized work around unavailable hardware/legal gates;
   do not mark dependent milestones complete or fake missing hardware success.
+- Reconciliation committed/pushed fd8cd6d6c69351979cef9f9320b80582dfe89da8;
+  clean Debug/Release 8/8 evidence M02-C03-reconcile-local.json. Hosted
+  CI 38812032068 portable Linux/macOS and plan passed; Windows still running.
+- Current C03 transaction slice: ProjectController immutable combined state,
+  typed structural/input/transport/ownership commands, final candidate validation,
+  root lease invariant, authored revisions, bounded snapshot/history accounting,
+  atomic rollback and undo/redo preserving IDs. Debug/Release 9/9 passed.
+  Next: commit tested controller, then one typed registry path with metadata,
+  access/validation/API descriptors and generated inventory checks. No native
+  preparation/application/save completion is implied by authored revisions.
 
 ## Build/hardware commands
 
