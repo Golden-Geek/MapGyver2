@@ -21,7 +21,7 @@ public:
 private:
     std::string value_;
 };
-enum class ErrorCode { invalid_id, duplicate_id, invalid_name, invalid_port, missing_reference, type_mismatch, dependency_cycle, invalid_definition };
+enum class ErrorCode { invalid_id, duplicate_id, invalid_name, invalid_port, missing_reference, type_mismatch, dependency_cycle, invalid_definition, capacity_exceeded, invalid_transport };
 class ModelError : public std::runtime_error {
 public:
     ModelError(ErrorCode code, std::string message, std::vector<Id> involved = {});

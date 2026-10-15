@@ -1,11 +1,12 @@
-# Active execution plan ? MapGyver Windows beta
+# Active execution plan - MapGyver Windows beta
 
 ## Scope and prerequisite evidence
 
-- Authorized: implement M00?M13; product MapGyver; public Golden-Geek/MapGyver2;
+- Authorized: implement M00-M13; product MapGyver; public Golden-Geek/MapGyver2;
   tested local commits pushed directly to main. No release/policy changes.
 - M00 complete at 93be949919b6aedeccda365087f7b6b1781ce27f, green CI 38771335741;
-  annotated milestone/m00 points there. M01 in progress; M02?M19 planned.
+  annotated milestone/m00 points there. M01 qualification and independent M02
+  portable implementation are in progress; M03-M19 remain planned.
 - Follow backlog IDs/dependencies. Renderer stays provisional; do not qualify
   dependent milestones from missing physical/hardware evidence.
 
@@ -77,6 +78,17 @@
   Next: commit/push the tested definitions slice with
   queued M01 work, collect hosted evidence, then implement scoped instance state.
   The chosen instance boundaries/next contracts are in libs/domain/README.md.
+- Definitions code fe7f107c9ec219db92ceb2d976a615449b213049 is now pushed, together
+  with native-window code/evidence. Clean local Debug/Release 6/6 reruns pass;
+  CI 38797212248 portable Linux/macOS jobs passed, Windows is still running.
+- Current M02.C01 instance slice is implemented under instances.hpp/cpp:
+  independent nested scopes, explicit sharing, per-instance rational transport
+  intent, keep-alive/last-reference retirement, live input cycle validation and
+  configurable capacities. All structural failures are atomic candidate edits.
+  Tests include 2,048-deep expansion/retirement and shared descendants.
+  Final Debug/Release each pass 7/7 CTest, including nested keep-alive and ID
+  collision rollback. Next: commit, clean-source/hosted evidence. No decoder readiness or
+  SDK shutdown is claimed by these portable logical ownership tests.
 - Continue independent authorized work around unavailable hardware/legal gates;
   do not mark dependent milestones complete or fake missing hardware success.
 

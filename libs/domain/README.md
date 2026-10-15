@@ -13,15 +13,27 @@ of the same app. It never implies sharing across separate composition instances.
 Configured unknown adapters remain authored objects; their runtime availability
 will be a separate read-only status.
 
-The next live-state slice must allocate independent source/child instances for
-each placement by default. Child ownership is scoped by parent instance and
-stable layer ID; local sharing groups are scoped by the parent instance too.
-Inputs bind a source per composition instance, with explicit existing-instance
-sharing as an alternative. Actual live bindings need their own cycle validation,
-including attempts to feed an instance from itself or its descendants. Rational
-transport timestamps, reference/lifecycle policy and configurable capacity
-limits belong to the instance owner, not the asset. No decoder success is implied
-by changing logical transport intent.
+InstancePool allocates independent source/child instances for each placement by
+default. Child ownership is scoped by parent instance and stable layer ID; local
+sharing groups are scoped by the parent instance too. Inputs bind a source per
+composition instance, with explicit existing-instance sharing as an alternative.
+Live bindings have a separate iterative cycle check, including direct/indirect
+feedback. Structural edits validate a candidate before publishing; configured
+instance/placement/ownership capacities fail atomically, including nested graph
+expansion. These are resource capacities, not a special surface/output count.
+
+Rational transport intent and keep-alive/reference policy belong to the instance
+owner. Removing one shared consumer preserves the owner; the last reference
+retires it unless keep-alive says otherwise. Iterative retirement handles deep
+graphs and shared descendants. Returned retired IDs request logical resource
+retirement; they do not claim SDK/process disposal completed. Unknown configured
+adapters can have retained intent without claiming readiness or decoded frames.
+Actual decoder position/status remains a separate runtime report.
+
+The pool has one control owner and is pinned to an immutable definition revision.
+It is not a render-thread data source. Command-driven definition editing must
+reconcile scoped instance ownership and publish separately compiled immutable
+render state; definition rename/reorder must preserve live IDs and transport.
 
 Canonical parameter descriptors/commands, surface/projector calibration and
 persistence are subsequent M02 slices; no empty backend/plugin abstractions are
