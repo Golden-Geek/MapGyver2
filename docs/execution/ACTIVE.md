@@ -18,9 +18,9 @@
   38781640097. Independent official SpoutDX 2.007.018 inputs are checksum/PE
   verified. Source licenses and the application 2.007.010#1 port were inspected.
 
-## Current slice: M01.C02
+## M01.C02 checkpoint
 
-Implementation is tested and ready for its code commit:
+Implementation committed at 681888124220b0f7e7008f001b879b4974dd2265:
 
 1. Application uses private single-owner bgfx sampling before Spout send/after
    receive. SDK/native handles stay in Windows adapters. Reference peer uses
@@ -37,15 +37,30 @@ Implementation is tested and ready for its code commit:
    resize/format cases across both directions, held frames, graceful restart,
    actual producer/consumer stalls, clean teardown. Same RTX 5080 Laptop GPU.
    C01 regression passes Debug/Release, including genuine WAIT_TIMEOUT.
-   Current reports correctly identify baseline 6cdc3d1 plus sourceDirty=true.
+   Clean-source reruns passed both configurations at 6818881, sourceDirty=false;
+   unaltered reports are retained as docs/progress/M01-spout-debug/release.json.
+   CI 38788520324 passed every required job, including both SDK clients.
 5. Supplemental Spout/GL dependency notices are recorded in docs/licenses.
    Windows SDK import libraries are compilation prerequisites, not app content.
 
-Next: commit/push M01.C02; rebuild both configurations and reference peer from
-that clean commit, rerun the manual GPU contracts, retain exact reports, collect
-hosted CI and make the evidence documentation commit. Do not tag M01 yet.
-Then implement the independently testable M01.C03 decoder/import/recovery
-experiments; keep unavailable physical two-output requirements open.
+## Current slice: M01.C03 (partial)
+
+Implement the independently testable decoder/import/recovery experiments;
+keep unavailable physical two-output requirements open. Do not tag M01 yet.
+The working tree adds optional windows-decode/FFmpeg avcodec 9.0.2#1, no
+proprietary decoder dependency. Pinned source SHA512 is recorded by the port;
+standard port patches only. Dependency Debug/Release compilation is running.
+
+The offline probe authors a bounded in-memory MPEG-2 fixture, retains a software
+decode reference, strictly selects D3D11VA with no software fallback, consumes
+the actual native NV12 array slice on the same bgfx GPU, converts via native
+video processor and samples through bgfx. Validation waits/readback are separate.
+It records rational PTS, applied bgfx frame, pixel errors, source/fixture hashes,
+API submissions, RAM/VRAM snapshots and offline first/warm timing percentiles.
+This is a working implementation, not yet compiled or qualified. Next: compile,
+investigate actual failures, add manual positive/strict-format-negative contracts,
+inspect resolved licenses, then local/CI/clean-source evidence. Full C03 still
+requires physical two-output, paired frame identity/scanout and recovery evidence.
 
 ## Commands
 

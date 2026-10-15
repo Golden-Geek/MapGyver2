@@ -7,9 +7,9 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
   fresh-checkout and hosted Windows/Linux/macOS build/test evidence.
 - Current milestone: [M01, graphics and sharing feasibility](progress/M01.md),
   in progress. M02–M19 remain planned; completing M00 does not qualify the beta.
-- M01.C01 texture sampling has clean native GPU evidence. M01.C02 bidirectional
-  Spout/bgfx interoperability passes local Debug/Release trials; its clean-source
-  and hosted checkpoint evidence is pending. Decode, physical outputs, recovery
+- M01.C01 texture sampling and M01.C02 bidirectional Spout/bgfx interoperability
+  have clean native Debug/Release GPU evidence and green hosted builds.
+  M01.C03 decoder/import experiments are in progress. Physical outputs, recovery
   and performance gates remain open.
 - First architecture gate: M01, render/Spout/decode/presentation feasibility on Windows hardware.
 - Open product decisions: current NDI licensing/distribution path and exact reference hardware/workload budgets.

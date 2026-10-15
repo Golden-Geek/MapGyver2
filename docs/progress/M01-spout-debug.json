@@ -1,0 +1,803 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-15T18:48:32.582758+00:00",
+  "evidenceClass": "native-gpu-spout-cross-version-processes",
+  "counterMeaning": "Controlled native API-copy paths, not physical hardware transfer counters; readback is validation only",
+  "reports": [
+    {
+      "direction": "mapgyver_to_reference",
+      "senderName": "MapGyver_M01_60c36298230444b4a994fb69dc17c934",
+      "result": "passed",
+      "frames": [
+        {
+          "appliedBgfxFrame": 0,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 842,
+          "format": "RGBA8",
+          "generation": 1,
+          "marker": 101,
+          "pixelHash": 2196525625,
+          "ready": true,
+          "side": 64,
+          "stats": {
+            "candidateDrawSubmissions": 0,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 1,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 1,
+            "validationGpuCopySubmissions": 1
+          }
+        },
+        {
+          "appliedBgfxFrame": 0,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 563,
+          "format": "RGBA8",
+          "generation": 2,
+          "marker": 102,
+          "pixelHash": 2371868121,
+          "ready": true,
+          "side": 128,
+          "stats": {
+            "candidateDrawSubmissions": 0,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 2,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 2,
+            "validationGpuCopySubmissions": 2
+          }
+        },
+        {
+          "appliedBgfxFrame": 0,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 896,
+          "format": "RGBA8",
+          "generation": 3,
+          "marker": 103,
+          "pixelHash": 3376486401,
+          "ready": true,
+          "side": 256,
+          "stats": {
+            "candidateDrawSubmissions": 0,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 3,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 3,
+            "validationGpuCopySubmissions": 3
+          }
+        },
+        {
+          "appliedBgfxFrame": 0,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 600,
+          "format": "BGRA8",
+          "generation": 4,
+          "marker": 104,
+          "pixelHash": 1842463361,
+          "ready": true,
+          "side": 64,
+          "stats": {
+            "candidateDrawSubmissions": 0,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 4,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 4,
+            "validationGpuCopySubmissions": 4
+          }
+        },
+        {
+          "appliedBgfxFrame": 0,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 716,
+          "format": "BGRA8",
+          "generation": 5,
+          "marker": 105,
+          "pixelHash": 1994666657,
+          "ready": true,
+          "side": 128,
+          "stats": {
+            "candidateDrawSubmissions": 0,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 5,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 5,
+            "validationGpuCopySubmissions": 5
+          }
+        },
+        {
+          "appliedBgfxFrame": 0,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 785,
+          "format": "BGRA8",
+          "generation": 6,
+          "marker": 106,
+          "pixelHash": 1497906561,
+          "ready": true,
+          "side": 256,
+          "stats": {
+            "candidateDrawSubmissions": 0,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 6,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 6,
+            "validationGpuCopySubmissions": 6
+          }
+        },
+        {
+          "appliedBgfxFrame": 0,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 694,
+          "format": "RGBA8",
+          "generation": 7,
+          "marker": 107,
+          "pixelHash": 2471908449,
+          "ready": true,
+          "side": 64,
+          "stats": {
+            "candidateDrawSubmissions": 0,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 7,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 7,
+            "validationGpuCopySubmissions": 7
+          }
+        },
+        {
+          "appliedBgfxFrame": 0,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 577,
+          "format": "RGBA8",
+          "generation": 8,
+          "marker": 108,
+          "pixelHash": 1206232497,
+          "ready": true,
+          "side": 128,
+          "stats": {
+            "candidateDrawSubmissions": 0,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 8,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 8,
+            "validationGpuCopySubmissions": 8
+          }
+        },
+        {
+          "appliedBgfxFrame": 0,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 970,
+          "format": "RGBA8",
+          "generation": 9,
+          "marker": 109,
+          "pixelHash": 1055564377,
+          "ready": true,
+          "side": 256,
+          "stats": {
+            "candidateDrawSubmissions": 0,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 9,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 9,
+            "validationGpuCopySubmissions": 9
+          }
+        },
+        {
+          "appliedBgfxFrame": 0,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 589,
+          "format": "BGRA8",
+          "generation": 10,
+          "marker": 110,
+          "pixelHash": 3442640953,
+          "ready": true,
+          "side": 64,
+          "stats": {
+            "candidateDrawSubmissions": 0,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 10,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 10,
+            "validationGpuCopySubmissions": 10
+          }
+        },
+        {
+          "appliedBgfxFrame": 0,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 568,
+          "format": "BGRA8",
+          "generation": 11,
+          "marker": 111,
+          "pixelHash": 3323079249,
+          "ready": true,
+          "side": 128,
+          "stats": {
+            "candidateDrawSubmissions": 0,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 11,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 11,
+            "validationGpuCopySubmissions": 11
+          }
+        },
+        {
+          "appliedBgfxFrame": 0,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 829,
+          "format": "BGRA8",
+          "generation": 12,
+          "marker": 112,
+          "pixelHash": 2399046505,
+          "ready": true,
+          "side": 256,
+          "stats": {
+            "candidateDrawSubmissions": 0,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 12,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 12,
+            "validationGpuCopySubmissions": 12
+          }
+        }
+      ],
+      "actors": [
+        {
+          "adapter": {
+            "deviceId": 11353,
+            "luidHigh": 0,
+            "luidLow": 89087,
+            "name": "NVIDIA GeForce RTX 5080 Laptop GPU",
+            "software": false,
+            "vendorId": 4318
+          },
+          "buildConfiguration": "Debug",
+          "counterMeaning": "API-path counts under owned non-keyed mutex and disabled instance frame count; not hardware counters",
+          "event": "ready",
+          "name": "MapGyver_M01_60c36298230444b4a994fb69dc17c934",
+          "pid": 12804,
+          "renderer": "bgfx-D3D11",
+          "role": "sender",
+          "sdkFrameCountEnabled": false,
+          "sdkModulePath": "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-spout\\experiments\\graphics\\Debug\\SpoutDX.dll",
+          "sdkVersion": "2.007.010=1",
+          "sourceDirty": false,
+          "sourceRevision": "681888124220b0f7e7008f001b879b4974dd2265",
+          "sdkModuleSha256": "8cef4a66257f538e7d9789a70bde14f4bef50492eb9586379b4c89b93bd5c35e"
+        },
+        {
+          "adapter": {
+            "deviceId": 11353,
+            "luidHigh": 0,
+            "luidLow": 89087,
+            "name": "NVIDIA GeForce RTX 5080 Laptop GPU",
+            "software": false,
+            "vendorId": 4318
+          },
+          "buildConfiguration": "Release",
+          "counterMeaning": "API-path counts under owned non-keyed mutex and disabled instance frame count; not hardware counters",
+          "event": "ready",
+          "name": "MapGyver_M01_60c36298230444b4a994fb69dc17c934",
+          "pid": 52480,
+          "renderer": "native-reference",
+          "role": "receiver",
+          "sdkFrameCountEnabled": false,
+          "sdkModulePath": "D:\\Projects\\Dev\\MapGyver2\\out\\qualification\\spout-reference-build\\Release\\SpoutDX.dll",
+          "sdkVersion": "2.007.018",
+          "sourceDirty": false,
+          "sourceRevision": "681888124220b0f7e7008f001b879b4974dd2265",
+          "sdkModuleSha256": "44c8551ec78c20b67762d807bb28fa18d2e7cf152ed6ba07644cfe1cc03ffdbb"
+        },
+        {
+          "adapter": {
+            "deviceId": 11353,
+            "luidHigh": 0,
+            "luidLow": 89087,
+            "name": "NVIDIA GeForce RTX 5080 Laptop GPU",
+            "software": false,
+            "vendorId": 4318
+          },
+          "buildConfiguration": "Debug",
+          "counterMeaning": "API-path counts under owned non-keyed mutex and disabled instance frame count; not hardware counters",
+          "event": "ready",
+          "name": "MapGyver_M01_60c36298230444b4a994fb69dc17c934",
+          "pid": 33816,
+          "renderer": "bgfx-D3D11",
+          "role": "sender",
+          "sdkFrameCountEnabled": false,
+          "sdkModulePath": "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-spout\\experiments\\graphics\\Debug\\SpoutDX.dll",
+          "sdkVersion": "2.007.010=1",
+          "sourceDirty": false,
+          "sourceRevision": "681888124220b0f7e7008f001b879b4974dd2265",
+          "sdkModuleSha256": "8cef4a66257f538e7d9789a70bde14f4bef50492eb9586379b4c89b93bd5c35e"
+        }
+      ],
+      "producerStall": {
+        "busy": true,
+        "connected": true,
+        "controlCallMicroseconds": 28,
+        "ready": false,
+        "stats": {
+          "candidateDrawSubmissions": 0,
+          "nonblockingMutexMisses": 1,
+          "sdkGpuCopyPathCalls": 13,
+          "sourceCpuUploadCalls": 0,
+          "validationCpuReadbacks": 13,
+          "validationGpuCopySubmissions": 13
+        }
+      },
+      "slowReceiver": {
+        "busy": true,
+        "controlCallMicroseconds": 40,
+        "copySubmitted": false,
+        "stats": {
+          "candidateDrawSubmissions": 12,
+          "nonblockingMutexMisses": 1,
+          "sdkGpuCopyPathCalls": 12,
+          "sourceCpuUploadCalls": 12,
+          "validationCpuReadbacks": 0,
+          "validationGpuCopySubmissions": 0
+        }
+      },
+      "disconnected": {
+        "connected": false,
+        "controlCallMicroseconds": 67785,
+        "lastValidatedMarker": 112,
+        "ready": false,
+        "stats": {
+          "candidateDrawSubmissions": 0,
+          "nonblockingMutexMisses": 1,
+          "sdkGpuCopyPathCalls": 13,
+          "sourceCpuUploadCalls": 0,
+          "validationCpuReadbacks": 13,
+          "validationGpuCopySubmissions": 13
+        }
+      },
+      "restart": {
+        "appliedBgfxFrame": 0,
+        "connected": true,
+        "contentAdvanced": true,
+        "controlCallMicroseconds": 804,
+        "format": "BGRA8",
+        "generation": 13,
+        "marker": 114,
+        "pixelHash": 763409313,
+        "ready": true,
+        "side": 256,
+        "stats": {
+          "candidateDrawSubmissions": 0,
+          "nonblockingMutexMisses": 1,
+          "sdkGpuCopyPathCalls": 14,
+          "sourceCpuUploadCalls": 0,
+          "validationCpuReadbacks": 14,
+          "validationGpuCopySubmissions": 14
+        }
+      },
+      "senderStats": {
+        "candidateDrawSubmissions": 1,
+        "controlCallMicroseconds": 26,
+        "nonblockingMutexMisses": 0,
+        "sdkGpuCopyPathCalls": 1,
+        "sourceCpuUploadCalls": 1,
+        "validationCpuReadbacks": 0,
+        "validationGpuCopySubmissions": 0
+      },
+      "receiverStats": {
+        "candidateDrawSubmissions": 0,
+        "controlCallMicroseconds": 3,
+        "nonblockingMutexMisses": 1,
+        "sdkGpuCopyPathCalls": 14,
+        "sourceCpuUploadCalls": 0,
+        "validationCpuReadbacks": 14,
+        "validationGpuCopySubmissions": 14
+      }
+    },
+    {
+      "direction": "reference_to_mapgyver",
+      "senderName": "MapGyver_M01_91063b8552ab4f04ad4137015bfdc073",
+      "result": "passed",
+      "frames": [
+        {
+          "appliedBgfxFrame": 5,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 1645,
+          "format": "RGBA8",
+          "generation": 1,
+          "marker": 101,
+          "pixelHash": 2196525625,
+          "ready": true,
+          "side": 64,
+          "stats": {
+            "candidateDrawSubmissions": 1,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 1,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 1,
+            "validationGpuCopySubmissions": 1
+          }
+        },
+        {
+          "appliedBgfxFrame": 9,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 1855,
+          "format": "RGBA8",
+          "generation": 2,
+          "marker": 102,
+          "pixelHash": 2371868121,
+          "ready": true,
+          "side": 128,
+          "stats": {
+            "candidateDrawSubmissions": 2,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 2,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 2,
+            "validationGpuCopySubmissions": 2
+          }
+        },
+        {
+          "appliedBgfxFrame": 13,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 2221,
+          "format": "RGBA8",
+          "generation": 3,
+          "marker": 103,
+          "pixelHash": 3376486401,
+          "ready": true,
+          "side": 256,
+          "stats": {
+            "candidateDrawSubmissions": 3,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 3,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 3,
+            "validationGpuCopySubmissions": 3
+          }
+        },
+        {
+          "appliedBgfxFrame": 17,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 1451,
+          "format": "BGRA8",
+          "generation": 4,
+          "marker": 104,
+          "pixelHash": 1842463361,
+          "ready": true,
+          "side": 64,
+          "stats": {
+            "candidateDrawSubmissions": 4,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 4,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 4,
+            "validationGpuCopySubmissions": 4
+          }
+        },
+        {
+          "appliedBgfxFrame": 21,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 1723,
+          "format": "BGRA8",
+          "generation": 5,
+          "marker": 105,
+          "pixelHash": 1994666657,
+          "ready": true,
+          "side": 128,
+          "stats": {
+            "candidateDrawSubmissions": 5,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 5,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 5,
+            "validationGpuCopySubmissions": 5
+          }
+        },
+        {
+          "appliedBgfxFrame": 25,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 2136,
+          "format": "BGRA8",
+          "generation": 6,
+          "marker": 106,
+          "pixelHash": 1497906561,
+          "ready": true,
+          "side": 256,
+          "stats": {
+            "candidateDrawSubmissions": 6,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 6,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 6,
+            "validationGpuCopySubmissions": 6
+          }
+        },
+        {
+          "appliedBgfxFrame": 29,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 1454,
+          "format": "RGBA8",
+          "generation": 7,
+          "marker": 107,
+          "pixelHash": 2471908449,
+          "ready": true,
+          "side": 64,
+          "stats": {
+            "candidateDrawSubmissions": 7,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 7,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 7,
+            "validationGpuCopySubmissions": 7
+          }
+        },
+        {
+          "appliedBgfxFrame": 33,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 1430,
+          "format": "RGBA8",
+          "generation": 8,
+          "marker": 108,
+          "pixelHash": 1206232497,
+          "ready": true,
+          "side": 128,
+          "stats": {
+            "candidateDrawSubmissions": 8,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 8,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 8,
+            "validationGpuCopySubmissions": 8
+          }
+        },
+        {
+          "appliedBgfxFrame": 37,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 2213,
+          "format": "RGBA8",
+          "generation": 9,
+          "marker": 109,
+          "pixelHash": 1055564377,
+          "ready": true,
+          "side": 256,
+          "stats": {
+            "candidateDrawSubmissions": 9,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 9,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 9,
+            "validationGpuCopySubmissions": 9
+          }
+        },
+        {
+          "appliedBgfxFrame": 41,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 1394,
+          "format": "BGRA8",
+          "generation": 10,
+          "marker": 110,
+          "pixelHash": 3442640953,
+          "ready": true,
+          "side": 64,
+          "stats": {
+            "candidateDrawSubmissions": 10,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 10,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 10,
+            "validationGpuCopySubmissions": 10
+          }
+        },
+        {
+          "appliedBgfxFrame": 45,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 1550,
+          "format": "BGRA8",
+          "generation": 11,
+          "marker": 111,
+          "pixelHash": 3323079249,
+          "ready": true,
+          "side": 128,
+          "stats": {
+            "candidateDrawSubmissions": 11,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 11,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 11,
+            "validationGpuCopySubmissions": 11
+          }
+        },
+        {
+          "appliedBgfxFrame": 49,
+          "connected": true,
+          "contentAdvanced": true,
+          "controlCallMicroseconds": 2238,
+          "format": "BGRA8",
+          "generation": 12,
+          "marker": 112,
+          "pixelHash": 2399046505,
+          "ready": true,
+          "side": 256,
+          "stats": {
+            "candidateDrawSubmissions": 12,
+            "nonblockingMutexMisses": 0,
+            "sdkGpuCopyPathCalls": 12,
+            "sourceCpuUploadCalls": 0,
+            "validationCpuReadbacks": 12,
+            "validationGpuCopySubmissions": 12
+          }
+        }
+      ],
+      "actors": [
+        {
+          "adapter": {
+            "deviceId": 11353,
+            "luidHigh": 0,
+            "luidLow": 89087,
+            "name": "NVIDIA GeForce RTX 5080 Laptop GPU",
+            "software": false,
+            "vendorId": 4318
+          },
+          "buildConfiguration": "Release",
+          "counterMeaning": "API-path counts under owned non-keyed mutex and disabled instance frame count; not hardware counters",
+          "event": "ready",
+          "name": "MapGyver_M01_91063b8552ab4f04ad4137015bfdc073",
+          "pid": 41964,
+          "renderer": "native-reference",
+          "role": "sender",
+          "sdkFrameCountEnabled": false,
+          "sdkModulePath": "D:\\Projects\\Dev\\MapGyver2\\out\\qualification\\spout-reference-build\\Release\\SpoutDX.dll",
+          "sdkVersion": "2.007.018",
+          "sourceDirty": false,
+          "sourceRevision": "681888124220b0f7e7008f001b879b4974dd2265",
+          "sdkModuleSha256": "44c8551ec78c20b67762d807bb28fa18d2e7cf152ed6ba07644cfe1cc03ffdbb"
+        },
+        {
+          "adapter": {
+            "deviceId": 11353,
+            "luidHigh": 0,
+            "luidLow": 89087,
+            "name": "NVIDIA GeForce RTX 5080 Laptop GPU",
+            "software": false,
+            "vendorId": 4318
+          },
+          "buildConfiguration": "Debug",
+          "counterMeaning": "API-path counts under owned non-keyed mutex and disabled instance frame count; not hardware counters",
+          "event": "ready",
+          "name": "MapGyver_M01_91063b8552ab4f04ad4137015bfdc073",
+          "pid": 43096,
+          "renderer": "bgfx-D3D11",
+          "role": "receiver",
+          "sdkFrameCountEnabled": false,
+          "sdkModulePath": "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-spout\\experiments\\graphics\\Debug\\SpoutDX.dll",
+          "sdkVersion": "2.007.010=1",
+          "sourceDirty": false,
+          "sourceRevision": "681888124220b0f7e7008f001b879b4974dd2265",
+          "sdkModuleSha256": "8cef4a66257f538e7d9789a70bde14f4bef50492eb9586379b4c89b93bd5c35e"
+        },
+        {
+          "adapter": {
+            "deviceId": 11353,
+            "luidHigh": 0,
+            "luidLow": 89087,
+            "name": "NVIDIA GeForce RTX 5080 Laptop GPU",
+            "software": false,
+            "vendorId": 4318
+          },
+          "buildConfiguration": "Release",
+          "counterMeaning": "API-path counts under owned non-keyed mutex and disabled instance frame count; not hardware counters",
+          "event": "ready",
+          "name": "MapGyver_M01_91063b8552ab4f04ad4137015bfdc073",
+          "pid": 32476,
+          "renderer": "native-reference",
+          "role": "sender",
+          "sdkFrameCountEnabled": false,
+          "sdkModulePath": "D:\\Projects\\Dev\\MapGyver2\\out\\qualification\\spout-reference-build\\Release\\SpoutDX.dll",
+          "sdkVersion": "2.007.018",
+          "sourceDirty": false,
+          "sourceRevision": "681888124220b0f7e7008f001b879b4974dd2265",
+          "sdkModuleSha256": "44c8551ec78c20b67762d807bb28fa18d2e7cf152ed6ba07644cfe1cc03ffdbb"
+        }
+      ],
+      "producerStall": {
+        "busy": true,
+        "connected": true,
+        "controlCallMicroseconds": 63,
+        "ready": false,
+        "stats": {
+          "candidateDrawSubmissions": 13,
+          "nonblockingMutexMisses": 1,
+          "sdkGpuCopyPathCalls": 13,
+          "sourceCpuUploadCalls": 0,
+          "validationCpuReadbacks": 13,
+          "validationGpuCopySubmissions": 13
+        }
+      },
+      "slowReceiver": {
+        "busy": true,
+        "controlCallMicroseconds": 7,
+        "copySubmitted": false,
+        "stats": {
+          "candidateDrawSubmissions": 0,
+          "nonblockingMutexMisses": 1,
+          "sdkGpuCopyPathCalls": 12,
+          "sourceCpuUploadCalls": 12,
+          "validationCpuReadbacks": 0,
+          "validationGpuCopySubmissions": 0
+        }
+      },
+      "disconnected": {
+        "connected": false,
+        "controlCallMicroseconds": 74440,
+        "lastValidatedMarker": 112,
+        "ready": false,
+        "stats": {
+          "candidateDrawSubmissions": 13,
+          "nonblockingMutexMisses": 1,
+          "sdkGpuCopyPathCalls": 13,
+          "sourceCpuUploadCalls": 0,
+          "validationCpuReadbacks": 13,
+          "validationGpuCopySubmissions": 13
+        }
+      },
+      "restart": {
+        "appliedBgfxFrame": 57,
+        "connected": true,
+        "contentAdvanced": true,
+        "controlCallMicroseconds": 2093,
+        "format": "BGRA8",
+        "generation": 13,
+        "marker": 114,
+        "pixelHash": 763409313,
+        "ready": true,
+        "side": 256,
+        "stats": {
+          "candidateDrawSubmissions": 14,
+          "nonblockingMutexMisses": 1,
+          "sdkGpuCopyPathCalls": 14,
+          "sourceCpuUploadCalls": 0,
+          "validationCpuReadbacks": 14,
+          "validationGpuCopySubmissions": 14
+        }
+      },
+      "senderStats": {
+        "candidateDrawSubmissions": 0,
+        "controlCallMicroseconds": 2,
+        "nonblockingMutexMisses": 0,
+        "sdkGpuCopyPathCalls": 1,
+        "sourceCpuUploadCalls": 1,
+        "validationCpuReadbacks": 0,
+        "validationGpuCopySubmissions": 0
+      },
+      "receiverStats": {
+        "candidateDrawSubmissions": 14,
+        "controlCallMicroseconds": 21,
+        "nonblockingMutexMisses": 1,
+        "sdkGpuCopyPathCalls": 14,
+        "sourceCpuUploadCalls": 0,
+        "validationCpuReadbacks": 14,
+        "validationGpuCopySubmissions": 14
+      }
+    }
+  ],
+  "cleanupErrors": []
+}
