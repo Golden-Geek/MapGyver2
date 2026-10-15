@@ -1,15 +1,18 @@
 # Project status
 
-Planning baseline: 2026-10-15. Implementation has not started in a target application repository.
+MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
 
 - Primary deliverable: a qualified Windows x64 beta through M13.
-- Next ready milestone: M00, repository and CI foundation.
-- M00 through M19: planned. No application commits or milestone tags exist as part of this handoff.
+- Current milestone: [M00, repository and CI foundation](progress/M00.md), in progress.
+- M01 through M19: planned. M00 has not yet been qualified; no milestone tags exist.
 - First architecture gate: M01, render/Spout/decode/presentation feasibility on Windows hardware.
 - Open product decisions: current NDI licensing/distribution path and exact reference hardware/workload budgets.
 - Later native targets: Windows ARM64, Linux x64/PipeWire, macOS ARM64/Syphon, Linux ARM64/Raspberry Pi.
 - Separate optional target: 32-bit Linux armhf.
 
-Preparing the handoff verifies its documents/backlog/templates; it does not verify the application, run GitHub CI, qualify GPUs or create remote repository milestones. Replace this status with actual implementation evidence as work proceeds.
+The planning baseline is committed and published. Application checks, CI source revisions
+and remaining gates are recorded in the milestone evidence; planning validation alone
+does not qualify application behavior. Only the laptop is currently available for GPU
+experiments; two physical outputs/projectors remain an external qualification gate.
 
 Track each milestone with `planned`, `in_progress`, `blocked` or `complete`, plus a link to its progress evidence. A blocked optional integration does not disappear from requirement coverage. Required Windows capability gaps prevent an unqualified claim that the full Windows beta meets the product contract.

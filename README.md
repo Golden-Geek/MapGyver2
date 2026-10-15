@@ -1,10 +1,17 @@
-# Projection Mapping Codex Handoff
+# MapGyver
 
-A repository-ready implementation plan for a GPL projection-mapping application. Windows x64 is the first delivery target. The architecture retains native Windows ARM64, macOS ARM64, Linux x64 and Linux ARM64 paths; 32-bit armhf is a separate optional extension.
+MapGyver is a GPL projection-mapping application under development at
+[Golden-Geek/MapGyver2](https://github.com/Golden-Geek/MapGyver2). Windows x64 is
+the first delivery target, with a native C++20 engine and static web editor.
+The current implementation is the M00 build foundation; playback and editing
+are not implemented yet. See [project status](docs/STATUS.md) for actual evidence.
 
 **Start with [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md), then give Codex [CODEX_START.md](CODEX_START.md).**
 
-This package contains planning documents, a machine-readable backlog, validation tooling and inactive CI templates. It does not contain the application implementation. All 20 milestones and 80 commits are planned; no application milestone, hardware qualification, GitHub workflow or repository commit has been executed by preparing this pack.
+The retained planning contract describes 20 milestones and 80 commit slices.
+The authorized delivery is M00–M13, Windows beta. Later native ports and advanced
+calibration/distributed rendering remain planned. Inactive CI templates are
+activated only when their real build/test contracts exist.
 
 | File | Use |
 | --- | --- |
@@ -22,7 +29,9 @@ This package contains planning documents, a machine-readable backlog, validation
 | [ci/activation.json](ci/activation.json) | When each CI template becomes active |
 | [tools/validate_plan.py](tools/validate_plan.py) | Backlog, dependencies, coverage and file-link validation |
 
-Copy the package contents into a new target repository. Preserve any existing repository instructions and adapt this pack rather than overwriting unrelated files. MapGyver is a design/code reference, not an implied destination for a rewrite. If the chosen repository is MapGyver, begin with an integration ADR covering its current JUCE build and migration boundary before replacing application architecture.
+This repository is a new implementation. The original
+[MapGyver](https://github.com/Golden-Geek/MapGyver) is a design/code reference;
+there is no existing JUCE application being replaced here.
 
 The `.github/workflows/plan.yml` workflow validates this planning pack after it is installed in a repository. Files under `ci/templates` end in `.yml.in` and deliberately do not run until their prerequisite targets and scripts exist. No application build can truthfully pass before that implementation exists.
 

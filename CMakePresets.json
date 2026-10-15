@@ -1,0 +1,32 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 31, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "foundation", "hidden": true,
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "toolchainFile": "${sourceDir}/out/deps/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "BUILD_TESTING": "ON", "PM_BUILD_PLATFORM": "OFF", "PM_BUILD_MEDIA": "OFF",
+        "PM_BUILD_UI": "OFF", "PM_BUILD_HARDWARE_TESTS": "OFF", "PM_BUILD_NDI": "OFF"
+      }
+    },
+    {
+      "name": "windows-ci", "inherits": "foundation",
+      "generator": "Visual Studio 17 2022", "architecture": "x64", "toolset": "v143,host=x64",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-windows" }
+    },
+    {
+      "name": "windows-local", "inherits": "foundation",
+      "generator": "Visual Studio 18 2026", "architecture": "x64", "toolset": "v145,host=x64",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-windows" }
+    },
+    {
+      "name": "portable-ci", "inherits": "foundation", "generator": "Ninja",
+      "condition": { "type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    }
+  ]
+}

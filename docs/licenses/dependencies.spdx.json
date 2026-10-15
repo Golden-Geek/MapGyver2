@@ -1,0 +1,42 @@
+{
+  "spdxVersion": "SPDX-2.3", "dataLicense": "CC0-1.0", "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "MapGyver M00 source dependency inventory",
+  "documentNamespace": "https://github.com/Golden-Geek/MapGyver2/spdx/m00-0.1.0-dev",
+  "creationInfo": { "created": "2026-10-15T00:00:00Z", "creators": ["Organization: Golden-Geek"] },
+  "documentDescribes": ["SPDXRef-MapGyver"],
+  "packages": [
+    {
+      "name": "MapGyver", "SPDXID": "SPDXRef-MapGyver", "versionInfo": "0.1.0-dev",
+      "downloadLocation": "https://github.com/Golden-Geek/MapGyver2", "filesAnalyzed": false,
+      "licenseConcluded": "GPL-3.0-or-later", "licenseDeclared": "GPL-3.0-or-later", "copyrightText": "NOASSERTION"
+    },
+    {
+      "name": "nlohmann-json", "SPDXID": "SPDXRef-nlohmann-json", "versionInfo": "3.12.0",
+      "downloadLocation": "https://github.com/nlohmann/json/releases/tag/v3.12.0", "filesAnalyzed": false,
+      "licenseConcluded": "MIT", "licenseDeclared": "MIT", "copyrightText": "NOASSERTION",
+      "sourceInfo": "vcpkg 3.12.0#2 at 20ceb8adbf0504d4b0d5e4058a32f9d4fc896391"
+    },
+    {
+      "name": "vcpkg", "SPDXID": "SPDXRef-vcpkg", "versionInfo": "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+      "downloadLocation": "git+https://github.com/microsoft/vcpkg.git@20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+      "filesAnalyzed": false, "licenseConcluded": "MIT", "licenseDeclared": "MIT", "copyrightText": "NOASSERTION"
+    },
+    {
+      "name": "vcpkg-cmake", "SPDXID": "SPDXRef-vcpkg-cmake", "versionInfo": "2025-08-07",
+      "downloadLocation": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/vcpkg-cmake",
+      "filesAnalyzed": false, "licenseConcluded": "MIT", "licenseDeclared": "MIT", "copyrightText": "NOASSERTION"
+    },
+    {
+      "name": "vcpkg-cmake-config", "SPDXID": "SPDXRef-vcpkg-cmake-config", "versionInfo": "2026-07-21",
+      "downloadLocation": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/vcpkg-cmake-config",
+      "filesAnalyzed": false, "licenseConcluded": "MIT", "licenseDeclared": "MIT", "copyrightText": "NOASSERTION"
+    }
+  ],
+  "relationships": [
+    { "spdxElementId": "SPDXRef-DOCUMENT", "relationshipType": "DESCRIBES", "relatedSpdxElement": "SPDXRef-MapGyver" },
+    { "spdxElementId": "SPDXRef-MapGyver", "relationshipType": "DEPENDS_ON", "relatedSpdxElement": "SPDXRef-nlohmann-json" },
+    { "spdxElementId": "SPDXRef-vcpkg", "relationshipType": "BUILD_TOOL_OF", "relatedSpdxElement": "SPDXRef-MapGyver" },
+    { "spdxElementId": "SPDXRef-vcpkg-cmake", "relationshipType": "BUILD_DEPENDENCY_OF", "relatedSpdxElement": "SPDXRef-nlohmann-json" },
+    { "spdxElementId": "SPDXRef-vcpkg-cmake-config", "relationshipType": "BUILD_DEPENDENCY_OF", "relatedSpdxElement": "SPDXRef-nlohmann-json" }
+  ]
+}

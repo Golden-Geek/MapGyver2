@@ -2,15 +2,15 @@
   "plan_version": 1,
   "created": "2026-10-15",
   "primary_platform": "windows-x64",
-  "project_name": "Projection Mapping Engine (working title)",
+  "project_name": "MapGyver",
   "license_intent": "GPL-3.0-or-later",
-  "implementation_status": "not_started",
+  "implementation_status": "in_progress",
   "milestones": [
     {
       "id": "M00",
       "title": "Repository and CI foundation",
       "track": "windows-v1",
-      "status": "planned",
+      "status": "in_progress",
       "depends_on": [],
       "goal": "Make a clean checkout build and diagnose itself on Windows x64; establish portable core builds and honest completion evidence.",
       "owned_paths": [

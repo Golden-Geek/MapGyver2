@@ -4,10 +4,20 @@
 from pathlib import Path
 import argparse
 import json
+import os
 import re
 import sys
 
 STATUSES = {'planned', 'in_progress', 'blocked', 'complete'}
+
+def owned_markdown(root):
+    """Exclude generated output and downloaded dependency documentation."""
+    excluded = {'.git', 'out', 'build', 'node_modules', '.venv', 'vcpkg_installed'}
+    for current, directories, files in os.walk(root):
+        directories[:] = [name for name in directories if name not in excluded]
+        for name in files:
+            if name.endswith('.md'):
+                yield Path(current) / name
 
 def validate(data, root, check_documents=True):
     errors = []
@@ -84,7 +94,7 @@ def validate(data, root, check_documents=True):
         content = main.read_text(encoding='utf-8') if main.exists() else ''
         for cid in all_commits:
             require(cid in content, f'Commit slice absent from human plan: {cid}.')
-        for document in root.rglob('*.md'):
+        for document in owned_markdown(root):
             text = document.read_text(encoding='utf-8')
             for match in re.finditer(r'\[[^\]\n]+\]\(([^)\s]+)\)', text):
                 target = match.group(1).split('#', 1)[0]

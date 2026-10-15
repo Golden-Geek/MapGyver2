@@ -1,0 +1,11 @@
+/out/
+/build/
+/vcpkg_installed/
+CMakeUserPresets.json
+__pycache__/
+*.py[cod]
+.venv/
+/ui/node_modules/
+/ui/dist/
+/test-results.xml
+/portable-results.xml
