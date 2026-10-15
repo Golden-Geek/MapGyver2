@@ -6,8 +6,8 @@
   commits pushed directly to main. No public release or policy changes.
 - Planning baseline: `1d686c1`; no previous application or Git history.
   Planning validation passed before the baseline commit and public push.
-- Follow backlog dependencies and preserve slice IDs. Current: M01.C01, first
-  real D3D11 shared-resource baseline before the bgfx comparison.
+- Follow backlog dependencies and preserve slice IDs. Current: M01.C01 bgfx
+  owned/shared texture sampling, lifetime retirement and producer-timeout tests.
 
 ## Steps
 
@@ -30,6 +30,12 @@
    docs/progress/M01-d3d11-baseline.json. Next: actual bgfx sampling/import path;
    C01 and M01 remain incomplete. Pinned bgfx archive/ownership findings are in
    docs/progress/M01.md; do not substitute latest docs for pinned API behavior.
+   Working-tree bgfx Release probe now passes 12 exact pixel/alpha cases and a
+   real keyed-mutex producer stall returns WAIT_TIMEOUT with no success payload.
+   Debug and Release hardware contracts pass after removing an invalid renderFrame
+   call in the single-threaded bgfx build. Both non-hardware wrappers pass; shader
+   provenance and 11 resolved dependency notices are recorded. Next: commit/push,
+   clean-source GPU reruns and hosted compilation. M01.C02 Spout follows.
 6. M02–M13 pending: follow contracts and continue independent work around
    unavailable hardware/legal evidence without qualifying dependents.
 

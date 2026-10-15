@@ -1,0 +1,33 @@
+{
+  "license": "BSD-2-Clause",
+  "upstreamArchive": "https://github.com/bkaradzic/bgfx.cmake/releases/download/v1.129.8940-496/bgfx.cmake.v1.129.8940-496.tar.gz",
+  "upstreamArchiveSha512": "520c542b65e76e92eae818e32eeb62bb2347ac89a1e10fc07cd5059a3b8a9a543cadca87d451a3bc157c415f6183b1f0e5031248e38fae704b8efd54679d482b",
+  "files": [
+    {
+      "file": "vs_fullscreen.bin",
+      "archiveEntry": "bgfx.cmake/bgfx/examples/runtime/shaders/dx11/vs_fullscreen.bin",
+      "sha256": "a2eb287c168aeea10d7fbe0591b0c51736de144a8ef93d29e0b05670e3f6cd1e"
+    },
+    {
+      "file": "fs_bokeh_copy.bin",
+      "archiveEntry": "bgfx.cmake/bgfx/examples/runtime/shaders/dx11/fs_bokeh_copy.bin",
+      "sha256": "0f1f237e956fbec373408e68d75430852c8b49905e32f1fe8386752e484a2716"
+    },
+    {
+      "file": "vs_fullscreen.sc",
+      "archiveEntry": "bgfx.cmake/bgfx/examples/38-bloom/vs_fullscreen.sc",
+      "sha256": "302365636ca26db8f8f25e9a38cecaad2a01cc3e5e0583ec46846995cb470bda"
+    },
+    {
+      "file": "fs_bokeh_copy.sc",
+      "archiveEntry": "bgfx.cmake/bgfx/examples/45-bokeh/fs_bokeh_copy.sc",
+      "sha256": "7e4baded27d1d6f4d92c7ae9df72bb331b519b98ce11cc630489fc4c3df48031"
+    },
+    {
+      "file": "LICENSE.bgfx",
+      "archiveEntry": "bgfx.cmake/bgfx/LICENSE",
+      "sha256": "1bee809a059b4c1d34e09338217eda8fc6e6b487719b2d63a45836e4d81bb0c0"
+    }
+  ],
+  "note": "Unmodified compiled DX11 examples and corresponding main shader sources; full includes/source are in the pinned archive."
+}

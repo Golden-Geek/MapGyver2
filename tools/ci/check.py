@@ -18,7 +18,7 @@ from build_metadata import source_identity
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--preset", required=True, choices=("windows-local", "windows-ci", "windows-graphics", "portable-ci"))
+    parser.add_argument("--preset", required=True, choices=("windows-local", "windows-ci", "windows-graphics", "windows-bgfx", "portable-ci"))
     parser.add_argument("--configuration", default="Release", choices=("Debug", "Release"))
     parser.add_argument("--skip-bootstrap", action="store_true", help="Use an already bootstrapped pinned dependency root")
     args = parser.parse_args()

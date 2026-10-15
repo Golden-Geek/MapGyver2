@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-15T17:30:55.756741+00:00",
+  "scope": "Resolved optional M01 graphics experiment source dependencies; not a release binary SBOM",
+  "baseline": "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+  "packages": [
+    {
+      "name": "bgfx",
+      "version": "1.129.8940-496",
+      "portVersion": 1,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": "BSD-2-Clause AND CC0-1.0",
+      "reviewedLicense": "BSD-2-Clause AND CC0-1.0",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/bgfx",
+      "installedNoticeSha256": "76f1e6edbc24d66134b9296c266e23b6495c097f67cd73bee6427a993db95318"
+    },
+    {
+      "name": "libsquish",
+      "version": "1.15",
+      "portVersion": 15,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": "MIT",
+      "reviewedLicense": "MIT",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/libsquish",
+      "installedNoticeSha256": "a6b8c383bf3ab28460d6507484d605dd722e03971606f0cd3032a3af682b63a5"
+    },
+    {
+      "name": "lodepng",
+      "version": "2021-12-04",
+      "portVersion": 1,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": null,
+      "reviewedLicense": "Zlib",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/lodepng",
+      "installedNoticeSha256": "bdafa318b8e637d600ca1b60545e894881977a16a16b74809c95e805701621e3",
+      "reviewNote": "Installed copyright text is the three-clause zlib notice; this port omits the SPDX field."
+    },
+    {
+      "name": "mgnlibs",
+      "version": "2019-09-29",
+      "portVersion": 2,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": "MIT",
+      "reviewedLicense": "MIT",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/mgnlibs",
+      "installedNoticeSha256": "fbd215ea10688f29f5c4d578ed1a45a2b9feb2aaa901c1cc9a2623903a315a81"
+    },
+    {
+      "name": "miniz",
+      "version": "3.1.2",
+      "portVersion": 0,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": "MIT",
+      "reviewedLicense": "MIT",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/miniz",
+      "installedNoticeSha256": "0115478d567121238cf6cc1c0c361926cf07a49d9e4c9e66da97fac6a01646b3"
+    },
+    {
+      "name": "nlohmann-json",
+      "version": "3.12.0",
+      "portVersion": 2,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": "MIT",
+      "reviewedLicense": "MIT",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/nlohmann-json",
+      "installedNoticeSha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+    },
+    {
+      "name": "sdl3",
+      "version": "3.4.18",
+      "portVersion": 0,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": "Zlib AND MIT AND Apache-2.0 AND BSD-3-Clause",
+      "reviewedLicense": "Zlib AND MIT AND Apache-2.0 AND BSD-3-Clause",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/sdl3",
+      "installedNoticeSha256": "a07a67f78bbeea16b26fae318f516dc381723c714d8a3bf1329b18250477617f"
+    },
+    {
+      "name": "stb",
+      "version": "2026-08-02",
+      "portVersion": 0,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": null,
+      "reviewedLicense": "MIT",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/stb",
+      "installedNoticeSha256": "5d7ecc83c3fb8ede1839c2a511b39f83e5cad6007b68b4a95f5fcbfc79956679",
+      "reviewNote": "Installed notice offers MIT or public-domain alternatives. Select MIT and retain notices; the port omits SPDX metadata."
+    },
+    {
+      "name": "tinyexr",
+      "version": "3.2.0",
+      "portVersion": 0,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": "BSD-3-Clause",
+      "reviewedLicense": "BSD-3-Clause",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/tinyexr",
+      "installedNoticeSha256": "d70fad9fc1ea223b4c7cea554f8b7956568779453e00e4ffde0c4d5262e3ab10"
+    },
+    {
+      "name": "vcpkg-cmake",
+      "version": "2025-08-07",
+      "portVersion": 0,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": "MIT",
+      "reviewedLicense": "MIT",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/vcpkg-cmake",
+      "installedNoticeSha256": "1ee376fc340e0aa6ad6a3581c94126e741468705096ac92263048a21daa86460"
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "version": "2026-07-21",
+      "portVersion": 0,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": "MIT",
+      "reviewedLicense": "MIT",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/vcpkg-cmake-config",
+      "installedNoticeSha256": "04b60f99a43bfd7fefdc8364b24aac704a2160cef969b75ba6a38b62dc4c4b70"
+    }
+  ],
+  "sourceArchiveNote": "bgfx bundles bx/bimg and third-party components. The pinned archive retains their licenses; include all applicable notices in a release.",
+  "shaderAssets": "../../experiments/graphics/shaders/provenance.json"
+}

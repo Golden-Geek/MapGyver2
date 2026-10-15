@@ -17,3 +17,15 @@ inventory and includes notices and matching source/build materials.
 
 NDI integration/distribution remains blocked by ADR-011. This inventory does
 not authorize a license exception or bundling proprietary runtimes.
+
+The optional M01 graphics experiment adds pinned bgfx/SDL3 and their resolved
+source dependencies. [Graphics inventory](graphics-dependencies.json) records
+versions, port revisions, license metadata and installed notice hashes.
+Two ports omit SPDX metadata: lodepng's installed zlib notice was reviewed;
+stb offers MIT/public-domain alternatives and the MIT option is selected.
+No proprietary SDK is added. bgfx's pinned source archive also contains bx,
+bimg and bundled component notices; retain the applicable full source/notices
+when producing a release rather than treating its top-level license as an SBOM.
+The copied example shader binaries have their own provenance and BSD notice
+under experiments/graphics/shaders. They are experimental assets; their
+historical compiler build is not claimed as reproduced.

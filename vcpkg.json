@@ -2,5 +2,14 @@
   "name": "mapgyver", "version-string": "0.1.0-dev",
   "description": "MapGyver native projection mapping engine",
   "homepage": "https://github.com/Golden-Geek/MapGyver2", "license": "GPL-3.0-or-later",
-  "dependencies": [ { "name": "nlohmann-json", "version>=": "3.12.0#2" } ]
+  "dependencies": [ { "name": "nlohmann-json", "version>=": "3.12.0#2" } ],
+  "features": {
+    "graphics-experiments": {
+      "description": "M01 Windows D3D11/bgfx/SDL3 feasibility only",
+      "dependencies": [
+        { "name": "bgfx", "version>=": "1.129.8940-496#1", "default-features": false, "platform": "windows" },
+        { "name": "sdl3", "version>=": "3.4.18", "default-features": false, "platform": "windows" }
+      ]
+    }
+  }
 }

@@ -22,3 +22,34 @@ timeouts, abandoned mutexes, device errors or pixel mismatches fail the process.
 The next experiment must exercise bgfx's pinned D3D11 import API and retain
 borrowed external resources through bgfx/GPU retirement. The renderer remains
 provisional. See the milestone progress document for actual source evidence.
+
+## bgfx import and sampling
+
+Build with `python tools/ci/check.py --preset windows-bgfx --configuration
+Release` (or Debug). This optional feature resolves pinned bgfx and SDL3.
+Windows CI compiles it; portable builds do not install GPU/window dependencies.
+
+Run the real GPU contract explicitly:
+
+```powershell
+python tests/hardware/test_bgfx_interop.py --executable out/build/windows-bgfx/experiments/graphics/Release/mapgyver-bgfx-interop.exe --report-directory out/reports/bgfx-hardware-release
+```
+
+The contract verifies 12 owned/imported sampling cases with exact RGBA/BGRA
+color and alpha, three sizes and distinct resource generations. A separate
+process with `--hold-producer-key` must fail with actual WAIT_TIMEOUT, exit 1 and
+no success JSON. Software adapters are rejected. Resource views are destroyed
+on the single bgfx owner, GPU completion is checked, then borrowed native
+resources are released. Native handles never cross the experimental public API.
+
+bgfx is compiled without its multithreaded feature. Its frame() renders inline;
+calling renderFrame() in that build is invalid and asserts before initialization.
+All fatal callbacks, including DebugCheck, terminate with diagnostics rather
+than enter a debugger dialog. Debug trace storage is bounded at 64 KiB and any
+truncation is counted. No persistent shader cache/profiler is configured.
+
+Only the validation phase performs staging copies/readback. API counts are not
+hardware counters or a zero-copy claim. Shaders are embedded from verified,
+licensed [upstream assets](shaders/README.md). This is functional texture
+interoperability, not Spout, hardware decoding, physical output or performance
+qualification. M01 remains open until those separate gates pass.
