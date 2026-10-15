@@ -1,0 +1,1325 @@
+{
+  "adapter": {
+    "deviceId": 11353,
+    "luidHigh": 0,
+    "luidLow": 89087,
+    "vendorId": 4318
+  },
+  "buildConfiguration": "Debug",
+  "cases": [
+    {
+      "applicationDecodeReadbacks": 0,
+      "applicationDecodedCpuUploadCalls": 0,
+      "candidateDrawSubmissions": 18,
+      "channelCodeTolerance": 2,
+      "codec": "mpeg2video",
+      "decodePath": "strict D3D11VA; software fallback forbidden",
+      "decodedFrames": 18,
+      "firstFrameConversionRenderValidationMicroseconds": 3591.0,
+      "fixtureBytes": 7337,
+      "fixtureSha256": "d9689a9ed861f4f58585ca02fd2986d7b9c7749db16f8e631c86f8ddecb8044c",
+      "frames": [
+        {
+          "appliedBgfxFrame": 5,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 3591.0,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 5267456,
+            "privateBytes": 175235072,
+            "processPeakWorkingSetBytes": 135335936,
+            "workingSetBytes": 135335936
+          },
+          "pts": 0,
+          "receiveFrameCallMicroseconds": 0.9,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 9,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 1697.5,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 5935104,
+            "privateBytes": 175280128,
+            "processPeakWorkingSetBytes": 136073216,
+            "workingSetBytes": 136073216
+          },
+          "pts": 1,
+          "receiveFrameCallMicroseconds": 0.8,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 13,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 1631.0,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 6406144,
+            "privateBytes": 175304704,
+            "processPeakWorkingSetBytes": 136577024,
+            "workingSetBytes": 136577024
+          },
+          "pts": 2,
+          "receiveFrameCallMicroseconds": 0.4,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 17,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 1485.7,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 6877184,
+            "privateBytes": 175341568,
+            "processPeakWorkingSetBytes": 137060352,
+            "workingSetBytes": 137060352
+          },
+          "pts": 3,
+          "receiveFrameCallMicroseconds": 0.8,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 21,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 1597.9,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 7348224,
+            "privateBytes": 175341568,
+            "processPeakWorkingSetBytes": 137535488,
+            "workingSetBytes": 137535488
+          },
+          "pts": 4,
+          "receiveFrameCallMicroseconds": 0.4,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 25,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 1617.6,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 7819264,
+            "privateBytes": 175341568,
+            "processPeakWorkingSetBytes": 138010624,
+            "workingSetBytes": 138010624
+          },
+          "pts": 5,
+          "receiveFrameCallMicroseconds": 1.9,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 29,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 1690.1,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 8331264,
+            "privateBytes": 175394816,
+            "processPeakWorkingSetBytes": 138539008,
+            "workingSetBytes": 138539008
+          },
+          "pts": 6,
+          "receiveFrameCallMicroseconds": 0.5,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 33,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 1583.8,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 8802304,
+            "privateBytes": 175419392,
+            "processPeakWorkingSetBytes": 139034624,
+            "workingSetBytes": 139034624
+          },
+          "pts": 7,
+          "receiveFrameCallMicroseconds": 0.5,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 37,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 1569.9,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 9273344,
+            "privateBytes": 175456256,
+            "processPeakWorkingSetBytes": 139522048,
+            "workingSetBytes": 139522048
+          },
+          "pts": 8,
+          "receiveFrameCallMicroseconds": 0.5,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 41,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 1593.5,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 9744384,
+            "privateBytes": 175456256,
+            "processPeakWorkingSetBytes": 139997184,
+            "workingSetBytes": 139997184
+          },
+          "pts": 9,
+          "receiveFrameCallMicroseconds": 0.6,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 45,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 1666.6,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 10215424,
+            "privateBytes": 175456256,
+            "processPeakWorkingSetBytes": 140476416,
+            "workingSetBytes": 140476416
+          },
+          "pts": 10,
+          "receiveFrameCallMicroseconds": 0.7,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 49,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 1614.6,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 10686464,
+            "privateBytes": 175456256,
+            "processPeakWorkingSetBytes": 140967936,
+            "workingSetBytes": 140967936
+          },
+          "pts": 11,
+          "receiveFrameCallMicroseconds": 0.7,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 53,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 1581.4,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 11157504,
+            "privateBytes": 175456256,
+            "processPeakWorkingSetBytes": 141447168,
+            "workingSetBytes": 141447168
+          },
+          "pts": 12,
+          "receiveFrameCallMicroseconds": 0.4,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 57,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 1498.5,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 11628544,
+            "privateBytes": 175493120,
+            "processPeakWorkingSetBytes": 141926400,
+            "workingSetBytes": 141926400
+          },
+          "pts": 13,
+          "receiveFrameCallMicroseconds": 0.7,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 61,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 5186.0,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 12099584,
+            "privateBytes": 175562752,
+            "processPeakWorkingSetBytes": 142487552,
+            "workingSetBytes": 142487552
+          },
+          "pts": 14,
+          "receiveFrameCallMicroseconds": 0.3,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 65,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 1745.4,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 12570624,
+            "privateBytes": 175562752,
+            "processPeakWorkingSetBytes": 142958592,
+            "workingSetBytes": 142958592
+          },
+          "pts": 15,
+          "receiveFrameCallMicroseconds": 0.6,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 69,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 1643.8,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 13041664,
+            "privateBytes": 175599616,
+            "processPeakWorkingSetBytes": 143462400,
+            "workingSetBytes": 143462400
+          },
+          "pts": 16,
+          "receiveFrameCallMicroseconds": 0.6,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 73,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 1655.3,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9220096,
+            "nonlocalVideoUsageBytes": 13238272,
+            "privateBytes": 175599616,
+            "processPeakWorkingSetBytes": 143663104,
+            "workingSetBytes": 143663104
+          },
+          "pts": 17,
+          "receiveFrameCallMicroseconds": 23.8,
+          "timeBase": [
+            1,
+            30
+          ]
+        }
+      ],
+      "generation": 1,
+      "gpuConversion": "D3D11 video processor: BT.601 limited NV12 to full BGRA8",
+      "maxChannelCodeError": 1,
+      "memoryAfterRetirement": {
+        "localVideoBudgetBytes": 15975055360,
+        "localVideoUsageBytes": 9015296,
+        "nonlocalVideoUsageBytes": 7143424,
+        "privateBytes": 175689728,
+        "processPeakWorkingSetBytes": 143777792,
+        "workingSetBytes": 143777792
+      },
+      "memoryAllocated": {
+        "localVideoBudgetBytes": 15975055360,
+        "localVideoUsageBytes": 9220096,
+        "nonlocalVideoUsageBytes": 13238272,
+        "privateBytes": 175599616,
+        "processPeakWorkingSetBytes": 143663104,
+        "workingSetBytes": 143663104
+      },
+      "memoryBefore": {
+        "localVideoBudgetBytes": 15975055360,
+        "localVideoUsageBytes": 8593408,
+        "nonlocalVideoUsageBytes": 1040384,
+        "privateBytes": 151076864,
+        "processPeakWorkingSetBytes": 122826752,
+        "workingSetBytes": 122826752
+      },
+      "nativeFormat": "NV12",
+      "sampledPeakLocalVideoUsageBytes": 9220096,
+      "setupMicroseconds": 956.9,
+      "side": 128,
+      "validationCpuReadbacks": 18,
+      "validationGpuCopySubmissions": 18,
+      "videoProcessorBltSubmissions": 18,
+      "warmConversionRenderValidationMicroseconds": {
+        "max": 5186.0,
+        "method": "nearest rank",
+        "p50": 1617.6,
+        "p95": 5186.0,
+        "p99": 5186.0,
+        "samples": 17
+      }
+    },
+    {
+      "applicationDecodeReadbacks": 0,
+      "applicationDecodedCpuUploadCalls": 0,
+      "candidateDrawSubmissions": 18,
+      "channelCodeTolerance": 2,
+      "codec": "mpeg2video",
+      "decodePath": "strict D3D11VA; software fallback forbidden",
+      "decodedFrames": 18,
+      "firstFrameConversionRenderValidationMicroseconds": 5650.1,
+      "fixtureBytes": 24126,
+      "fixtureSha256": "e5c190384b27ca885cf52230a12695d6362b079880d0396522e9619fe509580c",
+      "frames": [
+        {
+          "appliedBgfxFrame": 77,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 5650.1,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 11001856,
+            "privateBytes": 179232768,
+            "processPeakWorkingSetBytes": 147476480,
+            "workingSetBytes": 147476480
+          },
+          "pts": 0,
+          "receiveFrameCallMicroseconds": 0.4,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 81,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 4426.1,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 11669504,
+            "privateBytes": 179257344,
+            "processPeakWorkingSetBytes": 147902464,
+            "workingSetBytes": 147902464
+          },
+          "pts": 1,
+          "receiveFrameCallMicroseconds": 1.5,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 85,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 6543.8,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 12140544,
+            "privateBytes": 179257344,
+            "processPeakWorkingSetBytes": 148111360,
+            "workingSetBytes": 148111360
+          },
+          "pts": 2,
+          "receiveFrameCallMicroseconds": 0.6,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 89,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 4488.3,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 12611584,
+            "privateBytes": 179257344,
+            "processPeakWorkingSetBytes": 148316160,
+            "workingSetBytes": 148316160
+          },
+          "pts": 3,
+          "receiveFrameCallMicroseconds": 0.7,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 93,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 4564.0,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 13164544,
+            "privateBytes": 179294208,
+            "processPeakWorkingSetBytes": 148545536,
+            "workingSetBytes": 148545536
+          },
+          "pts": 4,
+          "receiveFrameCallMicroseconds": 0.3,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 97,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 4408.2,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 13635584,
+            "privateBytes": 179294208,
+            "processPeakWorkingSetBytes": 148750336,
+            "workingSetBytes": 148750336
+          },
+          "pts": 5,
+          "receiveFrameCallMicroseconds": 0.3,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 101,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 5929.1,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 14106624,
+            "privateBytes": 179294208,
+            "processPeakWorkingSetBytes": 148959232,
+            "workingSetBytes": 148959232
+          },
+          "pts": 6,
+          "receiveFrameCallMicroseconds": 0.3,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 105,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 4605.7,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 14577664,
+            "privateBytes": 179294208,
+            "processPeakWorkingSetBytes": 149168128,
+            "workingSetBytes": 149168128
+          },
+          "pts": 7,
+          "receiveFrameCallMicroseconds": 0.4,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 109,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 4368.5,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 14852096,
+            "privateBytes": 179294208,
+            "processPeakWorkingSetBytes": 149237760,
+            "workingSetBytes": 149237760
+          },
+          "pts": 8,
+          "receiveFrameCallMicroseconds": 0.3,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 113,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 4325.3,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 15126528,
+            "privateBytes": 179331072,
+            "processPeakWorkingSetBytes": 149254144,
+            "workingSetBytes": 149254144
+          },
+          "pts": 9,
+          "receiveFrameCallMicroseconds": 0.8,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 117,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 5812.0,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 15400960,
+            "privateBytes": 179331072,
+            "processPeakWorkingSetBytes": 149262336,
+            "workingSetBytes": 149262336
+          },
+          "pts": 10,
+          "receiveFrameCallMicroseconds": 0.3,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 121,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 4516.8,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 15675392,
+            "privateBytes": 179331072,
+            "processPeakWorkingSetBytes": 149270528,
+            "workingSetBytes": 149270528
+          },
+          "pts": 11,
+          "receiveFrameCallMicroseconds": 0.6,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 125,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 4418.8,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 15949824,
+            "privateBytes": 179331072,
+            "processPeakWorkingSetBytes": 149278720,
+            "workingSetBytes": 149278720
+          },
+          "pts": 12,
+          "receiveFrameCallMicroseconds": 0.6,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 129,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 4406.9,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 16224256,
+            "privateBytes": 179331072,
+            "processPeakWorkingSetBytes": 149286912,
+            "workingSetBytes": 149286912
+          },
+          "pts": 13,
+          "receiveFrameCallMicroseconds": 0.6,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 133,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 5144.9,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 16498688,
+            "privateBytes": 179367936,
+            "processPeakWorkingSetBytes": 149299200,
+            "workingSetBytes": 149299200
+          },
+          "pts": 14,
+          "receiveFrameCallMicroseconds": 1.0,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 137,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 4510.9,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 16773120,
+            "privateBytes": 179367936,
+            "processPeakWorkingSetBytes": 149573632,
+            "workingSetBytes": 149573632
+          },
+          "pts": 15,
+          "receiveFrameCallMicroseconds": 0.7,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 141,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 4436.6,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 17047552,
+            "privateBytes": 179367936,
+            "processPeakWorkingSetBytes": 149843968,
+            "workingSetBytes": 149843968
+          },
+          "pts": 16,
+          "receiveFrameCallMicroseconds": 0.6,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 145,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 4423.7,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 10141696,
+            "nonlocalVideoUsageBytes": 17047552,
+            "privateBytes": 179367936,
+            "processPeakWorkingSetBytes": 149852160,
+            "workingSetBytes": 149852160
+          },
+          "pts": 17,
+          "receiveFrameCallMicroseconds": 6.6,
+          "timeBase": [
+            1,
+            30
+          ]
+        }
+      ],
+      "generation": 2,
+      "gpuConversion": "D3D11 video processor: BT.601 limited NV12 to full BGRA8",
+      "maxChannelCodeError": 1,
+      "memoryAfterRetirement": {
+        "localVideoBudgetBytes": 15975055360,
+        "localVideoUsageBytes": 9539584,
+        "nonlocalVideoUsageBytes": 10952704,
+        "privateBytes": 179367936,
+        "processPeakWorkingSetBytes": 149852160,
+        "workingSetBytes": 149852160
+      },
+      "memoryAllocated": {
+        "localVideoBudgetBytes": 15975055360,
+        "localVideoUsageBytes": 10141696,
+        "nonlocalVideoUsageBytes": 17047552,
+        "privateBytes": 179367936,
+        "processPeakWorkingSetBytes": 149852160,
+        "workingSetBytes": 149852160
+      },
+      "memoryBefore": {
+        "localVideoBudgetBytes": 15975055360,
+        "localVideoUsageBytes": 9015296,
+        "nonlocalVideoUsageBytes": 7143424,
+        "privateBytes": 175710208,
+        "processPeakWorkingSetBytes": 143818752,
+        "workingSetBytes": 143818752
+      },
+      "nativeFormat": "NV12",
+      "sampledPeakLocalVideoUsageBytes": 10141696,
+      "setupMicroseconds": 455.8,
+      "side": 256,
+      "validationCpuReadbacks": 18,
+      "validationGpuCopySubmissions": 18,
+      "videoProcessorBltSubmissions": 18,
+      "warmConversionRenderValidationMicroseconds": {
+        "max": 6543.8,
+        "method": "nearest rank",
+        "p50": 4488.3,
+        "p95": 6543.8,
+        "p99": 6543.8,
+        "samples": 17
+      }
+    },
+    {
+      "applicationDecodeReadbacks": 0,
+      "applicationDecodedCpuUploadCalls": 0,
+      "candidateDrawSubmissions": 18,
+      "channelCodeTolerance": 2,
+      "codec": "mpeg2video",
+      "decodePath": "strict D3D11VA; software fallback forbidden",
+      "decodedFrames": 18,
+      "firstFrameConversionRenderValidationMicroseconds": 2648.5,
+      "fixtureBytes": 7337,
+      "fixtureSha256": "d9689a9ed861f4f58585ca02fd2986d7b9c7749db16f8e631c86f8ddecb8044c",
+      "frames": [
+        {
+          "appliedBgfxFrame": 149,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 2648.5,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 11501568,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148881408
+          },
+          "pts": 0,
+          "receiveFrameCallMicroseconds": 0.6,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 153,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 1574.0,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 11776000,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148910080
+          },
+          "pts": 1,
+          "receiveFrameCallMicroseconds": 0.9,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 157,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 1633.3,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 12050432,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148910080
+          },
+          "pts": 2,
+          "receiveFrameCallMicroseconds": 0.4,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 161,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 1498.3,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 12324864,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148914176
+          },
+          "pts": 3,
+          "receiveFrameCallMicroseconds": 0.7,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 165,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 1436.7,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 12599296,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148914176
+          },
+          "pts": 4,
+          "receiveFrameCallMicroseconds": 0.3,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 169,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 1518.0,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 12873728,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148918272
+          },
+          "pts": 5,
+          "receiveFrameCallMicroseconds": 0.3,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 173,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 1669.6,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 13148160,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148918272
+          },
+          "pts": 6,
+          "receiveFrameCallMicroseconds": 0.6,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 177,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 1647.9,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 13422592,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148922368
+          },
+          "pts": 7,
+          "receiveFrameCallMicroseconds": 0.4,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 181,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 1491.2,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 13697024,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148922368
+          },
+          "pts": 8,
+          "receiveFrameCallMicroseconds": 0.5,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 185,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 1491.6,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 13971456,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148926464
+          },
+          "pts": 9,
+          "receiveFrameCallMicroseconds": 0.5,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 189,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 1528.3,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 14245888,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148926464
+          },
+          "pts": 10,
+          "receiveFrameCallMicroseconds": 0.3,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 193,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 1542.0,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 14520320,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148930560
+          },
+          "pts": 11,
+          "receiveFrameCallMicroseconds": 0.7,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 197,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 1509.1,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 14794752,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148930560
+          },
+          "pts": 12,
+          "receiveFrameCallMicroseconds": 0.7,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 201,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 1486.8,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 15069184,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148934656
+          },
+          "pts": 13,
+          "receiveFrameCallMicroseconds": 0.3,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 205,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 1479.7,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 15343616,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148934656
+          },
+          "pts": 14,
+          "receiveFrameCallMicroseconds": 0.3,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 209,
+          "arraySize": 6,
+          "arraySlice": 5,
+          "conversionRenderValidationMicroseconds": 1590.4,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 15618048,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148942848
+          },
+          "pts": 15,
+          "receiveFrameCallMicroseconds": 0.5,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 213,
+          "arraySize": 6,
+          "arraySlice": 4,
+          "conversionRenderValidationMicroseconds": 1527.1,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 15892480,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148942848
+          },
+          "pts": 16,
+          "receiveFrameCallMicroseconds": 0.3,
+          "timeBase": [
+            1,
+            30
+          ]
+        },
+        {
+          "appliedBgfxFrame": 217,
+          "arraySize": 6,
+          "arraySlice": 3,
+          "conversionRenderValidationMicroseconds": 5600.3,
+          "maxChannelCodeError": 1,
+          "memory": {
+            "localVideoBudgetBytes": 15975055360,
+            "localVideoUsageBytes": 9809920,
+            "nonlocalVideoUsageBytes": 15892480,
+            "privateBytes": 178593792,
+            "processPeakWorkingSetBytes": 149868544,
+            "workingSetBytes": 148951040
+          },
+          "pts": 17,
+          "receiveFrameCallMicroseconds": 4.0,
+          "timeBase": [
+            1,
+            30
+          ]
+        }
+      ],
+      "generation": 3,
+      "gpuConversion": "D3D11 video processor: BT.601 limited NV12 to full BGRA8",
+      "maxChannelCodeError": 1,
+      "memoryAfterRetirement": {
+        "localVideoBudgetBytes": 15975055360,
+        "localVideoUsageBytes": 9605120,
+        "nonlocalVideoUsageBytes": 9797632,
+        "privateBytes": 178593792,
+        "processPeakWorkingSetBytes": 149868544,
+        "workingSetBytes": 148951040
+      },
+      "memoryAllocated": {
+        "localVideoBudgetBytes": 15975055360,
+        "localVideoUsageBytes": 9809920,
+        "nonlocalVideoUsageBytes": 15892480,
+        "privateBytes": 178593792,
+        "processPeakWorkingSetBytes": 149868544,
+        "workingSetBytes": 148951040
+      },
+      "memoryBefore": {
+        "localVideoBudgetBytes": 15975055360,
+        "localVideoUsageBytes": 9539584,
+        "nonlocalVideoUsageBytes": 10952704,
+        "privateBytes": 178315264,
+        "processPeakWorkingSetBytes": 149868544,
+        "workingSetBytes": 148078592
+      },
+      "nativeFormat": "NV12",
+      "sampledPeakLocalVideoUsageBytes": 9809920,
+      "setupMicroseconds": 177.2,
+      "side": 128,
+      "validationCpuReadbacks": 18,
+      "validationGpuCopySubmissions": 18,
+      "videoProcessorBltSubmissions": 18,
+      "warmConversionRenderValidationMicroseconds": {
+        "max": 5600.3,
+        "method": "nearest rank",
+        "p50": 1527.1,
+        "p95": 5600.3,
+        "p99": 5600.3,
+        "samples": 17
+      }
+    }
+  ],
+  "counterMeaning": "Explicit application API submissions; no physical decoder/copy-engine counters or claim of hidden SDK copies",
+  "evidenceClass": "native-gpu-d3d11va-bgfx-decoder-import",
+  "ffmpegConfiguration": "--prefix='D:/Projects/Dev/MapGyver2/out/deps/vcpkg/packages/ffmpeg_x64-windows/debug' --toolchain=msvc --enable-pic --disable-doc --enable-runtime-cpudetect --disable-autodetect --target-os=win32 --enable-w32threads --enable-d3d11va --enable-d3d12va --enable-dxva2 --enable-mediafoundation --cc=cl.exe --host-cc=cl.exe --cxx=cl.exe --windres=rc.exe --ld=link.exe --ar='ar-lib lib.exe' --ranlib=':' --disable-ffmpeg --disable-ffplay --disable-ffprobe --enable-avcodec --disable-avdevice --disable-avformat --disable-avfilter --disable-swresample --disable-swscale --disable-alsa --disable-amf --disable-libaom --disable-libass --disable-avisynth --disable-bzlib --disable-libdav1d --disable-libsvtav1 --disable-libfdk-aac --disable-libfontconfig --disable-libharfbuzz --disable-libfreetype --disable-libfribidi --disable-iconv --disable-libilbc --disable-lzma --disable-libmp3lame --disable-libmodplug --disable-cuda --disable-nvenc --disable-nvdec --disable-cuvid --disable-ffnvcodec --disable-opencl --disable-opengl --disable-libopenh264 --disable-libopenjpeg --disable-libopenmpt --disable-openssl --enable-schannel --disable-libopus --disable-sdl2 --disable-libsnappy --disable-libsoxr --disable-libspeex --disable-libssh --disable-libtensorflow --disable-libtesseract --disable-libtheora --disable-libtwolame --disable-libvorbis --disable-libvpx --disable-vulkan --disable-libwebp --disable-libx264 --disable-libx265 --disable-libxml2 --disable-zlib --disable-libsrt --disable-libvpl --disable-vaapi --disable-libzmq --disable-librubberband --enable-cross-compile --disable-static --enable-shared --extra-cflags='-DHAVE_UNISTD_H=0' --pkg-config='D:/Projects/Dev/MapGyver2/out/deps/vcpkg/downloads/tools/msys2/d5586eb050429df1/mingw64/bin/pkg-config.exe' --disable-optimizations --enable-debug --extra-cflags=-MDd --extra-cxxflags=-MDd --extra-ldflags='-libpath:D:/Projects/Dev/MapGyver2/out/build/windows-decode/vcpkg_installed/x64-windows/debug/lib' --arch=x86_64 --enable-asm --enable-x86asm",
+  "ffmpegLicense": "LGPL version 2.1 or later",
+  "ffmpegVersion": "9.0.2",
+  "physicalOutputs": "not_tested",
+  "productionDeadlineBudget": "not_qualified",
+  "result": "passed",
+  "schemaVersion": 1,
+  "sourceDirty": false,
+  "sourceRevision": "9d0716eeee9868f259d05f145c95b5f6f61007f2",
+  "timingMeaning": "Offline CPU wall times include allocations, GPU waits and readback validation; not show deadline/scanout latency"
+}

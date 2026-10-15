@@ -65,6 +65,22 @@ CLI. Both final GPU contracts passed. Next: commit, hosted/clean-source evidence
 Full C03 still
 requires physical two-output, paired frame identity/scanout and recovery evidence.
 
+Decoder code is now 9d0716eeee9868f259d05f145c95b5f6f61007f2. Clean Debug/Release
+wrappers and hardware contracts passed (54 frames each + actual format refusal),
+dirty=false. Reports are retained in docs/progress/M01-decoder-*.json. CI run
+38790658271 is still building native Windows; portable/plan jobs passed.
+
+Current working tree adds a real owned-process fault harness using factored
+Spout process helpers. Both directions pass consumer death with six subsequent
+producer publications, consumer reconnect, producer death while holding its
+mutex (observed metadata removed/disconnected), and fresh pair restart. This
+trial used unchanged native binaries at 6818881; C02 helper regression passes.
+Both Spout configurations/peer were rebuilt and final fault contracts pass;
+C02 helper regression passes Debug/Release. Next: commit, then retain clean
+committed reports and hosted results. No production supervisor or
+device-loss result is claimed. Do not force a global GPU TDR on this laptop:
+that would disrupt unrelated apps and is not required to progress independently.
+
 ## Commands
 
 - python tools/ci/check.py --preset windows-spout --configuration Debug --skip-bootstrap

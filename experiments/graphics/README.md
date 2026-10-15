@@ -123,3 +123,24 @@ success JSON. Support/failure remains explicit.
 This establishes one MPEG-2/NV12 path on the tested GPU. It does not qualify H.264,
 HEVC, AV1, 10-bit/HDR, seeks, dynamic in-stream resize, sustained workloads,
 device-loss recovery or physical multi-output presentation. M01 stays open.
+
+## Owned SDK/GPU worker process faults
+
+```powershell
+python tests/hardware/test_spout_worker_failure.py --participant out/build/windows-spout/experiments/graphics/Release/mapgyver-spout-participant.exe --reference out/qualification/spout-reference-build/Release/mapgyver-spout-reference.exe --report-directory out/reports/spout-worker-failure-release
+```
+
+Repeat with the app Debug build and a fresh directory. The test terminates only
+Popen handles it created. In each real SDK direction it kills the consumer,
+requires six successful native publications without a consumer, starts a fresh
+consumer and verifies pixels. It then kills the producer while it holds the
+sharing mutex. The receiver must report disconnected/not-ready when metadata
+disappears, or fail explicitly for a real abandoned mutex; stale data cannot
+claim successful new content. A bounded fresh pair restart validates new pixels.
+Process/session identities and timings are recorded with transcripts and actual
+exit codes. No browser or preview participates. Test cleanup never discovers or
+terminates user processes by name.
+
+This is a qualification harness with one restart per injected failure, not the
+production supervisor, backoff policy or a physical-output outage measurement.
+Device/driver loss is not injected. Those gates remain open.

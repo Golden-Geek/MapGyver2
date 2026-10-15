@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "contracts": [
+    {
+      "schemaVersion": 1,
+      "collectedUtc": "2026-10-15T19:03:41.935411+00:00",
+      "evidenceClass": "native-gpu-d3d11va-bgfx-decoder-import",
+      "result": "passed",
+      "sourceRevision": "9d0716eeee9868f259d05f145c95b5f6f61007f2",
+      "sourceDirty": false,
+      "buildConfiguration": "Debug",
+      "generations": 3,
+      "decodedFrames": 54,
+      "positiveCommand": [
+        "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-decode\\experiments\\graphics\\Debug\\mapgyver-decoder-probe.exe",
+        "--json",
+        "--fixture-directory",
+        "D:\\Projects\\Dev\\MapGyver2\\out\\reports\\decoder-clean-debug-9d0716e\\fixtures"
+      ],
+      "negativeCommand": [
+        "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-decode\\experiments\\graphics\\Debug\\mapgyver-decoder-probe.exe",
+        "--json",
+        "--reject-hardware-format"
+      ],
+      "rejectedHardwareFormat": {
+        "exitCode": 1,
+        "successPayload": false,
+        "stderr": "[mpeg2video @ 00000273706DFA80] decoding to AV_PIX_FMT_NONE is not supported.\n[mpeg2video @ 00000273706DFA80] mpeg_decode_postinit() failure\nDecoder probe failed: Send compressed packet: Invalid argument\n"
+      },
+      "physicalOutputQualification": "not_run",
+      "productionDeadlineQualification": "not_run"
+    },
+    {
+      "schemaVersion": 1,
+      "collectedUtc": "2026-10-15T19:04:07.930832+00:00",
+      "evidenceClass": "native-gpu-d3d11va-bgfx-decoder-import",
+      "result": "passed",
+      "sourceRevision": "9d0716eeee9868f259d05f145c95b5f6f61007f2",
+      "sourceDirty": false,
+      "buildConfiguration": "Release",
+      "generations": 3,
+      "decodedFrames": 54,
+      "positiveCommand": [
+        "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-decode\\experiments\\graphics\\Release\\mapgyver-decoder-probe.exe",
+        "--json",
+        "--fixture-directory",
+        "D:\\Projects\\Dev\\MapGyver2\\out\\reports\\decoder-clean-release-9d0716e\\fixtures"
+      ],
+      "negativeCommand": [
+        "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-decode\\experiments\\graphics\\Release\\mapgyver-decoder-probe.exe",
+        "--json",
+        "--reject-hardware-format"
+      ],
+      "rejectedHardwareFormat": {
+        "exitCode": 1,
+        "successPayload": false,
+        "stderr": "[mpeg2video @ 000002E3EA483800] decoding to AV_PIX_FMT_NONE is not supported.\n[mpeg2video @ 000002E3EA483800] mpeg_decode_postinit() failure\nDecoder probe failed: Send compressed packet: Invalid argument\n"
+      },
+      "physicalOutputQualification": "not_run",
+      "productionDeadlineQualification": "not_run"
+    }
+  ]
+}
