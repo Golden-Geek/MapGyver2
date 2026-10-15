@@ -144,3 +144,30 @@ terminates user processes by name.
 This is a qualification harness with one restart per injected failure, not the
 production supervisor, backoff policy or a physical-output outage measurement.
 Device/driver loss is not injected. Those gates remain open.
+
+## Coherent native frame sets
+
+```powershell
+python tools/ci/check.py --preset windows-bgfx --configuration Release
+python tests/hardware/test_frame_sets.py --executable out/build/windows-bgfx/experiments/graphics/Release/mapgyver-frame-set-probe.exe --report-directory out/reports/frame-sets-release
+```
+
+Any bgfx-enabled profile builds this probe. Repeat with Debug. A cooperating
+native producer completes every independent source texture before sampling.
+The private adapter submits all required members in one applied bgfx frame,
+holds their COM resources until a common GPU completion and retires the group
+together. Four generations vary port counts (2/5/11/2), sizes (64/128/256/64)
+and RGBA/BGRA formats. Eight complete sets verify 40 member pixel/alpha cases
+against independent Python hashes, with common source/frame/resource identity.
+The fixed 12-member offline fixture capacity is not a product output limit.
+
+The negative cases supply a missing native member and actual stale pixels in
+one member's GPU texture. They require specific errors, exit 1 and no complete
+success report. Software metadata alone is insufficient: validation follows
+the real GPU sampling and common completion. API uploads/draws/validation copies
+and readbacks are separate, and actual DXGI memory snapshots are recorded.
+
+This proves cooperating same-device data/application-frame coherence. It does
+not declare independent legacy senders coherent, implement production routing
+or hold-last policy, present multiple physical windows, or qualify synchronized
+optical scanout. Physical output, driver-loss and performance gates remain open.

@@ -108,6 +108,8 @@ def main():
             evidence["spoutReferenceConfiguration"] = "Release"
         if cached("PM_BUILD_DECODER_EXPERIMENT") == "ON":
             run("decoder-probe-version", [build / "experiments/graphics" / args.configuration / "mapgyver-decoder-probe.exe", "--version"])
+        if cached("PM_BUILD_BGFX_EXPERIMENT") == "ON":
+            run("frame-set-probe-version", [build / "experiments/graphics" / args.configuration / "mapgyver-frame-set-probe.exe", "--version"])
         run("test", ["ctest", "--test-dir", build, "-C", args.configuration,
                      "--output-on-failure", "--no-tests=error", "-LE", "hardware",
                      "--output-junit", reports / "test-results.xml"])

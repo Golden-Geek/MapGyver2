@@ -81,6 +81,23 @@ committed reports and hosted results. No production supervisor or
 device-loss result is claimed. Do not force a global GPU TDR on this laptop:
 that would disrupt unrelated apps and is not required to progress independently.
 
+Worker-fault code committed locally at fe8c5ed7963b6cdd371ef2f4890bab64429417c6.
+Clean Debug/Release wrapper + fault contract reruns passed; unaltered reports are
+docs/progress/M01-worker-debug/release.json. Push waits for decoder CI 38790658271
+to finish rather than cancel its native Windows dependency compilation.
+
+Current code work: private sample_set API submits all native members in one
+applied bgfx frame and retires together. Cooperating real GPU frame-set Release
+trial passes 8 sets/40 exact member hashes, port counts 2/5/11/2, sizes 64/128/256/64;
+missing member and actual stale GPU pixels fail specifically/no success JSON.
+No physical presentation claim. Debug/Release each pass 8 sets/40 members and
+both negatives. All changed consumers pass native regressions in both configs:
+C01 texture/timeout, C02 Spout, decoder/import/refusal, owned worker death/restart.
+windows-decode/windows-spout final wrappers pass 5/5 CTest and CLI checks.
+Next: commit this tested slice, clean source reports, push after decoder CI,
+then collect hosted evidence. Physical multi-window/scanout and device-loss
+qualification still require distinct experiments/hardware; do not mark M01 done.
+
 ## Commands
 
 - python tools/ci/check.py --preset windows-spout --configuration Debug --skip-bootstrap

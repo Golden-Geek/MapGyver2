@@ -391,66 +391,91 @@ using namespace mapgyver::experiments;
 struct BgfxProbeDevice::Impl {
     Session session;
     std::thread::id owner = std::this_thread::get_id();
-    bool active_sample = false;
+    std::size_t active_count = 0;
     Impl() { initialize(session, false); }
 };
 BgfxProbeDevice::BgfxProbeDevice() : impl_(std::make_unique<Impl>()) {}
 BgfxProbeDevice::~BgfxProbeDevice() = default;
 ID3D11Device* BgfxProbeDevice::device() const noexcept { return impl_->session.device; }
 BgfxProbeDevice::Sample BgfxProbeDevice::sample(ID3D11Texture2D* source) {
+    const std::array inputs{source};
+    return sample_set(inputs).members[0];
+}
+BgfxProbeDevice::SampleSet BgfxProbeDevice::sample_set(std::span<ID3D11Texture2D* const> sources) {
     auto& state = *impl_;
     auto& session = state.session;
     check(std::this_thread::get_id() == state.owner, "Candidate sampling must run on its GPU owner thread");
-    check(!state.active_sample && source != nullptr, "Only one bounded candidate sample may be live");
-    ComPtr<ID3D11Device> source_device;
-    source->GetDevice(&source_device);
-    check(source_device.Get() == session.device, "Candidate import belongs to another D3D11 device");
-    D3D11_TEXTURE2D_DESC description{};
-    source->GetDesc(&description);
-    check(description.Width > 0 && description.Width <= 512 && description.Height > 0 && description.Height <= 512,
-          "Candidate fixture size unsupported");
-    check(description.Format == DXGI_FORMAT_R8G8B8A8_UNORM || description.Format == DXGI_FORMAT_B8G8R8A8_UNORM,
-          "Candidate fixture format unsupported");
-    const auto width = static_cast<std::uint16_t>(description.Width);
-    const auto height = static_cast<std::uint16_t>(description.Height);
-    const auto format = description.Format == DXGI_FORMAT_R8G8B8A8_UNORM ? bgfx::TextureFormat::RGBA8 : bgfx::TextureFormat::BGRA8;
+    check(state.active_count == 0 && !sources.empty() && sources.size() <= session.cases.size(),
+          "Only one bounded candidate sample set may be live");
+    std::array<D3D11_TEXTURE2D_DESC, 12> descriptions{};
+    for (std::size_t index = 0; index < sources.size(); ++index) {
+        check(sources[index] != nullptr, "Candidate set contains a missing source");
+        ComPtr<ID3D11Device> source_device;
+        sources[index]->GetDevice(&source_device);
+        check(source_device.Get() == session.device, "Candidate import belongs to another D3D11 device");
+        auto& description = descriptions[index];
+        sources[index]->GetDesc(&description);
+        check(description.Width > 0 && description.Width <= 512 && description.Height > 0 && description.Height <= 512,
+              "Candidate fixture size unsupported");
+        check(description.Format == DXGI_FORMAT_R8G8B8A8_UNORM || description.Format == DXGI_FORMAT_B8G8R8A8_UNORM,
+              "Candidate fixture format unsupported");
+    }
     constexpr std::uint64_t sampling = BGFX_SAMPLER_MIN_POINT | BGFX_SAMPLER_MAG_POINT | BGFX_SAMPLER_MIP_POINT |
                                        BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP;
-    check(bgfx::isTextureValid(0, false, 1, format, BGFX_TEXTURE_RT | sampling), "Candidate format cannot be rendered");
-    auto& resources = session.cases[0];
-    state.active_sample = true;
-    resources.imported = source; // Explicit COM ownership until views and GPU use retire.
-    resources.source = bgfx::createTexture2D(width, height, false, 1, format, sampling);
-    resources.target = bgfx::createTexture2D(width, height, false, 1, format, BGFX_TEXTURE_RT | sampling);
-    check(bgfx::isValid(resources.source) && bgfx::isValid(resources.target), "Candidate sample allocation failed");
-    bgfx::frame();
-    check(bgfx::overrideInternal(resources.source, reinterpret_cast<uintptr_t>(source)) == reinterpret_cast<uintptr_t>(source),
-          "Candidate did not import the caller-owned texture");
-    const auto native = bgfx::overrideInternal(resources.target, width, height, 1, format, BGFX_TEXTURE_RT | sampling);
-    check(native != 0, "Candidate target is not ready");
-    resources.framebuffer = bgfx::createFrameBuffer(1, &resources.target, false);
-    check(bgfx::isValid(resources.framebuffer), "Candidate framebuffer allocation failed");
+    state.active_count = sources.size();
+    for (std::size_t index = 0; index < sources.size(); ++index) {
+        const auto& description = descriptions[index];
+        const auto format = description.Format == DXGI_FORMAT_R8G8B8A8_UNORM ? bgfx::TextureFormat::RGBA8 : bgfx::TextureFormat::BGRA8;
+        check(bgfx::isTextureValid(0, false, 1, format, BGFX_TEXTURE_RT | sampling), "Candidate format cannot be rendered");
+        auto& resources = session.cases[index];
+        resources.imported = sources[index]; // Held until every member's views and GPU use retire.
+        resources.source = bgfx::createTexture2D(static_cast<std::uint16_t>(description.Width), static_cast<std::uint16_t>(description.Height), false, 1, format, sampling);
+        resources.target = bgfx::createTexture2D(static_cast<std::uint16_t>(description.Width), static_cast<std::uint16_t>(description.Height), false, 1, format, BGFX_TEXTURE_RT | sampling);
+        check(bgfx::isValid(resources.source) && bgfx::isValid(resources.target), "Candidate sample allocation failed");
+    }
+    bgfx::frame(); // Execute all bounded allocations before importing native resources.
+    SampleSet result;
+    result.count = sources.size();
     constexpr std::array<float, 16> identity{1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
     SDL_PumpEvents();
-    bgfx::setViewFrameBuffer(0, resources.framebuffer);
-    bgfx::setViewRect(0, 0, 0, width, height);
-    bgfx::setViewTransform(0, identity.data(), identity.data());
-    bgfx::setViewClear(0, BGFX_CLEAR_COLOR, 0);
-    bgfx::setTransform(identity.data()); bgfx::setVertexBuffer(0, session.vertices);
-    bgfx::setTexture(0, session.sampler, resources.source, static_cast<std::uint32_t>(sampling));
-    bgfx::setState(BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A);
-    bgfx::submit(0, session.program);
-    return {reinterpret_cast<ID3D11Texture2D*>(native), bgfx::frame()};
+    for (std::size_t index = 0; index < sources.size(); ++index) {
+        auto& resources = session.cases[index];
+        const auto& description = descriptions[index];
+        const auto width = static_cast<std::uint16_t>(description.Width);
+        const auto height = static_cast<std::uint16_t>(description.Height);
+        const auto format = description.Format == DXGI_FORMAT_R8G8B8A8_UNORM ? bgfx::TextureFormat::RGBA8 : bgfx::TextureFormat::BGRA8;
+        check(bgfx::overrideInternal(resources.source, reinterpret_cast<uintptr_t>(sources[index])) == reinterpret_cast<uintptr_t>(sources[index]),
+              "Candidate did not import the caller-owned texture");
+        const auto native = bgfx::overrideInternal(resources.target, width, height, 1, format, BGFX_TEXTURE_RT | sampling);
+        check(native != 0, "Candidate target is not ready");
+        resources.framebuffer = bgfx::createFrameBuffer(1, &resources.target, false);
+        check(bgfx::isValid(resources.framebuffer), "Candidate framebuffer allocation failed");
+        const auto view = static_cast<bgfx::ViewId>(index);
+        bgfx::setViewFrameBuffer(view, resources.framebuffer);
+        bgfx::setViewRect(view, 0, 0, width, height);
+        bgfx::setViewTransform(view, identity.data(), identity.data());
+        bgfx::setViewClear(view, BGFX_CLEAR_COLOR, 0);
+        bgfx::setTransform(identity.data()); bgfx::setVertexBuffer(0, session.vertices);
+        bgfx::setTexture(0, session.sampler, resources.source, static_cast<std::uint32_t>(sampling));
+        bgfx::setState(BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A);
+        bgfx::submit(view, session.program);
+        result.members[index].texture = reinterpret_cast<ID3D11Texture2D*>(native);
+    }
+    result.applied_frame = bgfx::frame(); // One immutable software application frame for the whole set.
+    for (std::size_t index = 0; index < result.count; ++index) result.members[index].applied_frame = result.applied_frame;
+    return result;
 }
 void BgfxProbeDevice::retire() {
     auto& state = *impl_;
     check(std::this_thread::get_id() == state.owner, "Candidate retirement must run on its GPU owner thread");
-    if (!state.active_sample) return;
-    state.session.retire(state.session.cases[0]);
-    bgfx::setViewFrameBuffer(0, BGFX_INVALID_HANDLE);
+    if (state.active_count == 0) return;
+    for (std::size_t index = 0; index < state.active_count; ++index) {
+        state.session.retire(state.session.cases[index]);
+        bgfx::setViewFrameBuffer(static_cast<bgfx::ViewId>(index), BGFX_INVALID_HANDLE);
+    }
     bgfx::frame(); bgfx::frame();
     wait_gpu(state.session.device, state.session.context.Get());
-    state.session.cases[0].imported.Reset();
-    state.active_sample = false;
+    for (std::size_t index = 0; index < state.active_count; ++index) state.session.cases[index].imported.Reset();
+    state.active_count = 0;
 }
 } // namespace mapgyver::windows
