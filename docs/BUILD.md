@@ -75,6 +75,10 @@ vcpkg binary cache reuse. This does not erase caches. Source identity must match
 the checkout and dirty=false; source archives report unknown provenance instead.
 Generated/downloaded output stays under ignored `out/`.
 
+M01 adds the optional `windows-graphics` preset and standalone native D3D11
+baseline executable. Windows CI compiles it; real GPU execution is manual and
+separately recorded. See [graphics experiments](../experiments/graphics/README.md).
+
 Run `python tools/validate_plan.py` for document/backlog validation and
 `python tools/show_milestone.py Mxx` for focused milestone contracts. These
 commands do not qualify playback, GPU sharing, physical output or performance.

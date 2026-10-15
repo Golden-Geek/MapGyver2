@@ -6,8 +6,8 @@
   commits pushed directly to main. No public release or policy changes.
 - Planning baseline: `1d686c1`; no previous application or Git history.
   Planning validation passed before the baseline commit and public push.
-- Follow backlog dependencies and preserve slice IDs. Current slice: M00.C04
-  completion documentation; next M01.C01 after final green checkpoint.
+- Follow backlog dependencies and preserve slice IDs. Current: M01.C01, first
+  real D3D11 shared-resource baseline before the bgfx comparison.
 
 ## Steps
 
@@ -20,9 +20,13 @@
    fail-closed quality gate, logs and exact environment/source identity.
    Replacement run 38770417178 passed every required hosted job.
 4. M00.C04 complete: fresh-checkout Debug/Release, bootstrap guide and durable
-   evidence. Push completion docs, verify final CI, then create milestone/m00.
-5. M01 next: real D3D11/bgfx/Spout/decode experiments. Renderer provisional
+   evidence. Final `93be949` CI 38771335741 passed every job; annotated
+   milestone/m00 tag created and pushed at that green commit.
+5. M01.C01 in progress: native D3D11 baseline then actual bgfx imports. Renderer provisional
    until critical tests pass; no speculative backends/plugin framework.
+   Baseline six real RTX 5080 shared-texture cases and Debug/Release wrapper
+   passed locally. Commit this partial C01 slice, rerun against the clean commit,
+   retain native GPU JSON and verify hosted compilation before bgfx integration.
 6. M02–M13 pending: follow contracts and continue independent work around
    unavailable hardware/legal evidence without qualifying dependents.
 
