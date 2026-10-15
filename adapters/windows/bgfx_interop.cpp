@@ -113,6 +113,7 @@ struct CaseResources {
 struct Session {
     ProbeCallbacks callbacks;
     SDL_Window* window = nullptr;
+    std::array<SDL_Window*, 3> output_windows{}; // Bounded offline multi-window fixture.
     bool initialized = false;
     ID3D11Device* device = nullptr; // Borrowed from bgfx, lifetime bounded by initialized.
     ComPtr<ID3D11DeviceContext> context;
@@ -160,6 +161,7 @@ struct Session {
                 if (FAILED(status)) std::cerr << "Producer mutex cleanup failed: " << status << '\n';
             }
         }
+        for (auto* output : output_windows) if (output != nullptr) SDL_DestroyWindow(output);
         if (window != nullptr) SDL_DestroyWindow(window);
         SDL_Quit();
     }
@@ -383,6 +385,135 @@ nlohmann::json bgfx_texture_interop(bool hold_producer_key) {
             {"counterMeaning", "counted API submissions, not hardware bus/copy-engine counters; staging readback is validation only"},
             {"traceBytesDropped", session.callbacks.dropped},
             {"spoutInterop", "not_run"}, {"physicalOutputs", "not_tested"}, {"cases", std::move(cases)}};
+}
+
+nlohmann::json bgfx_window_submission() {
+    Session session;
+    initialize(session, false);
+    check((bgfx::getCaps()->supported & BGFX_CAPS_SWAP_CHAIN) != 0, "Candidate does not support native multi-window swapchains");
+    ComPtr<IDXGIDevice> dxgi;
+    require(session.device->QueryInterface(IID_PPV_ARGS(&dxgi)), "Window probe DXGI device");
+    ComPtr<IDXGIAdapter> base; require(dxgi->GetAdapter(&base), "Window probe adapter");
+    ComPtr<IDXGIAdapter3> adapter; require(base.As(&adapter), "Window probe memory adapter");
+    std::array<std::uint32_t, 3> generations{};
+    std::array<int, 3> widths{}, heights{};
+    const auto memory = [&] {
+        DXGI_QUERY_VIDEO_MEMORY_INFO information{};
+        require(adapter->QueryVideoMemoryInfo(0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &information), "Window video memory query");
+        return nlohmann::json{{"localVideoUsageBytes", information.CurrentUsage}, {"localVideoBudgetBytes", information.Budget},
+                              {"bgfxFrameBufferHandles", bgfx::getStats()->numFrameBuffers}};
+    };
+    const auto before = memory();
+    const auto release_gpu = [&](std::size_t index) {
+        bgfx::setViewFrameBuffer(static_cast<bgfx::ViewId>(index), BGFX_INVALID_HANDLE);
+        session.retire(session.cases[index]);
+    };
+    const auto flush_retirement = [&] {
+        bgfx::frame(); bgfx::frame(); // Pinned upstream example requires this before HWND destruction/reuse.
+        wait_gpu(session.device, session.context.Get());
+        require(session.device->GetDeviceRemovedReason(), "Window retirement device health");
+    };
+    const auto attach = [&](std::size_t index, int width, int height) {
+        auto* output = session.output_windows[index];
+        check(output != nullptr && (SDL_GetWindowFlags(output) & SDL_WINDOW_HIDDEN) != 0, "Window fixture must stay hidden");
+        int actual_width = 0, actual_height = 0;
+        check(SDL_GetWindowSizeInPixels(output, &actual_width, &actual_height), SDL_GetError());
+        check(actual_width == width && actual_height == height, "Native window pixel size did not settle");
+        auto* native = SDL_GetPointerProperty(SDL_GetWindowProperties(output), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
+        check(native != nullptr, "Output window has no native HWND");
+        auto& resources = session.cases[index];
+        resources.framebuffer = bgfx::createFrameBuffer(native, static_cast<std::uint16_t>(width), static_cast<std::uint16_t>(height));
+        check(bgfx::isValid(resources.framebuffer), "Native swapchain framebuffer creation failed");
+        resources.source = bgfx::createTexture2D(16, 16, false, 1, bgfx::TextureFormat::RGBA8,
+            BGFX_SAMPLER_MIN_POINT | BGFX_SAMPLER_MAG_POINT | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP);
+        check(bgfx::isValid(resources.source), "Window sample texture allocation failed");
+        widths[index] = width; heights[index] = height; ++generations[index];
+    };
+    const auto create = [&](std::size_t index, int width, int height) {
+        session.output_windows[index] = SDL_CreateWindow("MapGyver M01 hidden output API fixture", width, height,
+            SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
+        check(session.output_windows[index] != nullptr, SDL_GetError());
+        attach(index, width, height);
+    };
+    for (std::size_t index = 0; index < 3; ++index) create(index, 64 + static_cast<int>(index)*16, 64 + static_cast<int>(index)*16);
+    nlohmann::json stages = nlohmann::json::array();
+    std::uint32_t source_sequence = 0;
+    constexpr std::array<float,16> identity{1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+    for (int stage = 0; stage < 4; ++stage) {
+        if (stage == 1) {
+            for (std::size_t index = 0; index < 3; ++index) release_gpu(index);
+            flush_retirement(); // Prevent two swapchains being attached to one HWND.
+            for (std::size_t index = 0; index < 3; ++index) {
+                const int side = 128 + static_cast<int>(index)*16;
+                check(SDL_SetWindowSize(session.output_windows[index], side, side), SDL_GetError());
+                check(SDL_SyncWindow(session.output_windows[index]), SDL_GetError());
+                attach(index, side, side);
+            }
+        } else if (stage == 2) {
+            release_gpu(1); flush_retirement();
+            SDL_DestroyWindow(session.output_windows[1]); session.output_windows[1] = nullptr;
+        } else if (stage == 3) {
+            create(1, 96, 112); // New native-window identity; peers continue on the same GPU owner.
+        }
+        SDL_PumpEvents();
+        nlohmann::json windows = nlohmann::json::array();
+        for (std::size_t index = 0; index < 3; ++index) {
+            if (session.output_windows[index] != nullptr) {
+                windows.push_back({{"outputId", "output-"+std::to_string(index)},
+                    {"sdlWindowId", SDL_GetWindowID(session.output_windows[index])}, {"resourceGeneration", generations[index]},
+                    {"width", widths[index]}, {"height", heights[index]}, {"hidden", true}});
+            }
+        }
+        nlohmann::json frames = nlohmann::json::array();
+        for (int repeat = 0; repeat < 3; ++repeat) {
+            ++source_sequence;
+            const auto started = std::chrono::steady_clock::now();
+            std::uint32_t draws = 0;
+            for (std::size_t index = 0; index < 3; ++index) {
+                if (session.output_windows[index] == nullptr) continue; // Explicit removed test output only.
+                auto& resources = session.cases[index];
+                std::array<std::uint32_t,256> pixels{};
+                pixels.fill(0xff000000U | source_sequence * 256U | static_cast<std::uint32_t>(index+1));
+                bgfx::updateTexture2D(resources.source, 0, 0, 0, 0, 16, 16, bgfx::copy(pixels.data(), sizeof(pixels)));
+                const auto view = static_cast<bgfx::ViewId>(index);
+                bgfx::setViewFrameBuffer(view, resources.framebuffer);
+                bgfx::setViewRect(view, 0, 0, static_cast<std::uint16_t>(widths[index]), static_cast<std::uint16_t>(heights[index]));
+                bgfx::setViewTransform(view, identity.data(), identity.data());
+                bgfx::setViewClear(view, BGFX_CLEAR_COLOR, 0);
+                bgfx::setTransform(identity.data()); bgfx::setVertexBuffer(0, session.vertices);
+                bgfx::setTexture(0, session.sampler, resources.source);
+                bgfx::setState(BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A);
+                bgfx::submit(view, session.program); ++draws;
+            }
+            const auto applied = bgfx::frame();
+            bgfx::frame(); // Execute the pinned backend's next flip/present cycle.
+            wait_gpu(session.device, session.context.Get());
+            require(session.device->GetDeviceRemovedReason(), "Multi-window submission device health");
+            frames.push_back({{"sourceSequence", source_sequence}, {"appliedBgfxFrame", applied},
+                {"windowDrawSubmissions", draws}, {"sourceCpuUploadCalls", draws}, {"cpuReadbacks",0},
+                {"offlineSubmissionCompletionMicroseconds",std::chrono::duration<double,std::micro>(std::chrono::steady_clock::now()-started).count()}});
+        }
+        stages.push_back({{"stage",stage}, {"windows",windows}, {"frames",frames}, {"memory",memory()}});
+    }
+    for (std::size_t index = 0; index < 3; ++index) release_gpu(index);
+    flush_retirement();
+    const auto after = memory();
+    for (auto*& output : session.output_windows) { SDL_DestroyWindow(output); output = nullptr; }
+    int remaining_windows = 0;
+    auto** windows = SDL_GetWindows(&remaining_windows);
+    check(windows != nullptr, SDL_GetError());
+    SDL_free(windows);
+    return {{"schemaVersion",1}, {"evidenceClass","native-gpu-hidden-sdl-bgfx-multi-window-api"}, {"result","passed"},
+        {"adapter",{{"name",utf8(session.adapter.Description)},{"vendorId",session.adapter.VendorId},{"deviceId",session.adapter.DeviceId},
+                    {"luidHigh",session.adapter.AdapterLuid.HighPart},{"luidLow",session.adapter.AdapterLuid.LowPart}}},
+        {"stages",stages}, {"memoryBefore",before}, {"memoryAfterRetirement",after},
+        {"remainingSdlWindows",remaining_windows},
+        {"ownership","Single native GPU/API owner; swapchain destruction flushed before native window resize/reuse/destruction"},
+        {"visibility","All fixture windows hidden; no browser or preview subscriber"},
+        {"counterMeaning","Explicit draw/upload API submissions; no Present/scanout/hardware transfer counter is claimed"},
+        {"windowPixels","not_read_back"}, {"physicalTwoOutputQualification","not_run"},
+        {"opticalSynchronization","not_claimed"}, {"productionDeadlineBudget","not_qualified"},
+        {"traceBytesDropped",session.callbacks.dropped}};
 }
 } // namespace mapgyver::experiments
 

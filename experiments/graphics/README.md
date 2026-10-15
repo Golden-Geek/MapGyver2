@@ -171,3 +171,25 @@ This proves cooperating same-device data/application-frame coherence. It does
 not declare independent legacy senders coherent, implement production routing
 or hold-last policy, present multiple physical windows, or qualify synchronized
 optical scanout. Physical output, driver-loss and performance gates remain open.
+
+## Native multi-window API submission
+
+```powershell
+python tools/ci/check.py --preset windows-bgfx --configuration Release
+python tests/hardware/test_window_submission.py --executable out/build/windows-bgfx/experiments/graphics/Release/mapgyver-window-probe.exe --report-directory out/reports/window-api-release
+```
+
+Repeat with Debug. All fixture windows stay hidden. The same native GPU owner
+submits to three SDL/bgfx swapchains, resizes/rebinds them, destroys one output
+while the other two continue, and recreates it with a new SDL window ID and
+resource generation. Twelve application frames submit 33 native-window draws.
+Swapchain destruction is flushed and GPU completion checked before native
+window resize/reuse/destruction, following the pinned bgfx example's ownership
+requirement. Actual framebuffer-handle counts return to zero; SDL reports only
+the probe's original context window remaining. DXGI memory snapshots are retained.
+
+This is hidden-window API/lifetime evidence. No window pixels are read back or
+visually inspected; draw submissions are not physical Present/scanout counters.
+The test does not qualify two physical displays/projectors, visible-frame timing,
+optical synchronization, topology/hotplug recovery or production deadline budgets.
+Windows CI compiles this path and runs only its non-GPU version CLI.

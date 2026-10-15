@@ -43,16 +43,20 @@
 
 ## Current baseline and next actions
 
-- Worker/frame-set commits were queued locally until decoder CI finished, to
-  preserve its native dependency compilation result. Decoder run is now green;
-  push the tested commits plus this evidence record, then collect their CI.
-- No application edits remain in the working tree at this checkpoint beyond
-  these evidence docs. Next independently testable C03 path: native SDL/bgfx
-  multiple-window submission, resize/destruction/recreate and ownership metrics.
+- Worker/frame-set commits and clean evidence were pushed through 2f8b189.
+  CI 38793706815 is running; plan passed. Decoder CI 38790658271 is green.
+- Current independently tested C03 working tree: native SDL/bgfx multiple-window
+  submission, resize/destruction/recreate and ownership metrics.
   Pinned upstream examples/22-windows shows swapchain destruction must be flushed
   before native window destruction; use the pinned API, not latest assumptions.
 - Hidden-window API results must remain distinct from physical two-output and
   optical scanout evidence. Do not tag M01 or accept a renderer from them.
+- Debug/Release trials pass 12 application frames/33 native window draws across
+  create/resize/remove/recreate stages. Actual framebuffer handles return to zero
+  and SDL retains only the original context window. All windows hidden; window
+  pixels not read back. Both wrappers pass 5/5 CTest/CLI checks; C01 Debug lifetime
+  and real timeout regression passes. Source is 2f8b189 plus dirty=true.
+  Next: commit the tested window slice, clean-source reports, hosted evidence.
 - Continue independent authorized work around unavailable hardware/legal gates;
   do not mark dependent milestones complete or fake missing hardware success.
 

@@ -110,6 +110,7 @@ def main():
             run("decoder-probe-version", [build / "experiments/graphics" / args.configuration / "mapgyver-decoder-probe.exe", "--version"])
         if cached("PM_BUILD_BGFX_EXPERIMENT") == "ON":
             run("frame-set-probe-version", [build / "experiments/graphics" / args.configuration / "mapgyver-frame-set-probe.exe", "--version"])
+            run("window-probe-version", [build / "experiments/graphics" / args.configuration / "mapgyver-window-probe.exe", "--version"])
         run("test", ["ctest", "--test-dir", build, "-C", args.configuration,
                      "--output-on-failure", "--no-tests=error", "-LE", "hardware",
                      "--output-junit", reports / "test-results.xml"])
