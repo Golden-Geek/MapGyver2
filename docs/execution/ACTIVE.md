@@ -249,6 +249,13 @@
   before releasing buffers; never treats a cancellation request as completion.
   Next: final review/commit, clean source/build/IPC evidence, push, then M03.C02
   OSC/OSCQuery discovery and network adapters with the same validated service.
+- Native engine/pipe code committed as 551c322ab6b99b4be3c9ce3d662d28f98e35131b.
+  Clean Windows Debug/Release 13/13 wrappers and twelve real IPC phases each pass
+  with exact source SHA/dirty=false; retained M03-C01-pipe-local.json includes
+  environments/JUnit/native reports and binary/fixture hashes. Next: push tested
+  code/evidence, inspect source CI, then M03.C02 official OSCQuery/OSC contracts,
+  adapter choice/provenance and real network interoperability. Native applied
+  frames remain unreported until the render worker is connected; no milestone tag.
 
 ## Build/hardware commands
 
