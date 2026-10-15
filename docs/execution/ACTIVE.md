@@ -6,8 +6,8 @@
   commits pushed directly to main. No public release or policy changes.
 - Planning baseline: `1d686c1`; no previous application or Git history.
   Planning validation passed before the baseline commit and public push.
-- Follow backlog dependencies and preserve slice IDs. Current: M01.C01 bgfx
-  owned/shared texture sampling, lifetime retirement and producer-timeout tests.
+- Follow backlog dependencies and preserve slice IDs. Current: M01.C02 Spout
+  independent-process interoperability, following the qualified C01 experiment.
 
 ## Steps
 
@@ -35,7 +35,17 @@
    Debug and Release hardware contracts pass after removing an invalid renderFrame
    call in the single-threaded bgfx build. Both non-hardware wrappers pass; shader
    provenance and 11 resolved dependency notices are recorded. Next: commit/push,
-   clean-source GPU reruns and hosted compilation. M01.C02 Spout follows.
+   Clean commit `0300f34e44cc7c611483ac13ca2af990716b010a` passed native Debug and
+   Release hardware contracts (12 cases plus real stalled-key timeout each).
+   CI 38778592743 passed every required job, including bgfx/SDL3 compilation.
+   C01 is functionally satisfied for the reference GPU; M01 remains incomplete.
+   Retained GPU reports/summary are in docs/progress/M01-bgfx-*.json.
+   Next C02: add pinned SpoutDX, then bidirectional tests with official external
+   peers. Registry SDK is 2.007.010#1 (BSD-2-Clause); official reference examples
+   2.007.018 were downloaded to ignored out/research/spout. Zip SHA256 matches
+   GitHub's asset digest: 3b1a210da4f4a166a7cb55ce2b07e6c3d69e2fd4b1b73a0be2f14d8b0929173a.
+   Header and sender source are already there for API/fixture inspection. Do not
+   assume peer names, CLI options or visibility-independent cadence; inspect first.
 6. M02–M13 pending: follow contracts and continue independent work around
    unavailable hardware/legal evidence without qualifying dependents.
 

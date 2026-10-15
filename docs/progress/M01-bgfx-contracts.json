@@ -1,0 +1,33 @@
+{
+  "sourceRevision": "0300f34e44cc7c611483ac13ca2af990716b010a",
+  "reports": [
+    {
+      "schemaVersion": 1,
+      "collectedUtc": "2026-10-15T17:36:52.432991+00:00",
+      "evidenceClass": "native-gpu-bgfx-d3d11-sampling",
+      "sourceRevision": "0300f34e44cc7c611483ac13ca2af990716b010a",
+      "sourceDirty": false,
+      "result": "passed",
+      "positiveCases": 12,
+      "stalledProducer": {
+        "exitCode": 1,
+        "status": "WAIT_TIMEOUT",
+        "successPayload": false
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "collectedUtc": "2026-10-15T17:36:28.970353+00:00",
+      "evidenceClass": "native-gpu-bgfx-d3d11-sampling",
+      "sourceRevision": "0300f34e44cc7c611483ac13ca2af990716b010a",
+      "sourceDirty": false,
+      "result": "passed",
+      "positiveCases": 12,
+      "stalledProducer": {
+        "exitCode": 1,
+        "status": "WAIT_TIMEOUT",
+        "successPayload": false
+      }
+    }
+  ]
+}
