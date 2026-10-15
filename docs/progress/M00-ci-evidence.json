@@ -1,0 +1,615 @@
+{
+  "schemaVersion": 1,
+  "generatedUtc": "2026-10-15T16:40:28.835030+00:00",
+  "evidenceClass": "hosted-build-and-non-hardware-contract-tests",
+  "sourceRevision": "4fcc2012f06b6b079ea4fd7075a07f686bc75d69",
+  "ciRunUrl": "https://github.com/Golden-Geek/MapGyver2/actions/runs/38770417178",
+  "reports": [
+    {
+      "artifact": "portable-macos-15-4fcc2012f06b6b079ea4fd7075a07f686bc75d69",
+      "host": {
+        "system": "Darwin",
+        "release": "24.6.0",
+        "version": "Darwin Kernel Version 24.6.0: Tue Jul 21 20:51:34 PDT 2026; root:xnu-11417.140.69.711.44~1/RELEASE_ARM64_VMAPPLE",
+        "machine": "arm64",
+        "python": "3.14.7"
+      },
+      "runner": {
+        "ImageOS": "macos15",
+        "ImageVersion": "20260907.0337.1",
+        "RUNNER_OS": "macOS",
+        "RUNNER_ARCH": "ARM64"
+      },
+      "preset": "portable-ci",
+      "configuration": "Release",
+      "compiler": {
+        "id": "AppleClang",
+        "version": "17.0.0.17000013"
+      },
+      "cmakeVersion": "4.4.3",
+      "windowsSdk": null,
+      "dependencyBaseline": "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+      "resolvedPackages": [
+        {
+          "Package": "vcpkg-cmake-config",
+          "Version": "2026-07-21",
+          "Port-Version": null,
+          "Architecture": "arm64-osx"
+        },
+        {
+          "Package": "vcpkg-cmake",
+          "Version": "2025-08-07",
+          "Port-Version": null,
+          "Architecture": "arm64-osx"
+        },
+        {
+          "Package": "nlohmann-json",
+          "Version": "3.12.0",
+          "Port-Version": "2",
+          "Architecture": "arm64-osx"
+        }
+      ],
+      "commands": [
+        {
+          "name": "cmake-version",
+          "command": [
+            "cmake",
+            "--version"
+          ],
+          "exitCode": 0,
+          "log": "cmake-version.log"
+        },
+        {
+          "name": "git-version",
+          "command": [
+            "git",
+            "--version"
+          ],
+          "exitCode": 0,
+          "log": "git-version.log"
+        },
+        {
+          "name": "bootstrap",
+          "command": [
+            "/opt/homebrew/opt/python@3.14/bin/python3.14",
+            "/Users/runner/work/MapGyver2/MapGyver2/tools/ci/bootstrap.py",
+            "--triplet",
+            "arm64-osx",
+            "--core-only"
+          ],
+          "exitCode": 0,
+          "log": "bootstrap.log"
+        },
+        {
+          "name": "dependency-identity",
+          "command": [
+            "git",
+            "-C",
+            "/Users/runner/work/MapGyver2/MapGyver2/out/deps/vcpkg",
+            "rev-parse",
+            "HEAD"
+          ],
+          "exitCode": 0,
+          "log": "dependency-identity.log"
+        },
+        {
+          "name": "configure",
+          "command": [
+            "cmake",
+            "--preset",
+            "portable-ci"
+          ],
+          "exitCode": 0,
+          "log": "configure.log"
+        },
+        {
+          "name": "build",
+          "command": [
+            "cmake",
+            "--build",
+            "/Users/runner/work/MapGyver2/MapGyver2/out/build/portable-ci",
+            "--config",
+            "Release",
+            "--parallel",
+            "2"
+          ],
+          "exitCode": 0,
+          "log": "build.log"
+        },
+        {
+          "name": "test",
+          "command": [
+            "ctest",
+            "--test-dir",
+            "/Users/runner/work/MapGyver2/MapGyver2/out/build/portable-ci",
+            "-C",
+            "Release",
+            "--output-on-failure",
+            "--no-tests=error",
+            "-LE",
+            "hardware",
+            "--output-junit",
+            "/Users/runner/work/MapGyver2/MapGyver2/out/reports/portable-ci/Release/test-results.xml"
+          ],
+          "exitCode": 0,
+          "log": "test.log"
+        },
+        {
+          "name": "diagnostics",
+          "command": [
+            "/Users/runner/work/MapGyver2/MapGyver2/out/build/portable-ci/mapgyver-engine",
+            "--diagnose",
+            "--json",
+            "--no-gpu"
+          ],
+          "exitCode": 0,
+          "log": "diagnostics.log"
+        }
+      ],
+      "testCases": [
+        "build.feature-rejection",
+        "build.source-identity",
+        "ci.quality-gate",
+        "diagnostics.contract",
+        "planning.contract"
+      ],
+      "passedTests": 5,
+      "environmentSha256": "86c8f865a1287df8f4cf59326cc3414d6564748729ad250550737894a09a5434",
+      "junitSha256": "48deafb0a32621268713099b4a62247f9cf4c13924f9a08882db56c3f5158937"
+    },
+    {
+      "artifact": "portable-ubuntu-24.04-4fcc2012f06b6b079ea4fd7075a07f686bc75d69",
+      "host": {
+        "system": "Linux",
+        "release": "6.17.0-1022-azure",
+        "version": "#22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026",
+        "machine": "x86_64",
+        "python": "3.12.3"
+      },
+      "runner": {
+        "ImageOS": "ubuntu24",
+        "ImageVersion": "20261004.327.1",
+        "RUNNER_OS": "Linux",
+        "RUNNER_ARCH": "X64"
+      },
+      "preset": "portable-ci",
+      "configuration": "Release",
+      "compiler": {
+        "id": "GNU",
+        "version": "13.3.0"
+      },
+      "cmakeVersion": "3.31.6",
+      "windowsSdk": null,
+      "dependencyBaseline": "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+      "resolvedPackages": [
+        {
+          "Package": "vcpkg-cmake-config",
+          "Version": "2026-07-21",
+          "Port-Version": null,
+          "Architecture": "x64-linux"
+        },
+        {
+          "Package": "vcpkg-cmake",
+          "Version": "2025-08-07",
+          "Port-Version": null,
+          "Architecture": "x64-linux"
+        },
+        {
+          "Package": "nlohmann-json",
+          "Version": "3.12.0",
+          "Port-Version": "2",
+          "Architecture": "x64-linux"
+        }
+      ],
+      "commands": [
+        {
+          "name": "cmake-version",
+          "command": [
+            "cmake",
+            "--version"
+          ],
+          "exitCode": 0,
+          "log": "cmake-version.log"
+        },
+        {
+          "name": "git-version",
+          "command": [
+            "git",
+            "--version"
+          ],
+          "exitCode": 0,
+          "log": "git-version.log"
+        },
+        {
+          "name": "bootstrap",
+          "command": [
+            "/usr/bin/python3",
+            "/home/runner/work/MapGyver2/MapGyver2/tools/ci/bootstrap.py",
+            "--triplet",
+            "x64-linux",
+            "--core-only"
+          ],
+          "exitCode": 0,
+          "log": "bootstrap.log"
+        },
+        {
+          "name": "dependency-identity",
+          "command": [
+            "git",
+            "-C",
+            "/home/runner/work/MapGyver2/MapGyver2/out/deps/vcpkg",
+            "rev-parse",
+            "HEAD"
+          ],
+          "exitCode": 0,
+          "log": "dependency-identity.log"
+        },
+        {
+          "name": "configure",
+          "command": [
+            "cmake",
+            "--preset",
+            "portable-ci"
+          ],
+          "exitCode": 0,
+          "log": "configure.log"
+        },
+        {
+          "name": "build",
+          "command": [
+            "cmake",
+            "--build",
+            "/home/runner/work/MapGyver2/MapGyver2/out/build/portable-ci",
+            "--config",
+            "Release",
+            "--parallel",
+            "2"
+          ],
+          "exitCode": 0,
+          "log": "build.log"
+        },
+        {
+          "name": "test",
+          "command": [
+            "ctest",
+            "--test-dir",
+            "/home/runner/work/MapGyver2/MapGyver2/out/build/portable-ci",
+            "-C",
+            "Release",
+            "--output-on-failure",
+            "--no-tests=error",
+            "-LE",
+            "hardware",
+            "--output-junit",
+            "/home/runner/work/MapGyver2/MapGyver2/out/reports/portable-ci/Release/test-results.xml"
+          ],
+          "exitCode": 0,
+          "log": "test.log"
+        },
+        {
+          "name": "diagnostics",
+          "command": [
+            "/home/runner/work/MapGyver2/MapGyver2/out/build/portable-ci/mapgyver-engine",
+            "--diagnose",
+            "--json",
+            "--no-gpu"
+          ],
+          "exitCode": 0,
+          "log": "diagnostics.log"
+        }
+      ],
+      "testCases": [
+        "build.feature-rejection",
+        "build.source-identity",
+        "ci.quality-gate",
+        "diagnostics.contract",
+        "planning.contract"
+      ],
+      "passedTests": 5,
+      "environmentSha256": "c6e427ef6c42ef3c5e38478dd05c2bef4b450e00e3f932fc4f4d948794e172f7",
+      "junitSha256": "2d9488d582e183a0ead89425f404c80f64da9fd54b15650aeb17dec722445d11"
+    },
+    {
+      "artifact": "windows-Debug-4fcc2012f06b6b079ea4fd7075a07f686bc75d69",
+      "host": {
+        "system": "Windows",
+        "release": "2022Server",
+        "version": "10.0.20348",
+        "machine": "AMD64",
+        "python": "3.12.10"
+      },
+      "runner": {
+        "ImageOS": "win22",
+        "ImageVersion": "20261012.333.1",
+        "RUNNER_OS": "Windows",
+        "RUNNER_ARCH": "X64"
+      },
+      "preset": "windows-ci",
+      "configuration": "Debug",
+      "compiler": {
+        "id": "MSVC",
+        "version": "19.44.35229.0"
+      },
+      "cmakeVersion": "3.31.6",
+      "windowsSdk": "10.0.26100.0",
+      "dependencyBaseline": "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+      "resolvedPackages": [
+        {
+          "Package": "vcpkg-cmake-config",
+          "Version": "2026-07-21",
+          "Port-Version": null,
+          "Architecture": "x64-windows"
+        },
+        {
+          "Package": "vcpkg-cmake",
+          "Version": "2025-08-07",
+          "Port-Version": null,
+          "Architecture": "x64-windows"
+        },
+        {
+          "Package": "nlohmann-json",
+          "Version": "3.12.0",
+          "Port-Version": "2",
+          "Architecture": "x64-windows"
+        }
+      ],
+      "commands": [
+        {
+          "name": "cmake-version",
+          "command": [
+            "cmake",
+            "--version"
+          ],
+          "exitCode": 0,
+          "log": "cmake-version.log"
+        },
+        {
+          "name": "git-version",
+          "command": [
+            "git",
+            "--version"
+          ],
+          "exitCode": 0,
+          "log": "git-version.log"
+        },
+        {
+          "name": "bootstrap",
+          "command": [
+            "C:\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python.exe",
+            "D:\\a\\MapGyver2\\MapGyver2\\tools\\ci\\bootstrap.py",
+            "--triplet",
+            "x64-windows"
+          ],
+          "exitCode": 0,
+          "log": "bootstrap.log"
+        },
+        {
+          "name": "dependency-identity",
+          "command": [
+            "git",
+            "-C",
+            "D:\\a\\MapGyver2\\MapGyver2\\out\\deps\\vcpkg",
+            "rev-parse",
+            "HEAD"
+          ],
+          "exitCode": 0,
+          "log": "dependency-identity.log"
+        },
+        {
+          "name": "configure",
+          "command": [
+            "cmake",
+            "--preset",
+            "windows-ci"
+          ],
+          "exitCode": 0,
+          "log": "configure.log"
+        },
+        {
+          "name": "build",
+          "command": [
+            "cmake",
+            "--build",
+            "D:\\a\\MapGyver2\\MapGyver2\\out\\build\\windows-ci",
+            "--config",
+            "Debug",
+            "--parallel",
+            "2"
+          ],
+          "exitCode": 0,
+          "log": "build.log"
+        },
+        {
+          "name": "test",
+          "command": [
+            "ctest",
+            "--test-dir",
+            "D:\\a\\MapGyver2\\MapGyver2\\out\\build\\windows-ci",
+            "-C",
+            "Debug",
+            "--output-on-failure",
+            "--no-tests=error",
+            "-LE",
+            "hardware",
+            "--output-junit",
+            "D:\\a\\MapGyver2\\MapGyver2\\out\\reports\\windows-ci\\Debug\\test-results.xml"
+          ],
+          "exitCode": 0,
+          "log": "test.log"
+        },
+        {
+          "name": "diagnostics",
+          "command": [
+            "D:\\a\\MapGyver2\\MapGyver2\\out\\build\\windows-ci\\Debug\\mapgyver-engine.exe",
+            "--diagnose",
+            "--json",
+            "--no-gpu"
+          ],
+          "exitCode": 0,
+          "log": "diagnostics.log"
+        }
+      ],
+      "testCases": [
+        "build.feature-rejection",
+        "build.source-identity",
+        "ci.quality-gate",
+        "diagnostics.contract",
+        "planning.contract"
+      ],
+      "passedTests": 5,
+      "environmentSha256": "c5847e146e1334c350c636028914c261b6d21dbfbf8c0c7737130377aa3a155b",
+      "junitSha256": "64a6d96e8a6194f8950d967a263feff6f8ae78e145e6353d3cc7f86c8258fb14"
+    },
+    {
+      "artifact": "windows-Release-4fcc2012f06b6b079ea4fd7075a07f686bc75d69",
+      "host": {
+        "system": "Windows",
+        "release": "2022Server",
+        "version": "10.0.20348",
+        "machine": "AMD64",
+        "python": "3.12.10"
+      },
+      "runner": {
+        "ImageOS": "win22",
+        "ImageVersion": "20261012.333.1",
+        "RUNNER_OS": "Windows",
+        "RUNNER_ARCH": "X64"
+      },
+      "preset": "windows-ci",
+      "configuration": "Release",
+      "compiler": {
+        "id": "MSVC",
+        "version": "19.44.35229.0"
+      },
+      "cmakeVersion": "3.31.6",
+      "windowsSdk": "10.0.26100.0",
+      "dependencyBaseline": "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+      "resolvedPackages": [
+        {
+          "Package": "vcpkg-cmake-config",
+          "Version": "2026-07-21",
+          "Port-Version": null,
+          "Architecture": "x64-windows"
+        },
+        {
+          "Package": "vcpkg-cmake",
+          "Version": "2025-08-07",
+          "Port-Version": null,
+          "Architecture": "x64-windows"
+        },
+        {
+          "Package": "nlohmann-json",
+          "Version": "3.12.0",
+          "Port-Version": "2",
+          "Architecture": "x64-windows"
+        }
+      ],
+      "commands": [
+        {
+          "name": "cmake-version",
+          "command": [
+            "cmake",
+            "--version"
+          ],
+          "exitCode": 0,
+          "log": "cmake-version.log"
+        },
+        {
+          "name": "git-version",
+          "command": [
+            "git",
+            "--version"
+          ],
+          "exitCode": 0,
+          "log": "git-version.log"
+        },
+        {
+          "name": "bootstrap",
+          "command": [
+            "C:\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python.exe",
+            "D:\\a\\MapGyver2\\MapGyver2\\tools\\ci\\bootstrap.py",
+            "--triplet",
+            "x64-windows"
+          ],
+          "exitCode": 0,
+          "log": "bootstrap.log"
+        },
+        {
+          "name": "dependency-identity",
+          "command": [
+            "git",
+            "-C",
+            "D:\\a\\MapGyver2\\MapGyver2\\out\\deps\\vcpkg",
+            "rev-parse",
+            "HEAD"
+          ],
+          "exitCode": 0,
+          "log": "dependency-identity.log"
+        },
+        {
+          "name": "configure",
+          "command": [
+            "cmake",
+            "--preset",
+            "windows-ci"
+          ],
+          "exitCode": 0,
+          "log": "configure.log"
+        },
+        {
+          "name": "build",
+          "command": [
+            "cmake",
+            "--build",
+            "D:\\a\\MapGyver2\\MapGyver2\\out\\build\\windows-ci",
+            "--config",
+            "Release",
+            "--parallel",
+            "2"
+          ],
+          "exitCode": 0,
+          "log": "build.log"
+        },
+        {
+          "name": "test",
+          "command": [
+            "ctest",
+            "--test-dir",
+            "D:\\a\\MapGyver2\\MapGyver2\\out\\build\\windows-ci",
+            "-C",
+            "Release",
+            "--output-on-failure",
+            "--no-tests=error",
+            "-LE",
+            "hardware",
+            "--output-junit",
+            "D:\\a\\MapGyver2\\MapGyver2\\out\\reports\\windows-ci\\Release\\test-results.xml"
+          ],
+          "exitCode": 0,
+          "log": "test.log"
+        },
+        {
+          "name": "diagnostics",
+          "command": [
+            "D:\\a\\MapGyver2\\MapGyver2\\out\\build\\windows-ci\\Release\\mapgyver-engine.exe",
+            "--diagnose",
+            "--json",
+            "--no-gpu"
+          ],
+          "exitCode": 0,
+          "log": "diagnostics.log"
+        }
+      ],
+      "testCases": [
+        "build.feature-rejection",
+        "build.source-identity",
+        "ci.quality-gate",
+        "diagnostics.contract",
+        "planning.contract"
+      ],
+      "passedTests": 5,
+      "environmentSha256": "1d3a23b0156b244e46575ba9360b3a55c8750cba5c4f0693aaefe4e3c120150d",
+      "junitSha256": "d0778982670cd66e1de8aef274db91d323ef4f4c108352e8a3ca7d8ec7fd8d36"
+    }
+  ]
+}

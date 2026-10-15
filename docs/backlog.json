@@ -10,7 +10,7 @@
       "id": "M00",
       "title": "Repository and CI foundation",
       "track": "windows-v1",
-      "status": "in_progress",
+      "status": "complete",
       "depends_on": [],
       "goal": "Make a clean checkout build and diagnose itself on Windows x64; establish portable core builds and honest completion evidence.",
       "owned_paths": [

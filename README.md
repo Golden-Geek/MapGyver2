@@ -6,7 +6,16 @@ the first delivery target, with a native C++20 engine and static web editor.
 The current implementation is the M00 build foundation; playback and editing
 are not implemented yet. See [project status](docs/STATUS.md) for actual evidence.
 
-**Start with [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md), then give Codex [CODEX_START.md](CODEX_START.md).**
+Build and run diagnostics using [the build guide](docs/BUILD.md). Track ongoing
+work in [the active execution plan](docs/execution/ACTIVE.md).
+
+```powershell
+python tools/ci/check.py --preset windows-local --configuration Release
+out/build/windows-local/Release/mapgyver-engine.exe --diagnose --json --no-gpu
+```
+
+Use `windows-ci` with VS2022 or `windows-local` with VS2026. See the build guide
+for portable builds, prerequisites, evidence and diagnostic capability limits.
 
 The retained planning contract describes 20 milestones and 80 commit slices.
 The authorized delivery is M00–M13, Windows beta. Later native ports and advanced
@@ -25,7 +34,7 @@ activated only when their real build/test contracts exist.
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Accepted defaults, provisional decisions and blocking gates |
 | [docs/PROTOCOL_CONTRACTS.md](docs/PROTOCOL_CONTRACTS.md) | Commands, parameters, frame sets and managed applications |
 | [docs/SOURCES.md](docs/SOURCES.md) | Primary-source references and verified action revisions |
-| [docs/STATUS.md](docs/STATUS.md) | Honest initial project state |
+| [docs/STATUS.md](docs/STATUS.md) | Current implementation and qualification state |
 | [ci/activation.json](ci/activation.json) | When each CI template becomes active |
 | [tools/validate_plan.py](tools/validate_plan.py) | Backlog, dependencies, coverage and file-link validation |
 
@@ -33,8 +42,15 @@ This repository is a new implementation. The original
 [MapGyver](https://github.com/Golden-Geek/MapGyver) is a design/code reference;
 there is no existing JUCE application being replaced here.
 
-The `.github/workflows/plan.yml` workflow validates this planning pack after it is installed in a repository. Files under `ci/templates` end in `.yml.in` and deliberately do not run until their prerequisite targets and scripts exist. No application build can truthfully pass before that implementation exists.
+The Plan workflow validates the contract. CI builds Windows Debug/Release and
+Linux/macOS portable core, runs real tests, and retains source/environment/log
+evidence. Its stable quality gate fails unless every prerequisite succeeds.
+Later workflow templates stay inactive until their real contracts exist.
 
 Local validation: `python tools/validate_plan.py`. Focused task context: `python tools/show_milestone.py M00`.
 
-Original handoff documentation and helper tools are provided under GPL-3.0-or-later; external references retain their own licenses. The canonical GPLv3 text is included in LICENSE. The application dependency notices and approved optional-runtime path are completed during implementation.
+Application code, handoff documents and helpers are GPL-3.0-or-later; external
+dependencies retain their own licenses. See LICENSE and
+[dependency provenance](docs/licenses/README.md). NDI remains optional and blocked
+pending the owner-approved distribution path. The
+[original pack reports](docs/planning-baseline/README.md) are historical evidence.

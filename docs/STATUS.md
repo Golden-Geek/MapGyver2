@@ -3,8 +3,10 @@
 MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
 
 - Primary deliverable: a qualified Windows x64 beta through M13.
-- Current milestone: [M00, repository and CI foundation](progress/M00.md), in progress.
-- M01 through M19: planned. M00 has not yet been qualified; no milestone tags exist.
+- [M00, repository and CI foundation](progress/M00.md): complete, with local
+  fresh-checkout and hosted Windows/Linux/macOS build/test evidence.
+- Next ready milestone: M01, graphics and sharing feasibility. M01–M19 remain
+  planned; completing M00 does not qualify native GPU output or the Windows beta.
 - First architecture gate: M01, render/Spout/decode/presentation feasibility on Windows hardware.
 - Open product decisions: current NDI licensing/distribution path and exact reference hardware/workload budgets.
 - Later native targets: Windows ARM64, Linux x64/PipeWire, macOS ARM64/Syphon, Linux ARM64/Raspberry Pi.

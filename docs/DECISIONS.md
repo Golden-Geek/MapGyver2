@@ -2,7 +2,7 @@
 
 | ID | State | Decision and consequence |
 | --- | --- | --- |
-| ADR-001 | Accepted default | New native engine with a web editor; Windows x64 is first. MapGyver is a reference. An existing-repository migration requires its own bounded integration ADR. |
+| ADR-001 | Accepted default | New native engine with a web editor named MapGyver in Golden-Geek/MapGyver2; Windows x64 is first. Golden-Geek/MapGyver is a reference. This repository started with a planning pack and no application, so no JUCE migration is taking place. An existing-repository migration requires its own bounded integration ADR. |
 | ADR-002 | Accepted | Portable C++20 domain/control/persistence. Platform presentation, codecs, process APIs and sharing live in adapters. |
 | ADR-003 | Provisional until M01 | SDL3 for platform/window integration and bgfx as the first render candidate. Native external textures, synchronization, multiple windows and hardware decoding are acceptance gates. Native D3D11 behind the same narrow interface is the bounded fallback. |
 | ADR-004 | Accepted | Assets, source instances, layers/clips, named-output compositions, cues, surfaces, groups, layouts, projection patches and output targets are distinct responsibilities. |
@@ -19,6 +19,7 @@
 | ADR-015 | Open until M01 | Name exact reference hardware/driver/OS/media workloads and ratify provisional performance thresholds. Record budgets before later optimization claims. |
 | ADR-016 | Accepted | Single editing owner plus read-only observers initially. Remote concurrency uses revisions and explicit ownership rather than an early CRDT implementation. |
 | ADR-017 | Accepted | Advanced automatic calibration and distributed execution are post-beta extensions, with stable data/interface boundaries established earlier. |
+| ADR-018 | Accepted | windows-2022 qualifies VS2022/v143 after actual windows-2025 supplied VS2026 without VS2022. Local VS2026/v145 is separate evidence. See docs/adr/ADR-018-ci-toolchain.md. |
 
 An accepted default is actionable within the plan; it is not a claim that hardware qualification exists. Change a decision with a short ADR containing trigger, options considered, measured evidence, compatibility and acceptance impact. Do not change the stack simply because another framework is familiar.
 
