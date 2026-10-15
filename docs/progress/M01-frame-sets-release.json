@@ -1,0 +1,597 @@
+{
+  "adapter": {
+    "deviceId": 11353,
+    "luidHigh": 0,
+    "luidLow": 89087,
+    "vendorId": 4318
+  },
+  "buildConfiguration": "Release",
+  "counterMeaning": "Application API submissions; validation readbacks separate; not hardware transfer counters",
+  "evidenceClass": "native-gpu-cooperating-bgfx-frame-sets",
+  "ownership": "All source/native targets retained through common GPU completion and group retirement",
+  "physicalOutputs": "not_tested",
+  "physicalScanoutSynchronization": "not_claimed",
+  "result": "passed",
+  "schemaVersion": 1,
+  "sets": [
+    {
+      "appliedBgfxFrame": 5,
+      "completeAfterGpuCompletion": true,
+      "frameSequence": 1,
+      "generation": 1,
+      "localVideoBudgetBytes": 15975055360,
+      "localVideoUsageBytes": 8855552,
+      "offlineMicroseconds": 1742.5,
+      "ports": [
+        {
+          "appliedBgfxFrame": 5,
+          "format": "RGBA8",
+          "frameSequence": 1,
+          "pixelHash": 3998728321,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-0",
+          "resourceGeneration": 1,
+          "side": 64
+        },
+        {
+          "appliedBgfxFrame": 5,
+          "format": "BGRA8",
+          "frameSequence": 1,
+          "pixelHash": 3800163857,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-1",
+          "resourceGeneration": 1,
+          "side": 64
+        }
+      ],
+      "pts": 0,
+      "requiredPorts": 2,
+      "samplingDrawSubmissions": 2,
+      "sourceCpuUploadCalls": 2,
+      "sourceInstanceId": "cooperating-probe",
+      "timeBase": [
+        1,
+        30
+      ],
+      "validationCpuReadbacks": 2,
+      "validationGpuCopySubmissions": 2
+    },
+    {
+      "appliedBgfxFrame": 9,
+      "completeAfterGpuCompletion": true,
+      "frameSequence": 2,
+      "generation": 1,
+      "localVideoBudgetBytes": 15975055360,
+      "localVideoUsageBytes": 8855552,
+      "offlineMicroseconds": 541.1,
+      "ports": [
+        {
+          "appliedBgfxFrame": 9,
+          "format": "RGBA8",
+          "frameSequence": 2,
+          "pixelHash": 1247183369,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-0",
+          "resourceGeneration": 1,
+          "side": 64
+        },
+        {
+          "appliedBgfxFrame": 9,
+          "format": "BGRA8",
+          "frameSequence": 2,
+          "pixelHash": 629698025,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-1",
+          "resourceGeneration": 1,
+          "side": 64
+        }
+      ],
+      "pts": 1,
+      "requiredPorts": 2,
+      "samplingDrawSubmissions": 2,
+      "sourceCpuUploadCalls": 2,
+      "sourceInstanceId": "cooperating-probe",
+      "timeBase": [
+        1,
+        30
+      ],
+      "validationCpuReadbacks": 2,
+      "validationGpuCopySubmissions": 2
+    },
+    {
+      "appliedBgfxFrame": 13,
+      "completeAfterGpuCompletion": true,
+      "frameSequence": 3,
+      "generation": 2,
+      "localVideoBudgetBytes": 15975055360,
+      "localVideoUsageBytes": 9510912,
+      "offlineMicroseconds": 2994.4,
+      "ports": [
+        {
+          "appliedBgfxFrame": 13,
+          "format": "RGBA8",
+          "frameSequence": 3,
+          "pixelHash": 1796028097,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-0",
+          "resourceGeneration": 2,
+          "side": 128
+        },
+        {
+          "appliedBgfxFrame": 13,
+          "format": "BGRA8",
+          "frameSequence": 3,
+          "pixelHash": 2690122249,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-1",
+          "resourceGeneration": 2,
+          "side": 128
+        },
+        {
+          "appliedBgfxFrame": 13,
+          "format": "RGBA8",
+          "frameSequence": 3,
+          "pixelHash": 2969945433,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-2",
+          "resourceGeneration": 2,
+          "side": 128
+        },
+        {
+          "appliedBgfxFrame": 13,
+          "format": "BGRA8",
+          "frameSequence": 3,
+          "pixelHash": 1912570945,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-3",
+          "resourceGeneration": 2,
+          "side": 128
+        },
+        {
+          "appliedBgfxFrame": 13,
+          "format": "RGBA8",
+          "frameSequence": 3,
+          "pixelHash": 4131119497,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-4",
+          "resourceGeneration": 2,
+          "side": 128
+        }
+      ],
+      "pts": 2,
+      "requiredPorts": 5,
+      "samplingDrawSubmissions": 5,
+      "sourceCpuUploadCalls": 5,
+      "sourceInstanceId": "cooperating-probe",
+      "timeBase": [
+        1,
+        30
+      ],
+      "validationCpuReadbacks": 5,
+      "validationGpuCopySubmissions": 5
+    },
+    {
+      "appliedBgfxFrame": 17,
+      "completeAfterGpuCompletion": true,
+      "frameSequence": 4,
+      "generation": 2,
+      "localVideoBudgetBytes": 15975055360,
+      "localVideoUsageBytes": 9510912,
+      "offlineMicroseconds": 1237.1,
+      "ports": [
+        {
+          "appliedBgfxFrame": 17,
+          "format": "RGBA8",
+          "frameSequence": 4,
+          "pixelHash": 622795617,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-0",
+          "resourceGeneration": 2,
+          "side": 128
+        },
+        {
+          "appliedBgfxFrame": 17,
+          "format": "BGRA8",
+          "frameSequence": 4,
+          "pixelHash": 2451264985,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-1",
+          "resourceGeneration": 2,
+          "side": 128
+        },
+        {
+          "appliedBgfxFrame": 17,
+          "format": "RGBA8",
+          "frameSequence": 4,
+          "pixelHash": 642724633,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-2",
+          "resourceGeneration": 2,
+          "side": 128
+        },
+        {
+          "appliedBgfxFrame": 17,
+          "format": "BGRA8",
+          "frameSequence": 4,
+          "pixelHash": 2323143185,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-3",
+          "resourceGeneration": 2,
+          "side": 128
+        },
+        {
+          "appliedBgfxFrame": 17,
+          "format": "RGBA8",
+          "frameSequence": 4,
+          "pixelHash": 1151823033,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-4",
+          "resourceGeneration": 2,
+          "side": 128
+        }
+      ],
+      "pts": 3,
+      "requiredPorts": 5,
+      "samplingDrawSubmissions": 5,
+      "sourceCpuUploadCalls": 5,
+      "sourceInstanceId": "cooperating-probe",
+      "timeBase": [
+        1,
+        30
+      ],
+      "validationCpuReadbacks": 5,
+      "validationGpuCopySubmissions": 5
+    },
+    {
+      "appliedBgfxFrame": 21,
+      "completeAfterGpuCompletion": true,
+      "frameSequence": 5,
+      "generation": 3,
+      "localVideoBudgetBytes": 15975055360,
+      "localVideoUsageBytes": 15278080,
+      "offlineMicroseconds": 10441.2,
+      "ports": [
+        {
+          "appliedBgfxFrame": 21,
+          "format": "RGBA8",
+          "frameSequence": 5,
+          "pixelHash": 807523033,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-0",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 21,
+          "format": "BGRA8",
+          "frameSequence": 5,
+          "pixelHash": 2428482529,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-1",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 21,
+          "format": "RGBA8",
+          "frameSequence": 5,
+          "pixelHash": 4040054769,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-2",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 21,
+          "format": "BGRA8",
+          "frameSequence": 5,
+          "pixelHash": 3839656953,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-3",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 21,
+          "format": "RGBA8",
+          "frameSequence": 5,
+          "pixelHash": 2201070769,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-4",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 21,
+          "format": "BGRA8",
+          "frameSequence": 5,
+          "pixelHash": 1442477273,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-5",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 21,
+          "format": "RGBA8",
+          "frameSequence": 5,
+          "pixelHash": 3346749801,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-6",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 21,
+          "format": "BGRA8",
+          "frameSequence": 5,
+          "pixelHash": 3382979313,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-7",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 21,
+          "format": "RGBA8",
+          "frameSequence": 5,
+          "pixelHash": 3859107049,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-8",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 21,
+          "format": "BGRA8",
+          "frameSequence": 5,
+          "pixelHash": 347050193,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-9",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 21,
+          "format": "RGBA8",
+          "frameSequence": 5,
+          "pixelHash": 868449873,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-10",
+          "resourceGeneration": 3,
+          "side": 256
+        }
+      ],
+      "pts": 4,
+      "requiredPorts": 11,
+      "samplingDrawSubmissions": 11,
+      "sourceCpuUploadCalls": 11,
+      "sourceInstanceId": "cooperating-probe",
+      "timeBase": [
+        1,
+        30
+      ],
+      "validationCpuReadbacks": 11,
+      "validationGpuCopySubmissions": 11
+    },
+    {
+      "appliedBgfxFrame": 25,
+      "completeAfterGpuCompletion": true,
+      "frameSequence": 6,
+      "generation": 3,
+      "localVideoBudgetBytes": 15975055360,
+      "localVideoUsageBytes": 15278080,
+      "offlineMicroseconds": 4910.8,
+      "ports": [
+        {
+          "appliedBgfxFrame": 25,
+          "format": "RGBA8",
+          "frameSequence": 6,
+          "pixelHash": 1724081249,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-0",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 25,
+          "format": "BGRA8",
+          "frameSequence": 6,
+          "pixelHash": 3843017241,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-1",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 25,
+          "format": "RGBA8",
+          "frameSequence": 6,
+          "pixelHash": 3694023913,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-2",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 25,
+          "format": "BGRA8",
+          "frameSequence": 6,
+          "pixelHash": 1495574785,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-3",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 25,
+          "format": "RGBA8",
+          "frameSequence": 6,
+          "pixelHash": 3715243881,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-4",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 25,
+          "format": "BGRA8",
+          "frameSequence": 6,
+          "pixelHash": 3786146321,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-5",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 25,
+          "format": "RGBA8",
+          "frameSequence": 6,
+          "pixelHash": 4160682465,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-6",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 25,
+          "format": "BGRA8",
+          "frameSequence": 6,
+          "pixelHash": 1322767753,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-7",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 25,
+          "format": "RGBA8",
+          "frameSequence": 6,
+          "pixelHash": 50637649,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-8",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 25,
+          "format": "BGRA8",
+          "frameSequence": 6,
+          "pixelHash": 4252569593,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-9",
+          "resourceGeneration": 3,
+          "side": 256
+        },
+        {
+          "appliedBgfxFrame": 25,
+          "format": "RGBA8",
+          "frameSequence": 6,
+          "pixelHash": 363118169,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-10",
+          "resourceGeneration": 3,
+          "side": 256
+        }
+      ],
+      "pts": 5,
+      "requiredPorts": 11,
+      "samplingDrawSubmissions": 11,
+      "sourceCpuUploadCalls": 11,
+      "sourceInstanceId": "cooperating-probe",
+      "timeBase": [
+        1,
+        30
+      ],
+      "validationCpuReadbacks": 11,
+      "validationGpuCopySubmissions": 11
+    },
+    {
+      "appliedBgfxFrame": 29,
+      "completeAfterGpuCompletion": true,
+      "frameSequence": 7,
+      "generation": 4,
+      "localVideoBudgetBytes": 15975055360,
+      "localVideoUsageBytes": 15409152,
+      "offlineMicroseconds": 912.7,
+      "ports": [
+        {
+          "appliedBgfxFrame": 29,
+          "format": "RGBA8",
+          "frameSequence": 7,
+          "pixelHash": 3442886761,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-0",
+          "resourceGeneration": 4,
+          "side": 64
+        },
+        {
+          "appliedBgfxFrame": 29,
+          "format": "BGRA8",
+          "frameSequence": 7,
+          "pixelHash": 351904473,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-1",
+          "resourceGeneration": 4,
+          "side": 64
+        }
+      ],
+      "pts": 6,
+      "requiredPorts": 2,
+      "samplingDrawSubmissions": 2,
+      "sourceCpuUploadCalls": 2,
+      "sourceInstanceId": "cooperating-probe",
+      "timeBase": [
+        1,
+        30
+      ],
+      "validationCpuReadbacks": 2,
+      "validationGpuCopySubmissions": 2
+    },
+    {
+      "appliedBgfxFrame": 33,
+      "completeAfterGpuCompletion": true,
+      "frameSequence": 8,
+      "generation": 4,
+      "localVideoBudgetBytes": 15975055360,
+      "localVideoUsageBytes": 15409152,
+      "offlineMicroseconds": 594.5,
+      "ports": [
+        {
+          "appliedBgfxFrame": 33,
+          "format": "RGBA8",
+          "frameSequence": 8,
+          "pixelHash": 801510297,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-0",
+          "resourceGeneration": 4,
+          "side": 64
+        },
+        {
+          "appliedBgfxFrame": 33,
+          "format": "BGRA8",
+          "frameSequence": 8,
+          "pixelHash": 2456494169,
+          "pixelsAndAlphaMatchExactly": true,
+          "portId": "port-1",
+          "resourceGeneration": 4,
+          "side": 64
+        }
+      ],
+      "pts": 7,
+      "requiredPorts": 2,
+      "samplingDrawSubmissions": 2,
+      "sourceCpuUploadCalls": 2,
+      "sourceInstanceId": "cooperating-probe",
+      "timeBase": [
+        1,
+        30
+      ],
+      "validationCpuReadbacks": 2,
+      "validationGpuCopySubmissions": 2
+    }
+  ],
+  "sourceDirty": false,
+  "sourceRevision": "8f58a75878afad425307efbf02f6c8fd6abb16c9",
+  "timingMeaning": "Offline wall time includes upload/allocation/readback; not a show deadline budget"
+}

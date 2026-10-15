@@ -1,121 +1,83 @@
 # Active execution plan ? MapGyver Windows beta
 
-## Scope and baseline
+## Scope and prerequisite evidence
 
-- Authorized: M00?M13; product MapGyver; public Golden-Geek/MapGyver2; tested
-  local commits pushed directly to main. No public release or policy changes.
-- Planning baseline: 1d686c1. M00 complete at 93be949919b6aedeccda365087f7b6b1781ce27f,
-  green CI 38771335741; annotated milestone/m00 points to that commit.
-- Follow docs/backlog.json dependencies and preserve slice IDs. M01 is in
-  progress; M02?M19 are planned. Renderer remains provisional.
+- Authorized: implement M00?M13; product MapGyver; public Golden-Geek/MapGyver2;
+  tested local commits pushed directly to main. No release/policy changes.
+- M00 complete at 93be949919b6aedeccda365087f7b6b1781ce27f, green CI 38771335741;
+  annotated milestone/m00 points there. M01 in progress; M02?M19 planned.
+- Follow backlog IDs/dependencies. Renderer stays provisional; do not qualify
+  dependent milestones from missing physical/hardware evidence.
 
-## Completed evidence
+## Tested M01 slices
 
-- M01.C01: 0300f34e44cc7c611483ac13ca2af990716b010a, green CI 38778592743.
-  Clean native Debug/Release each passed 12 owned/imported exact pixel/alpha
-  cases and a real held-key WAIT_TIMEOUT. Retained reports in docs/progress.
-- M01.C02 prerequisite: 6cdc3d13b869c5c4546d722e7dd483dc177e0ef6, green CI
-  38781640097. Independent official SpoutDX 2.007.018 inputs are checksum/PE
-  verified. Source licenses and the application 2.007.010#1 port were inspected.
+- C01: 0300f34e44cc7c611483ac13ca2af990716b010a; CI 38778592743 green.
+  Clean Debug/Release: 12 exact owned/imported texture cases plus real keyed
+  mutex timeout each. Actual COM/fence lifetime, no renderer fork.
+- C02: 681888124220b0f7e7008f001b879b4974dd2265; CI 38788520324 green.
+  Clean Debug/Release: 24 cross-SDK Spout/bgfx cases each, resize/format changes,
+  producer restart, held frames and real producer/consumer mutex stalls.
+  App SDK 2.007.010#1; independent official MD Release SDK 2.007.018 in its own
+  project/DLL directory. Actual DLL hashes/GPU LUIDs checked. No global registry
+  frame-count change. SDK bool success alone is not frame/copy evidence.
+- C03 decoder: 9d0716eeee9868f259d05f145c95b5f6f61007f2; CI 38790658271 green.
+  Clean native Debug/Release: 54 strict D3D11VA MPEG-2/NV12 frames each, three
+  generations, GPU BT.601 conversion and bgfx sampling; software-reference max
+  channel error 1 (fixed tolerance 2). Actual format refusal fails/no fallback.
+  Fixture hashes, rational PTS, API submissions, RAM/VRAM and offline timing
+  retained. Other codecs, full decode/show latency and performance unqualified.
+- C03 worker faults: fe8c5ed7963b6cdd371ef2f4890bab64429417c6.
+  Clean native Debug/Release pass both directions: own consumer death, six native
+  publications without consumer, consumer reconnect, producer death while holding
+  mutex (metadata vanished: disconnected/not-ready), fresh pair restart.
+  No production supervisor/backoff or driver/device-loss claim.
+- C03 frame sets: 8f58a75878afad425307efbf02f6c8fd6abb16c9.
+  Clean native Debug/Release each pass 8 complete sets/40 exact member hashes,
+  port counts 2/5/11/2, sizes 64/128/256/64, RGBA/BGRA. All members submit in one
+  applied bgfx frame and retire after common GPU completion. Missing native
+  member and actual stale GPU pixels fail specifically/no success JSON.
+  Changed-sampler regressions all pass Debug/Release: C01, C02, decoder and
+  worker faults. windows-decode/windows-spout wrappers pass 5/5 CTest/CLI checks.
+- Unaltered native reports and command/negative summaries are in docs/progress;
+  actual source hashes, CI URLs, evidence limits are in docs/progress/M01.md.
 
-## M01.C02 checkpoint
+## Current baseline and next actions
 
-Implementation committed at 681888124220b0f7e7008f001b879b4974dd2265:
+- Worker/frame-set commits were queued locally until decoder CI finished, to
+  preserve its native dependency compilation result. Decoder run is now green;
+  push the tested commits plus this evidence record, then collect their CI.
+- No application edits remain in the working tree at this checkpoint beyond
+  these evidence docs. Next independently testable C03 path: native SDL/bgfx
+  multiple-window submission, resize/destruction/recreate and ownership metrics.
+  Pinned upstream examples/22-windows shows swapchain destruction must be flushed
+  before native window destruction; use the pinned API, not latest assumptions.
+- Hidden-window API results must remain distinct from physical two-output and
+  optical scanout evidence. Do not tag M01 or accept a renderer from them.
+- Continue independent authorized work around unavailable hardware/legal gates;
+  do not mark dependent milestones complete or fake missing hardware success.
 
-1. Application uses private single-owner bgfx sampling before Spout send/after
-   receive. SDK/native handles stay in Windows adapters. Reference peer uses
-   independently pinned official SpoutDX 2.007.018 and native D3D11.
-2. Reference peer is /MD Release only, in a separate project/DLL directory from
-   application 2.007.010#1 Debug/Release. Wrapper and Windows CI compile both.
-   Fixture inputs remain ignored under out/qualification; no SDK binaries in Git.
-3. SDK SendTexture success can mean no copy; ReceiveTexture connected can mean
-   no new data. Test actual pixels/markers and generations. Outer nonblocking
-   recursive non-keyed mutex + instance DisableFrameCount force inspected SDK
-   copy paths. Never change the global Spout frame-count registry setting.
-4. Debug/Release integrated wrappers pass all five CTest contracts, verified
-   fixture preparation, peer build and CLI checks. Both GPU trials pass 24
-   resize/format cases across both directions, held frames, graceful restart,
-   actual producer/consumer stalls, clean teardown. Same RTX 5080 Laptop GPU.
-   C01 regression passes Debug/Release, including genuine WAIT_TIMEOUT.
-   Clean-source reruns passed both configurations at 6818881, sourceDirty=false;
-   unaltered reports are retained as docs/progress/M01-spout-debug/release.json.
-   CI 38788520324 passed every required job, including both SDK clients.
-5. Supplemental Spout/GL dependency notices are recorded in docs/licenses.
-   Windows SDK import libraries are compilation prerequisites, not app content.
+## Build/hardware commands
 
-## Current slice: M01.C03 (partial)
-
-Implement the independently testable decoder/import/recovery experiments;
-keep unavailable physical two-output requirements open. Do not tag M01 yet.
-The working tree adds optional windows-decode/FFmpeg avcodec 9.0.2#1, no
-proprietary decoder dependency. Pinned source SHA512 is recorded by the port;
-standard port patches only. Dependency Debug/Release compilation passed; resolved
-LGPL-2.1-or-later runtime and six additional build package notices were inspected.
-
-The offline probe authors a bounded in-memory MPEG-2 fixture, retains a software
-decode reference, strictly selects D3D11VA with no software fallback, consumes
-the actual native NV12 array slice on the same bgfx GPU, converts via native
-video processor and samples through bgfx. Validation waits/readback are separate.
-It records rational PTS, applied bgfx frame, pixel errors, source/fixture hashes,
-API submissions, RAM/VRAM snapshots and offline first/warm timing percentiles.
-Debug/Release native trials passed all 54 frames each (maximum color error 1,
-fixed tolerance 2) and genuine FFmpeg format-refusal errors, exit 1/no success
-payload. Final Debug/Release wrappers passed 5/5 CTest and the non-GPU version
-CLI. Both final GPU contracts passed. Next: commit, hosted/clean-source evidence.
-Full C03 still
-requires physical two-output, paired frame identity/scanout and recovery evidence.
-
-Decoder code is now 9d0716eeee9868f259d05f145c95b5f6f61007f2. Clean Debug/Release
-wrappers and hardware contracts passed (54 frames each + actual format refusal),
-dirty=false. Reports are retained in docs/progress/M01-decoder-*.json. CI run
-38790658271 is still building native Windows; portable/plan jobs passed.
-
-Current working tree adds a real owned-process fault harness using factored
-Spout process helpers. Both directions pass consumer death with six subsequent
-producer publications, consumer reconnect, producer death while holding its
-mutex (observed metadata removed/disconnected), and fresh pair restart. This
-trial used unchanged native binaries at 6818881; C02 helper regression passes.
-Both Spout configurations/peer were rebuilt and final fault contracts pass;
-C02 helper regression passes Debug/Release. Next: commit, then retain clean
-committed reports and hosted results. No production supervisor or
-device-loss result is claimed. Do not force a global GPU TDR on this laptop:
-that would disrupt unrelated apps and is not required to progress independently.
-
-Worker-fault code committed locally at fe8c5ed7963b6cdd371ef2f4890bab64429417c6.
-Clean Debug/Release wrapper + fault contract reruns passed; unaltered reports are
-docs/progress/M01-worker-debug/release.json. Push waits for decoder CI 38790658271
-to finish rather than cancel its native Windows dependency compilation.
-
-Current code work: private sample_set API submits all native members in one
-applied bgfx frame and retires together. Cooperating real GPU frame-set Release
-trial passes 8 sets/40 exact member hashes, port counts 2/5/11/2, sizes 64/128/256/64;
-missing member and actual stale GPU pixels fail specifically/no success JSON.
-No physical presentation claim. Debug/Release each pass 8 sets/40 members and
-both negatives. All changed consumers pass native regressions in both configs:
-C01 texture/timeout, C02 Spout, decoder/import/refusal, owned worker death/restart.
-windows-decode/windows-spout final wrappers pass 5/5 CTest and CLI checks.
-Next: commit this tested slice, clean source reports, push after decoder CI,
-then collect hosted evidence. Physical multi-window/scanout and device-loss
-qualification still require distinct experiments/hardware; do not mark M01 done.
-
-## Commands
-
-- python tools/ci/check.py --preset windows-spout --configuration Debug --skip-bootstrap
-- Repeat with Release; wrapper builds the reference peer in Release for both.
-- python tests/hardware/test_spout_interop.py --participant out/build/windows-spout/experiments/graphics/<configuration>/mapgyver-spout-participant.exe --reference out/qualification/spout-reference-build/Release/mapgyver-spout-reference.exe --report-directory out/reports/<fresh-directory>
-- python tests/hardware/test_bgfx_interop.py --executable out/build/windows-spout/experiments/graphics/<configuration>/mapgyver-bgfx-interop.exe --report-directory out/reports/<fresh-directory>
+- python tools/ci/check.py --preset windows-spout --configuration <Debug|Release> --skip-bootstrap
+  Builds app + verified separate /MD Release reference peer; non-GPU tests only.
+- python tools/ci/check.py --preset windows-decode --configuration <Debug|Release> --skip-bootstrap
+  Builds FFmpeg avcodec/core probe and all bgfx experiments; non-GPU tests only.
+- Manual tests: tests/hardware/test_bgfx_interop.py, test_spout_interop.py,
+  test_decoder_import.py, test_spout_worker_failure.py, test_frame_sets.py.
+  Use --help for exact executable arguments and fresh out/reports directories.
 
 ## Decisions and open gates
 
-- Local VS2026/v145; hosted Windows VS2022/v143 (ADR-018). Actual SDK/tool
-  versions are in each wrapper report. Registry baseline:
-  20ceb8adbf0504d4b0d5e4058a32f9d4fc896391. No private renderer fork.
-- Only laptop hardware is available: Win11 x64 10.0.26300, NVIDIA RTX 5080
-  Laptop GPU, driver 32.0.15.9201 plus Intel integrated graphics. Two physical
-  outputs/projectors and hotplug qualification remain external gates.
-- API submission/path counts are not hardware bus/copy-engine counters. CPU
-  uploads, rendering, SDK copies and validation readbacks are separate.
-- Crash/device-loss, hardware decode/import, physical paired scanout and fixed
-  performance workloads/budgets remain unqualified. Continue useful independent
-  work without marking dependent milestones complete.
-- NDI distribution path remains unresolved (ADR-011); required gaps block M13.
+- Local VS2026/v145; hosted Windows VS2022/v143 (ADR-018). Actual versions per
+  wrapper report. Registry 20ceb8adbf0504d4b0d5e4058a32f9d4fc896391. Standard port
+  patches only. Source/dependency notice inventories are under docs/licenses.
+- Laptop only: Win11 x64 10.0.26300, NVIDIA RTX 5080 Laptop GPU, driver
+  32.0.15.9201 plus Intel integrated. Physical two independent outputs/projectors
+  and hotplug qualification are unavailable. Keep those gates open.
+- Counters describe explicit API submissions/controlled SDK paths, never hardware
+  bus/copy/decoder-engine counts. Offline readback/allocation/waits are not show
+  deadline work. Fixed fixture capacities do not limit product surface counts.
+- Device-loss test is not run; do not force a global GPU TDR that disrupts unrelated
+  apps on this laptop. Production worker supervision/recovery is still future work.
+- M01.C04 backend decision and exact sustained workload budgets stay open.
+  NDI legal/distribution path remains unresolved (ADR-011), blocking M13 coverage.

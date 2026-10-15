@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "contracts": [
+    {
+      "schemaVersion": 1,
+      "collectedUtc": "2026-10-15T19:21:50.634574+00:00",
+      "evidenceClass": "native-gpu-cooperating-bgfx-frame-sets",
+      "result": "passed",
+      "sourceRevision": "8f58a75878afad425307efbf02f6c8fd6abb16c9",
+      "sourceDirty": false,
+      "buildConfiguration": "Debug",
+      "command": [
+        "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-decode\\experiments\\graphics\\Debug\\mapgyver-frame-set-probe.exe",
+        "--json"
+      ],
+      "sets": 8,
+      "memberPixelCases": 40,
+      "negativeContracts": [
+        {
+          "command": [
+            "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-decode\\experiments\\graphics\\Debug\\mapgyver-frame-set-probe.exe",
+            "--json",
+            "--stale-member"
+          ],
+          "exitCode": 1,
+          "stderr": "Frame-set probe failed: Frame-set member pixel identity mismatch\n",
+          "successPayload": false
+        },
+        {
+          "command": [
+            "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-decode\\experiments\\graphics\\Debug\\mapgyver-frame-set-probe.exe",
+            "--json",
+            "--missing-member"
+          ],
+          "exitCode": 1,
+          "stderr": "Frame-set probe failed: Candidate set contains a missing source\n",
+          "successPayload": false
+        }
+      ],
+      "physicalScanoutSynchronization": "not_qualified"
+    },
+    {
+      "schemaVersion": 1,
+      "collectedUtc": "2026-10-15T19:22:03.694974+00:00",
+      "evidenceClass": "native-gpu-cooperating-bgfx-frame-sets",
+      "result": "passed",
+      "sourceRevision": "8f58a75878afad425307efbf02f6c8fd6abb16c9",
+      "sourceDirty": false,
+      "buildConfiguration": "Release",
+      "command": [
+        "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-decode\\experiments\\graphics\\Release\\mapgyver-frame-set-probe.exe",
+        "--json"
+      ],
+      "sets": 8,
+      "memberPixelCases": 40,
+      "negativeContracts": [
+        {
+          "command": [
+            "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-decode\\experiments\\graphics\\Release\\mapgyver-frame-set-probe.exe",
+            "--json",
+            "--stale-member"
+          ],
+          "exitCode": 1,
+          "stderr": "Frame-set probe failed: Frame-set member pixel identity mismatch\n",
+          "successPayload": false
+        },
+        {
+          "command": [
+            "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-decode\\experiments\\graphics\\Release\\mapgyver-frame-set-probe.exe",
+            "--json",
+            "--missing-member"
+          ],
+          "exitCode": 1,
+          "stderr": "Frame-set probe failed: Candidate set contains a missing source\n",
+          "successPayload": false
+        }
+      ],
+      "physicalScanoutSynchronization": "not_qualified"
+    }
+  ]
+}
