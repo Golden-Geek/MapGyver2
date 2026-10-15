@@ -114,6 +114,17 @@
   fixed (owned ID); no checks weakened. Unknown adapters/formats remain configured.
   Next: final review, commit/push C02, clean-source and hosted evidence, then
   M02.C03 typed registry/transaction/undo-redo with combined model validation.
+- C02 committed/pushed as cc29c53207b94bb21904c36bd3d5bb9c67ab1ede.
+  Clean Windows Debug/Release wrappers pass all eight contracts; exact commands,
+  environment and parsed actual JUnit outcomes are in M02-C02-local.json.
+  Hosted results pending. Next C03 must reconcile definition edits without
+  resetting unchanged live IDs/transport, validate instance+stage references in
+  one candidate, expose typed metadata/access/units/persistence through one
+  registration path, and support atomic structural batches with undo/redo.
+- C02 CI 38808397792 native Linux/macOS portable and plan jobs passed; Windows
+  native Debug/Release dependency builds are still running. Preserve that result
+  instead of cancelling it with a routine documentation push. Evidence docs can
+  be committed locally and pushed with the next tested implementation slice.
 - Continue independent authorized work around unavailable hardware/legal gates;
   do not mark dependent milestones complete or fake missing hardware success.
 
