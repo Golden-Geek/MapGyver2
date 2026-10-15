@@ -20,7 +20,7 @@ jobs:
       - run: python3 tools/validate_plan.py
   windows-native:
     name: windows-native (${{ matrix.configuration }})
-    runs-on: windows-2025
+    runs-on: windows-2022
     timeout-minutes: 45
     strategy:
       fail-fast: false

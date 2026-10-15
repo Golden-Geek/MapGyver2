@@ -31,10 +31,13 @@
   34 scenarios). This validates the planning contract, not application behavior.
 - M00.C01: `90faf2a`, pushed; local Debug/Release build and banner smoke passed.
 - M00.C02: `b47656a`, pushed; all four CTest contracts passed in both configurations.
+- M00.C03 `d4d3367`: run 38769687062 passed Linux/macOS but failed Windows:
+  windows-2025 had VS2026, no VS2022. Quality gate correctly failed. ADR-018
+  switches to windows-2022; replacement run must pass before M00 completion.
 - Local M00: `python tools/ci/bootstrap.py --triplet x64-windows`,
   `cmake --preset windows-local`, build Debug/Release, CTest for each with
   `--output-on-failure --no-tests=error`.
-- Hosted: windows-ci on windows-2025 / VS2022; portable-ci on native Linux x64
+- Hosted: windows-ci on windows-2022 / VS2022; portable-ci on native Linux x64
   and macOS ARM64. Record actual source hashes and run URLs in milestone evidence.
 
 ## Decisions and open gates

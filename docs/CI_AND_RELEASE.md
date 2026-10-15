@@ -26,7 +26,7 @@ Do not set blanket `continue-on-error` or silently skip all tests. Test quaranti
 
 ## Reproducible build contract
 
-M00 implements `python tools/ci/bootstrap.py --triplet <triplet> [--core-only]`, a pinned dependency root and CMake presets `windows-ci` and `portable-ci`. Windows uses the Visual Studio 2022 generator on `windows-2025`; the actual image currently supplies VS 2022 17.14. Record exact compiler/SDK/CMake versions per run. Portable core uses Ninja and an explicitly selected current compiler supporting the project's C++20 subset.
+M00 implements `python tools/ci/bootstrap.py --triplet <triplet> [--core-only]`, a pinned dependency root and CMake presets `windows-ci` and `portable-ci`. Windows uses the Visual Studio 2022 generator on `windows-2022`. The first actual windows-2025 run supplied VS2026 without VS2022 and failed; ADR-018 records the runner correction retaining v143 qualification. Record exact compiler/SDK/CMake versions per run. Portable core uses Ninja and an explicitly selected current compiler supporting the project's C++20 subset.
 
 The implementation adds `windows-local` for VS2026/v145, while hosted Windows
 remains VS2022/v143. Minimums are CMake 3.31 (4.2 for local VS2026), Python 3.11,
