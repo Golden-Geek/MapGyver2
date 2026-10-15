@@ -57,6 +57,15 @@
   pixels not read back. Both wrappers pass 5/5 CTest/CLI checks; C01 Debug lifetime
   and real timeout regression passes. Source is 2f8b189 plus dirty=true.
   Next: commit the tested window slice, clean-source reports, hosted evidence.
+- Window slice is now committed locally at c50228c31b646097e2d4a750359ab4642e9090a0.
+  Clean native Debug/Release wrappers and API contracts pass; unaltered reports
+  and commands are in docs/progress/M01-windows-*.json / M01-window-contracts.json.
+  No window pixel/visible scanout claim. Keep M01.C03/C04 open; no tag.
+- Next independent work while CI/hardware gates remain open: M02.C01 portable
+  stable assets/instances/typed composition ports and cycle validation. This does
+  not select a renderer, depend on native SDK types or qualify M02 ahead of M01.
+  Preserve backlog dependency order for completion; continue authorized model
+  implementation without substituting docs/tests for missing hardware evidence.
 - Continue independent authorized work around unavailable hardware/legal gates;
   do not mark dependent milestones complete or fake missing hardware success.
 

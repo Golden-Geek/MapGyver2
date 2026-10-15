@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "contracts": [
+    {
+      "schemaVersion": 1,
+      "collectedUtc": "2026-10-15T19:32:08.713661+00:00",
+      "evidenceClass": "native-gpu-hidden-sdl-bgfx-multi-window-api",
+      "result": "passed",
+      "sourceRevision": "c50228c31b646097e2d4a750359ab4642e9090a0",
+      "sourceDirty": false,
+      "buildConfiguration": "Debug",
+      "command": [
+        "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-decode\\experiments\\graphics\\Debug\\mapgyver-window-probe.exe",
+        "--json"
+      ],
+      "applicationFrames": 12,
+      "windowDrawSubmissions": 33,
+      "stages": 4,
+      "remainingBgfxFrameBufferHandles": 0,
+      "remainingContextWindows": 1,
+      "physicalTwoOutputQualification": "not_run",
+      "windowPixelQualification": "not_run"
+    },
+    {
+      "schemaVersion": 1,
+      "collectedUtc": "2026-10-15T19:32:20.751075+00:00",
+      "evidenceClass": "native-gpu-hidden-sdl-bgfx-multi-window-api",
+      "result": "passed",
+      "sourceRevision": "c50228c31b646097e2d4a750359ab4642e9090a0",
+      "sourceDirty": false,
+      "buildConfiguration": "Release",
+      "command": [
+        "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-decode\\experiments\\graphics\\Release\\mapgyver-window-probe.exe",
+        "--json"
+      ],
+      "applicationFrames": 12,
+      "windowDrawSubmissions": 33,
+      "stages": 4,
+      "remainingBgfxFrameBufferHandles": 0,
+      "remainingContextWindows": 1,
+      "physicalTwoOutputQualification": "not_run",
+      "windowPixelQualification": "not_run"
+    }
+  ]
+}

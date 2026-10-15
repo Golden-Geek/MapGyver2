@@ -1,0 +1,268 @@
+{
+  "adapter": {
+    "deviceId": 11353,
+    "luidHigh": 0,
+    "luidLow": 89087,
+    "name": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "vendorId": 4318
+  },
+  "buildConfiguration": "Release",
+  "counterMeaning": "Explicit draw/upload API submissions; no Present/scanout/hardware transfer counter is claimed",
+  "evidenceClass": "native-gpu-hidden-sdl-bgfx-multi-window-api",
+  "memoryAfterRetirement": {
+    "bgfxFrameBufferHandles": 0,
+    "localVideoBudgetBytes": 15975055360,
+    "localVideoUsageBytes": 9904128
+  },
+  "memoryBefore": {
+    "bgfxFrameBufferHandles": 0,
+    "localVideoBudgetBytes": 15975055360,
+    "localVideoUsageBytes": 8593408
+  },
+  "opticalSynchronization": "not_claimed",
+  "ownership": "Single native GPU/API owner; swapchain destruction flushed before native window resize/reuse/destruction",
+  "physicalTwoOutputQualification": "not_run",
+  "productionDeadlineBudget": "not_qualified",
+  "remainingSdlWindows": 1,
+  "result": "passed",
+  "schemaVersion": 1,
+  "sourceDirty": false,
+  "sourceRevision": "c50228c31b646097e2d4a750359ab4642e9090a0",
+  "stages": [
+    {
+      "frames": [
+        {
+          "appliedBgfxFrame": 4,
+          "cpuReadbacks": 0,
+          "offlineSubmissionCompletionMicroseconds": 8744.9,
+          "sourceCpuUploadCalls": 3,
+          "sourceSequence": 1,
+          "windowDrawSubmissions": 3
+        },
+        {
+          "appliedBgfxFrame": 6,
+          "cpuReadbacks": 0,
+          "offlineSubmissionCompletionMicroseconds": 1028.8,
+          "sourceCpuUploadCalls": 3,
+          "sourceSequence": 2,
+          "windowDrawSubmissions": 3
+        },
+        {
+          "appliedBgfxFrame": 8,
+          "cpuReadbacks": 0,
+          "offlineSubmissionCompletionMicroseconds": 1297.5,
+          "sourceCpuUploadCalls": 3,
+          "sourceSequence": 3,
+          "windowDrawSubmissions": 3
+        }
+      ],
+      "memory": {
+        "bgfxFrameBufferHandles": 3,
+        "localVideoBudgetBytes": 15975055360,
+        "localVideoUsageBytes": 9232384
+      },
+      "stage": 0,
+      "windows": [
+        {
+          "height": 64,
+          "hidden": true,
+          "outputId": "output-0",
+          "resourceGeneration": 1,
+          "sdlWindowId": 3,
+          "width": 64
+        },
+        {
+          "height": 80,
+          "hidden": true,
+          "outputId": "output-1",
+          "resourceGeneration": 1,
+          "sdlWindowId": 4,
+          "width": 80
+        },
+        {
+          "height": 96,
+          "hidden": true,
+          "outputId": "output-2",
+          "resourceGeneration": 1,
+          "sdlWindowId": 5,
+          "width": 96
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "appliedBgfxFrame": 12,
+          "cpuReadbacks": 0,
+          "offlineSubmissionCompletionMicroseconds": 3518.7,
+          "sourceCpuUploadCalls": 3,
+          "sourceSequence": 4,
+          "windowDrawSubmissions": 3
+        },
+        {
+          "appliedBgfxFrame": 14,
+          "cpuReadbacks": 0,
+          "offlineSubmissionCompletionMicroseconds": 555.3,
+          "sourceCpuUploadCalls": 3,
+          "sourceSequence": 5,
+          "windowDrawSubmissions": 3
+        },
+        {
+          "appliedBgfxFrame": 16,
+          "cpuReadbacks": 0,
+          "offlineSubmissionCompletionMicroseconds": 719.8,
+          "sourceCpuUploadCalls": 3,
+          "sourceSequence": 6,
+          "windowDrawSubmissions": 3
+        }
+      ],
+      "memory": {
+        "bgfxFrameBufferHandles": 3,
+        "localVideoBudgetBytes": 15975055360,
+        "localVideoUsageBytes": 9707520
+      },
+      "stage": 1,
+      "windows": [
+        {
+          "height": 128,
+          "hidden": true,
+          "outputId": "output-0",
+          "resourceGeneration": 2,
+          "sdlWindowId": 3,
+          "width": 128
+        },
+        {
+          "height": 144,
+          "hidden": true,
+          "outputId": "output-1",
+          "resourceGeneration": 2,
+          "sdlWindowId": 4,
+          "width": 144
+        },
+        {
+          "height": 160,
+          "hidden": true,
+          "outputId": "output-2",
+          "resourceGeneration": 2,
+          "sdlWindowId": 5,
+          "width": 160
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "appliedBgfxFrame": 20,
+          "cpuReadbacks": 0,
+          "offlineSubmissionCompletionMicroseconds": 4351.8,
+          "sourceCpuUploadCalls": 2,
+          "sourceSequence": 7,
+          "windowDrawSubmissions": 2
+        },
+        {
+          "appliedBgfxFrame": 22,
+          "cpuReadbacks": 0,
+          "offlineSubmissionCompletionMicroseconds": 277.5,
+          "sourceCpuUploadCalls": 2,
+          "sourceSequence": 8,
+          "windowDrawSubmissions": 2
+        },
+        {
+          "appliedBgfxFrame": 24,
+          "cpuReadbacks": 0,
+          "offlineSubmissionCompletionMicroseconds": 293.1,
+          "sourceCpuUploadCalls": 2,
+          "sourceSequence": 9,
+          "windowDrawSubmissions": 2
+        }
+      ],
+      "memory": {
+        "bgfxFrameBufferHandles": 2,
+        "localVideoBudgetBytes": 15975055360,
+        "localVideoUsageBytes": 9707520
+      },
+      "stage": 2,
+      "windows": [
+        {
+          "height": 128,
+          "hidden": true,
+          "outputId": "output-0",
+          "resourceGeneration": 2,
+          "sdlWindowId": 3,
+          "width": 128
+        },
+        {
+          "height": 160,
+          "hidden": true,
+          "outputId": "output-2",
+          "resourceGeneration": 2,
+          "sdlWindowId": 5,
+          "width": 160
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "appliedBgfxFrame": 26,
+          "cpuReadbacks": 0,
+          "offlineSubmissionCompletionMicroseconds": 2340.3,
+          "sourceCpuUploadCalls": 3,
+          "sourceSequence": 10,
+          "windowDrawSubmissions": 3
+        },
+        {
+          "appliedBgfxFrame": 28,
+          "cpuReadbacks": 0,
+          "offlineSubmissionCompletionMicroseconds": 391.7,
+          "sourceCpuUploadCalls": 3,
+          "sourceSequence": 11,
+          "windowDrawSubmissions": 3
+        },
+        {
+          "appliedBgfxFrame": 30,
+          "cpuReadbacks": 0,
+          "offlineSubmissionCompletionMicroseconds": 700.8,
+          "sourceCpuUploadCalls": 3,
+          "sourceSequence": 12,
+          "windowDrawSubmissions": 3
+        }
+      ],
+      "memory": {
+        "bgfxFrameBufferHandles": 3,
+        "localVideoBudgetBytes": 15975055360,
+        "localVideoUsageBytes": 9904128
+      },
+      "stage": 3,
+      "windows": [
+        {
+          "height": 128,
+          "hidden": true,
+          "outputId": "output-0",
+          "resourceGeneration": 2,
+          "sdlWindowId": 3,
+          "width": 128
+        },
+        {
+          "height": 112,
+          "hidden": true,
+          "outputId": "output-1",
+          "resourceGeneration": 3,
+          "sdlWindowId": 6,
+          "width": 96
+        },
+        {
+          "height": 160,
+          "hidden": true,
+          "outputId": "output-2",
+          "resourceGeneration": 2,
+          "sdlWindowId": 5,
+          "width": 160
+        }
+      ]
+    }
+  ],
+  "traceBytesDropped": 0,
+  "visibility": "All fixture windows hidden; no browser or preview subscriber",
+  "windowPixels": "not_read_back"
+}

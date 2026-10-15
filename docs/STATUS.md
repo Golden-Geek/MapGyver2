@@ -10,8 +10,9 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
 - M01.C01 texture sampling and M01.C02 bidirectional Spout/bgfx interoperability
   have clean native Debug/Release GPU evidence and green hosted builds.
   M01.C03 has clean native decoder/import, owned process-fault and cooperating
-  frame-set evidence. Multi-window submission, physical outputs, device-loss
-  recovery and sustained performance gates remain open. Renderer provisional.
+  frame-set and hidden multi-window API evidence. Physical two-output/scanout,
+  device-loss recovery and sustained performance gates remain open. Renderer
+  provisional; no M01 completion tag.
 - First architecture gate: M01, render/Spout/decode/presentation feasibility on Windows hardware.
 - Open product decisions: current NDI licensing/distribution path and exact reference hardware/workload budgets.
 - Later native targets: Windows ARM64, Linux x64/PipeWire, macOS ARM64/Syphon, Linux ARM64/Raspberry Pi.
