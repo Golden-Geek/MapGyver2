@@ -13,6 +13,69 @@ InstancePool::InstancePool(DefinitionSnapshot definitions, InstanceLimits limits
     : definitions_(std::move(definitions)), limits_(limits), ids_(std::make_shared<IdGenerator>(std::move(ids))) {
     require(static_cast<bool>(*ids_),ErrorCode::invalid_definition,"Instance ID generator is missing");
 }
+InstancePool InstancePool::restore(DefinitionSnapshot definitions, std::map<Id,SourceInstance> instances,
+                                   std::map<Id,Placement> placements, InstanceLimits limits, IdGenerator ids) {
+    require(instances.size() <= limits.instances && placements.size() <= limits.placements,
+            ErrorCode::capacity_exceeded,"Restored instance/placement capacity exceeded");
+    InstancePool pool{std::move(definitions),limits,std::move(ids)};
+    pool.instances_ = std::move(instances); pool.placements_ = std::move(placements);
+    std::map<Id,std::uint64_t> stored_counts;
+    for (auto& [id,node] : pool.instances_) {
+        require(id == node.id && !pool.placements_.contains(id),ErrorCode::duplicate_id,"Restored instance identity is inconsistent or reused",{id,node.id});
+        static_cast<void>(pool.definitions_.asset(node.asset));
+        pool.set_transport(id,node.transport);
+        stored_counts.emplace(id,node.owner_references); node.owner_references = 0;
+    }
+    const auto reference = [&](const InstancePort& source) {
+        static_cast<void>(pool.output_port(source)); pool.acquire(source.instance);
+    };
+    for (const auto& [id,placement] : pool.placements_) {
+        require(id == placement.id,ErrorCode::invalid_definition,"Restored placement identity differs from its key",{id,placement.id});
+        reference(placement.source);
+    }
+    struct Scope {Id parent, token; bool shared; bool operator==(const Scope&) const = default;};
+    std::map<Id,Scope> static_owners;
+    for (const auto& [id,node] : pool.instances_) {
+        const auto& asset = pool.definitions_.asset(node.asset);
+        const auto* source = std::get_if<CompositionSource>(&asset.source);
+        if (source == nullptr) {
+            require(node.layers.empty() && node.inputs.empty(),ErrorCode::type_mismatch,"External sources cannot own composition bindings",{id});
+            continue;
+        }
+        const auto& composition = pool.definitions_.composition(source->composition);
+        std::size_t expected_layers = 0;
+        std::map<Id,Id> shared_groups;
+        for (const auto& layer : composition.layers) {
+            const auto* expected = std::get_if<AssetPort>(&layer.source);
+            if (expected == nullptr) continue;
+            ++expected_layers;
+            const auto found = node.layers.find(layer.id);
+            require(found != node.layers.end(),ErrorCode::missing_reference,"Restored static layer binding is missing",{id,layer.id});
+            const auto& binding = found->second;
+            require(binding.port == expected->port && pool.instance(binding.instance).asset == expected->asset,
+                    ErrorCode::type_mismatch,"Restored layer binding differs from its definition",{id,layer.id,binding.instance});
+            const Scope scope{id,layer.shared_group.value_or(layer.id),layer.shared_group.has_value()};
+            const auto [owner,inserted] = static_owners.emplace(binding.instance,scope);
+            require(inserted || owner->second == scope,ErrorCode::invalid_definition,"Restored static children share state outside their declared scope",{id,layer.id,binding.instance});
+            if (layer.shared_group) {
+                const auto [group,first] = shared_groups.emplace(*layer.shared_group,binding.instance);
+                require(first || group->second == binding.instance,ErrorCode::invalid_definition,"Restored share group uses different instances",{id,*layer.shared_group});
+            }
+            reference(binding);
+        }
+        require(expected_layers == node.layers.size(),ErrorCode::invalid_definition,"Restored source has extra static layer bindings",{id});
+        for (const auto& [input,binding] : node.inputs) {
+            require(pool.input_port(id,input).kind == pool.output_port(binding).kind,ErrorCode::type_mismatch,"Restored input binding has the wrong stream kind",{id,input});
+            reference(binding);
+        }
+    }
+    pool.validate_live_graph();
+    for (const auto& [id,node] : pool.instances_) {
+        require(node.owner_references == stored_counts.at(id),ErrorCode::invalid_definition,"Stored derived ownership count is inconsistent",{id});
+        require(node.owner_references != 0 || node.keep_alive,ErrorCode::invalid_definition,"Restored source is unreachable and not preloaded",{id});
+    }
+    return pool;
+}
 const SourceInstance& InstancePool::instance(const Id& id) const {
     const auto found = instances_.find(id);
     if (found == instances_.end()) throw ModelError(ErrorCode::missing_reference,"Source instance does not exist",{id});

@@ -52,6 +52,7 @@ public:
     [[nodiscard]] const ParameterDescriptor& parameter(const std::string& address) const;
     [[nodiscard]] std::vector<ParameterDescriptor> inventory() const;
     [[nodiscard]] const std::vector<ActionDescriptor>& actions() const noexcept { return actions_; }
+    [[nodiscard]] std::uint64_t revision() const noexcept { return revision_; }
     [[nodiscard]] AuthoredChange write(ProjectController& controller, std::uint64_t revision, const std::vector<ParameterWrite>& writes) const;
     [[nodiscard]] AuthoredChange execute(ProjectController& controller, std::uint64_t revision, const std::vector<Command>& commands) const;
     [[nodiscard]] AuthoredChange undo(ProjectController& controller, std::uint64_t revision) const;

@@ -35,7 +35,7 @@ struct SourceInstance {
     Id asset;
     TransportIntent transport{};
     bool keep_alive = false;
-    std::size_t owner_references = 0;
+    std::uint64_t owner_references = 0;
     // Layer and sharing identities are scoped by this parent live instance.
     std::map<Id,InstancePort> layers;
     std::map<Id,InstancePort> inputs;
@@ -58,6 +58,11 @@ class InstancePool {
 public:
     using IdGenerator = std::function<Id()>;
     explicit InstancePool(DefinitionSnapshot definitions, InstanceLimits limits = {}, IdGenerator ids = Id::random);
+    // Rehydrate logical state only. Verify stored derived counts against a fresh
+    // ownership traversal; no SDK/process/resource state is resumed here.
+    [[nodiscard]] static InstancePool restore(DefinitionSnapshot definitions,
+        std::map<Id,SourceInstance> instances, std::map<Id,Placement> placements,
+        InstanceLimits limits = {}, IdGenerator ids = Id::random);
     [[nodiscard]] Placement place(const AssetPort& source, bool keep_alive = false);
     [[nodiscard]] Placement place_shared(const InstancePort& source);
     // Returned IDs are logical resources to retire, not completed SDK shutdowns.

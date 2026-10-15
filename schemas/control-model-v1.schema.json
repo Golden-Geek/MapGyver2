@@ -1,0 +1,2717 @@
+{
+  "$defs": {
+    "ActionDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "access": {
+          "enum": [
+            "readOnly",
+            "readWrite",
+            "trigger"
+          ],
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "payloadType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "address",
+        "payloadType",
+        "description",
+        "access"
+      ],
+      "type": "object"
+    },
+    "Asset": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "source": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "ExternalSource"
+                },
+                "value": {
+                  "$ref": "#/$defs/ExternalSource"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "CompositionSource"
+                },
+                "value": {
+                  "$ref": "#/$defs/CompositionSource"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "source"
+      ],
+      "type": "object"
+    },
+    "AssetPort": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "port": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset",
+        "port"
+      ],
+      "type": "object"
+    },
+    "AssignSurfaceContent": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "AssetPort"
+                },
+                "value": {
+                  "$ref": "#/$defs/AssetPort"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "InstancePort"
+                },
+                "value": {
+                  "$ref": "#/$defs/InstancePort"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "surface": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "surface",
+        "source"
+      ],
+      "type": "object"
+    },
+    "BindInput": {
+      "additionalProperties": false,
+      "properties": {
+        "input": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "keepAlive": {
+          "type": "boolean"
+        },
+        "owner": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "source": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "AssetPort"
+                },
+                "value": {
+                  "$ref": "#/$defs/AssetPort"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "InstancePort"
+                },
+                "value": {
+                  "$ref": "#/$defs/InstancePort"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "required": [
+        "owner",
+        "input",
+        "source",
+        "keepAlive"
+      ],
+      "type": "object"
+    },
+    "Calibration": {
+      "additionalProperties": false,
+      "properties": {
+        "boundary": {
+          "items": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "mode": {
+          "enum": [
+            "homography",
+            "mesh"
+          ],
+          "type": "string"
+        },
+        "referenceHeight": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "referenceWidth": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "triangles": {
+          "items": {
+            "$ref": "#/$defs/Triangle"
+          },
+          "type": "array"
+        },
+        "vertices": {
+          "items": {
+            "$ref": "#/$defs/WarpVertex"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "mode",
+        "referenceWidth",
+        "referenceHeight",
+        "vertices",
+        "triangles",
+        "boundary"
+      ],
+      "type": "object"
+    },
+    "Canvas": {
+      "additionalProperties": false,
+      "properties": {
+        "alpha": {
+          "type": "string"
+        },
+        "colourSpace": {
+          "type": "string"
+        },
+        "height": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "pixelFormat": {
+          "type": "string"
+        },
+        "width": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "pixelFormat",
+        "colourSpace",
+        "alpha"
+      ],
+      "type": "object"
+    },
+    "CommandDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "ReplaceDefinitions"
+                },
+                "value": {
+                  "$ref": "#/$defs/ReplaceDefinitions"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "ReplaceStage"
+                },
+                "value": {
+                  "$ref": "#/$defs/ReplaceStage"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "PlaceSource"
+                },
+                "value": {
+                  "$ref": "#/$defs/PlaceSource"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "ShareSource"
+                },
+                "value": {
+                  "$ref": "#/$defs/ShareSource"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "RemovePlacement"
+                },
+                "value": {
+                  "$ref": "#/$defs/RemovePlacement"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "BindInput"
+                },
+                "value": {
+                  "$ref": "#/$defs/BindInput"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "UnbindInput"
+                },
+                "value": {
+                  "$ref": "#/$defs/UnbindInput"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "SetTransport"
+                },
+                "value": {
+                  "$ref": "#/$defs/SetTransport"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "SetKeepAlive"
+                },
+                "value": {
+                  "$ref": "#/$defs/SetKeepAlive"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "AssignSurfaceContent"
+                },
+                "value": {
+                  "$ref": "#/$defs/AssignSurfaceContent"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "schemaVersion": {
+          "const": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "command"
+      ],
+      "type": "object"
+    },
+    "Composition": {
+      "additionalProperties": false,
+      "properties": {
+        "canvases": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Canvas"
+          },
+          "propertyNames": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/Port"
+          },
+          "type": "array"
+        },
+        "layers": {
+          "items": {
+            "$ref": "#/$defs/Layer"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "outputs": {
+          "items": {
+            "$ref": "#/$defs/Port"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "inputs",
+        "outputs",
+        "layers",
+        "canvases"
+      ],
+      "type": "object"
+    },
+    "CompositionSource": {
+      "additionalProperties": false,
+      "properties": {
+        "composition": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "composition"
+      ],
+      "type": "object"
+    },
+    "Definitions": {
+      "additionalProperties": false,
+      "properties": {
+        "assets": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Asset"
+          },
+          "propertyNames": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "compositions": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Composition"
+          },
+          "propertyNames": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "assets",
+        "compositions"
+      ],
+      "type": "object"
+    },
+    "DesiredOutputMode": {
+      "additionalProperties": false,
+      "properties": {
+        "height": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "refreshHz": {
+          "$ref": "#/$defs/Rational"
+        },
+        "width": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "refreshHz"
+      ],
+      "type": "object"
+    },
+    "ExternalSource": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {
+          "type": "string"
+        },
+        "locator": {
+          "type": "string"
+        },
+        "outputs": {
+          "items": {
+            "$ref": "#/$defs/Port"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "adapter",
+        "locator",
+        "outputs"
+      ],
+      "type": "object"
+    },
+    "InputPort": {
+      "additionalProperties": false,
+      "properties": {
+        "port": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "port"
+      ],
+      "type": "object"
+    },
+    "InstancePort": {
+      "additionalProperties": false,
+      "properties": {
+        "instance": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "port": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "instance",
+        "port"
+      ],
+      "type": "object"
+    },
+    "Layer": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "video",
+            "audio",
+            "number",
+            "boolean",
+            "text",
+            "trigger"
+          ],
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "sharedGroup": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "AssetPort"
+                },
+                "value": {
+                  "$ref": "#/$defs/AssetPort"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "InputPort"
+                },
+                "value": {
+                  "$ref": "#/$defs/InputPort"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "source",
+        "sharedGroup"
+      ],
+      "type": "object"
+    },
+    "Layout": {
+      "additionalProperties": false,
+      "properties": {
+        "charts": {
+          "items": {
+            "$ref": "#/$defs/SurfaceChart"
+          },
+          "type": "array"
+        },
+        "group": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "independent",
+            "continuous"
+          ],
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "group",
+        "mode",
+        "charts"
+      ],
+      "type": "object"
+    },
+    "LayoutVertex": {
+      "additionalProperties": false,
+      "properties": {
+        "compositionUv": {
+          "$ref": "#/$defs/Vec2"
+        },
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "surfaceUv": {
+          "$ref": "#/$defs/Vec2"
+        }
+      },
+      "required": [
+        "id",
+        "surfaceUv",
+        "compositionUv"
+      ],
+      "type": "object"
+    },
+    "MediaTime": {
+      "additionalProperties": false,
+      "properties": {
+        "ticks": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string",
+          "x-mapgyver-maximum": "9223372036854775807",
+          "x-mapgyver-minimum": "-9223372036854775808"
+        },
+        "timeBase": {
+          "$ref": "#/$defs/Rational"
+        }
+      },
+      "required": [
+        "ticks",
+        "timeBase"
+      ],
+      "type": "object"
+    },
+    "NumericRange": {
+      "additionalProperties": false,
+      "properties": {
+        "maximum": {
+          "type": "number"
+        },
+        "minimum": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "minimum",
+        "maximum"
+      ],
+      "type": "object"
+    },
+    "OutputTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {
+          "type": "string"
+        },
+        "desired": {
+          "$ref": "#/$defs/DesiredOutputMode"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "adapter",
+        "endpoint",
+        "desired"
+      ],
+      "type": "object"
+    },
+    "ParameterDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "access": {
+          "enum": [
+            "readOnly",
+            "readWrite",
+            "trigger"
+          ],
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "availabilityReason": {
+          "type": "string"
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "defaultValue": {
+          "anyOf": [
+            {
+              "oneOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "boolean"
+                    },
+                    "value": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "unsignedInteger"
+                    },
+                    "value": {
+                      "maxLength": 20,
+                      "pattern": "^(0|[1-9][0-9]*)$",
+                      "type": "string",
+                      "x-mapgyver-maximum": "18446744073709551615",
+                      "x-mapgyver-minimum": "0"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "real"
+                    },
+                    "value": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "text"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "reference"
+                    },
+                    "value": {
+                      "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "optionalReference"
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "Rational"
+                    },
+                    "value": {
+                      "$ref": "#/$defs/Rational"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "MediaTime"
+                    },
+                    "value": {
+                      "$ref": "#/$defs/MediaTime"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "Vec2"
+                    },
+                    "value": {
+                      "$ref": "#/$defs/Vec2"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "streamKind"
+                    },
+                    "value": {
+                      "enum": [
+                        "video",
+                        "audio",
+                        "number",
+                        "boolean",
+                        "text",
+                        "trigger"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "layoutMode"
+                    },
+                    "value": {
+                      "enum": [
+                        "independent",
+                        "continuous"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "warpMode"
+                    },
+                    "value": {
+                      "enum": [
+                        "homography",
+                        "mesh"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "layerSource"
+                    },
+                    "value": {
+                      "oneOf": [
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "const": "AssetPort"
+                            },
+                            "value": {
+                              "$ref": "#/$defs/AssetPort"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "value"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "const": "InputPort"
+                            },
+                            "value": {
+                              "$ref": "#/$defs/InputPort"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "value"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "InstancePort"
+                    },
+                    "value": {
+                      "$ref": "#/$defs/InstancePort"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "idList"
+                    },
+                    "value": {
+                      "items": {
+                        "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "triangles"
+                    },
+                    "value": {
+                      "items": {
+                        "$ref": "#/$defs/Triangle"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "seams"
+                    },
+                    "value": {
+                      "items": {
+                        "$ref": "#/$defs/Seam"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "owner": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "parameter": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "persistence": {
+          "enum": [
+            "authored",
+            "resumeCheckpoint",
+            "transient"
+          ],
+          "type": "string"
+        },
+        "range": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NumericRange"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "enum": [
+            "boolean",
+            "unsignedInteger",
+            "real",
+            "text",
+            "reference",
+            "optionalReference",
+            "Rational",
+            "MediaTime",
+            "Vec2",
+            "streamKind",
+            "layoutMode",
+            "warpMode",
+            "layerSource",
+            "InstancePort",
+            "idList",
+            "triangles",
+            "seams"
+          ],
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "boolean"
+                },
+                "value": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "unsignedInteger"
+                },
+                "value": {
+                  "maxLength": 20,
+                  "pattern": "^(0|[1-9][0-9]*)$",
+                  "type": "string",
+                  "x-mapgyver-maximum": "18446744073709551615",
+                  "x-mapgyver-minimum": "0"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "real"
+                },
+                "value": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "text"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "reference"
+                },
+                "value": {
+                  "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "optionalReference"
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "Rational"
+                },
+                "value": {
+                  "$ref": "#/$defs/Rational"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "MediaTime"
+                },
+                "value": {
+                  "$ref": "#/$defs/MediaTime"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "Vec2"
+                },
+                "value": {
+                  "$ref": "#/$defs/Vec2"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "streamKind"
+                },
+                "value": {
+                  "enum": [
+                    "video",
+                    "audio",
+                    "number",
+                    "boolean",
+                    "text",
+                    "trigger"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "layoutMode"
+                },
+                "value": {
+                  "enum": [
+                    "independent",
+                    "continuous"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "warpMode"
+                },
+                "value": {
+                  "enum": [
+                    "homography",
+                    "mesh"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "layerSource"
+                },
+                "value": {
+                  "oneOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "type": {
+                          "const": "AssetPort"
+                        },
+                        "value": {
+                          "$ref": "#/$defs/AssetPort"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "value"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "type": {
+                          "const": "InputPort"
+                        },
+                        "value": {
+                          "$ref": "#/$defs/InputPort"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "value"
+                      ],
+                      "type": "object"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "InstancePort"
+                },
+                "value": {
+                  "$ref": "#/$defs/InstancePort"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "idList"
+                },
+                "value": {
+                  "items": {
+                    "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "triangles"
+                },
+                "value": {
+                  "items": {
+                    "$ref": "#/$defs/Triangle"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "seams"
+                },
+                "value": {
+                  "items": {
+                    "$ref": "#/$defs/Seam"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "required": [
+        "parameter",
+        "owner",
+        "address",
+        "type",
+        "value",
+        "defaultValue",
+        "range",
+        "unit",
+        "description",
+        "access",
+        "persistence",
+        "available",
+        "availabilityReason"
+      ],
+      "type": "object"
+    },
+    "ParameterWrite": {
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "boolean"
+                },
+                "value": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "unsignedInteger"
+                },
+                "value": {
+                  "maxLength": 20,
+                  "pattern": "^(0|[1-9][0-9]*)$",
+                  "type": "string",
+                  "x-mapgyver-maximum": "18446744073709551615",
+                  "x-mapgyver-minimum": "0"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "real"
+                },
+                "value": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "text"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "reference"
+                },
+                "value": {
+                  "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "optionalReference"
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "Rational"
+                },
+                "value": {
+                  "$ref": "#/$defs/Rational"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "MediaTime"
+                },
+                "value": {
+                  "$ref": "#/$defs/MediaTime"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "Vec2"
+                },
+                "value": {
+                  "$ref": "#/$defs/Vec2"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "streamKind"
+                },
+                "value": {
+                  "enum": [
+                    "video",
+                    "audio",
+                    "number",
+                    "boolean",
+                    "text",
+                    "trigger"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "layoutMode"
+                },
+                "value": {
+                  "enum": [
+                    "independent",
+                    "continuous"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "warpMode"
+                },
+                "value": {
+                  "enum": [
+                    "homography",
+                    "mesh"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "layerSource"
+                },
+                "value": {
+                  "oneOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "type": {
+                          "const": "AssetPort"
+                        },
+                        "value": {
+                          "$ref": "#/$defs/AssetPort"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "value"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "type": {
+                          "const": "InputPort"
+                        },
+                        "value": {
+                          "$ref": "#/$defs/InputPort"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "value"
+                      ],
+                      "type": "object"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "InstancePort"
+                },
+                "value": {
+                  "$ref": "#/$defs/InstancePort"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "idList"
+                },
+                "value": {
+                  "items": {
+                    "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "triangles"
+                },
+                "value": {
+                  "items": {
+                    "$ref": "#/$defs/Triangle"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "seams"
+                },
+                "value": {
+                  "items": {
+                    "$ref": "#/$defs/Seam"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "required": [
+        "address",
+        "value"
+      ],
+      "type": "object"
+    },
+    "PlaceSource": {
+      "additionalProperties": false,
+      "properties": {
+        "keepAlive": {
+          "type": "boolean"
+        },
+        "source": {
+          "$ref": "#/$defs/AssetPort"
+        }
+      },
+      "required": [
+        "source",
+        "keepAlive"
+      ],
+      "type": "object"
+    },
+    "Placement": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/InstancePort"
+        }
+      },
+      "required": [
+        "id",
+        "source"
+      ],
+      "type": "object"
+    },
+    "Port": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "video",
+            "audio",
+            "number",
+            "boolean",
+            "text",
+            "trigger"
+          ],
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "kind"
+      ],
+      "type": "object"
+    },
+    "ProjectDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "definitions": {
+          "$ref": "#/$defs/Definitions"
+        },
+        "placements": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Placement"
+          },
+          "propertyNames": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "rootPlacement": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": 1,
+          "type": "integer"
+        },
+        "sources": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SourceInstance"
+          },
+          "propertyNames": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "stage": {
+          "$ref": "#/$defs/Stage"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "definitions",
+        "sources",
+        "placements",
+        "stage",
+        "rootPlacement"
+      ],
+      "type": "object"
+    },
+    "ProjectionPatch": {
+      "additionalProperties": false,
+      "properties": {
+        "calibration": {
+          "$ref": "#/$defs/Calibration"
+        },
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "output": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "surface": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "surface",
+        "output",
+        "calibration"
+      ],
+      "type": "object"
+    },
+    "Rational": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string",
+          "x-mapgyver-maximum": "9223372036854775807",
+          "x-mapgyver-minimum": "-9223372036854775808"
+        },
+        "numerator": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string",
+          "x-mapgyver-maximum": "9223372036854775807",
+          "x-mapgyver-minimum": "-9223372036854775808"
+        }
+      },
+      "required": [
+        "numerator",
+        "denominator"
+      ],
+      "type": "object"
+    },
+    "RegistryDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/ActionDescriptor"
+          },
+          "type": "array"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/ParameterDescriptor"
+          },
+          "type": "array"
+        },
+        "revision": {
+          "maxLength": 20,
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string",
+          "x-mapgyver-maximum": "18446744073709551615",
+          "x-mapgyver-minimum": "0"
+        },
+        "schemaVersion": {
+          "const": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "revision",
+        "parameters",
+        "actions"
+      ],
+      "type": "object"
+    },
+    "RemovePlacement": {
+      "additionalProperties": false,
+      "properties": {
+        "placement": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "placement"
+      ],
+      "type": "object"
+    },
+    "ReplaceDefinitions": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "$ref": "#/$defs/Definitions"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "type": "object"
+    },
+    "ReplaceStage": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "$ref": "#/$defs/Stage"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "type": "object"
+    },
+    "Seam": {
+      "additionalProperties": false,
+      "properties": {
+        "first": {
+          "$ref": "#/$defs/SurfaceEdge"
+        },
+        "reversed": {
+          "type": "boolean"
+        },
+        "second": {
+          "$ref": "#/$defs/SurfaceEdge"
+        }
+      },
+      "required": [
+        "first",
+        "second",
+        "reversed"
+      ],
+      "type": "object"
+    },
+    "SetKeepAlive": {
+      "additionalProperties": false,
+      "properties": {
+        "instance": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "value": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "instance",
+        "value"
+      ],
+      "type": "object"
+    },
+    "SetTransport": {
+      "additionalProperties": false,
+      "properties": {
+        "instance": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/TransportIntent"
+        }
+      },
+      "required": [
+        "instance",
+        "value"
+      ],
+      "type": "object"
+    },
+    "ShareSource": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/InstancePort"
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "type": "object"
+    },
+    "SourceInstance": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "inputs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/InstancePort"
+          },
+          "propertyNames": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "keepAlive": {
+          "type": "boolean"
+        },
+        "layers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/InstancePort"
+          },
+          "propertyNames": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "ownerReferences": {
+          "maxLength": 20,
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string",
+          "x-mapgyver-maximum": "18446744073709551615",
+          "x-mapgyver-minimum": "0"
+        },
+        "transport": {
+          "$ref": "#/$defs/TransportIntent"
+        }
+      },
+      "required": [
+        "id",
+        "asset",
+        "transport",
+        "keepAlive",
+        "ownerReferences",
+        "layers",
+        "inputs"
+      ],
+      "type": "object"
+    },
+    "Stage": {
+      "additionalProperties": false,
+      "properties": {
+        "groups": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SurfaceGroup"
+          },
+          "propertyNames": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "layouts": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Layout"
+          },
+          "propertyNames": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "outputs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/OutputTarget"
+          },
+          "propertyNames": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "patches": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ProjectionPatch"
+          },
+          "propertyNames": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "surfaces": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Surface"
+          },
+          "propertyNames": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "surfaces",
+        "groups",
+        "layouts",
+        "outputs",
+        "patches"
+      ],
+      "type": "object"
+    },
+    "Surface": {
+      "additionalProperties": false,
+      "properties": {
+        "contentPlacement": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "geometry": {
+          "$ref": "#/$defs/SurfaceGeometry"
+        },
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "contentPlacement",
+        "geometry"
+      ],
+      "type": "object"
+    },
+    "SurfaceChart": {
+      "additionalProperties": false,
+      "properties": {
+        "surface": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "triangles": {
+          "items": {
+            "$ref": "#/$defs/Triangle"
+          },
+          "type": "array"
+        },
+        "vertices": {
+          "items": {
+            "$ref": "#/$defs/LayoutVertex"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "surface",
+        "vertices",
+        "triangles"
+      ],
+      "type": "object"
+    },
+    "SurfaceEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "first": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "second": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "surface": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "surface",
+        "first",
+        "second"
+      ],
+      "type": "object"
+    },
+    "SurfaceGeometry": {
+      "additionalProperties": false,
+      "properties": {
+        "triangles": {
+          "items": {
+            "$ref": "#/$defs/Triangle"
+          },
+          "type": "array"
+        },
+        "vertices": {
+          "items": {
+            "$ref": "#/$defs/SurfaceVertex"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "vertices",
+        "triangles"
+      ],
+      "type": "object"
+    },
+    "SurfaceGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "seams": {
+          "items": {
+            "$ref": "#/$defs/Seam"
+          },
+          "type": "array"
+        },
+        "surfaces": {
+          "items": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "surfaces",
+        "seams"
+      ],
+      "type": "object"
+    },
+    "SurfaceVertex": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "local": {
+          "$ref": "#/$defs/Vec2"
+        },
+        "uv": {
+          "$ref": "#/$defs/Vec2"
+        }
+      },
+      "required": [
+        "id",
+        "local",
+        "uv"
+      ],
+      "type": "object"
+    },
+    "TransportIntent": {
+      "additionalProperties": false,
+      "properties": {
+        "loop": {
+          "type": "boolean"
+        },
+        "playing": {
+          "type": "boolean"
+        },
+        "position": {
+          "$ref": "#/$defs/MediaTime"
+        },
+        "rate": {
+          "$ref": "#/$defs/Rational"
+        }
+      },
+      "required": [
+        "position",
+        "rate",
+        "playing",
+        "loop"
+      ],
+      "type": "object"
+    },
+    "Triangle": {
+      "additionalProperties": false,
+      "properties": {
+        "vertices": {
+          "items": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array"
+        }
+      },
+      "required": [
+        "vertices"
+      ],
+      "type": "object"
+    },
+    "UnbindInput": {
+      "additionalProperties": false,
+      "properties": {
+        "input": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "owner": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "owner",
+        "input"
+      ],
+      "type": "object"
+    },
+    "Vec2": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "type": "object"
+    },
+    "WarpVertex": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "type": "string"
+        },
+        "projectorPixels": {
+          "$ref": "#/$defs/Vec2"
+        },
+        "surfaceUv": {
+          "$ref": "#/$defs/Vec2"
+        }
+      },
+      "required": [
+        "id",
+        "surfaceUv",
+        "projectorPixels"
+      ],
+      "type": "object"
+    },
+    "WriteDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1,
+          "type": "integer"
+        },
+        "write": {
+          "$ref": "#/$defs/ParameterWrite"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "write"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/Golden-Geek/MapGyver2/schemas/control-model-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/ProjectDocument"
+    },
+    {
+      "$ref": "#/$defs/CommandDocument"
+    },
+    {
+      "$ref": "#/$defs/WriteDocument"
+    },
+    {
+      "$ref": "#/$defs/RegistryDocument"
+    }
+  ],
+  "title": "MapGyver portable control/model wire documents v1"
+}

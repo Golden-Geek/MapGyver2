@@ -47,6 +47,7 @@ struct AuthoredChange {
 class ProjectController {
 public:
     explicit ProjectController(DefaultProject project, ProjectLimits limits = {});
+    explicit ProjectController(ProjectState project, ProjectLimits limits = {});
     [[nodiscard]] AuthoredChange transact(std::uint64_t expected_revision, const std::vector<Command>& commands);
     [[nodiscard]] AuthoredChange undo(std::uint64_t expected_revision);
     [[nodiscard]] AuthoredChange redo(std::uint64_t expected_revision);

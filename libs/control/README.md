@@ -55,7 +55,43 @@ restores the same snapshot pointer. Parameter count and write-batch capacities
 are configurable. Transport position/playing metadata requests explicit resume
 checkpoints; it never labels an actual decoded playhead as authored persistence.
 
-Protocol wire encoding, generated API/TypeScript/OSCQuery exports, native runtime
-capability reports, render compilation and persistence remain subsequent slices.
-This code is independent of OS/GPU headers and does not qualify M01 hardware
-requirements or M02 ahead of its dependency.
+wire.hpp supplies strict versioned project, command, parameter-write and registry
+documents. One field list drives encoding, decoding and generated JSON Schema.
+Stable-ID maps and ordered vectors preserve identity and authored order. Tagged
+variants use fixed semantic names, not C++ variant indices or memory layouts.
+All 64-bit integers use canonical decimal strings, including rational components,
+media ticks, derived counts and revisions; 32-bit dimensions remain JSON numbers.
+This preserves exact values in JavaScript. The schema's x-mapgyver integer bounds
+document string ranges; the codec enforces them. Graph/geometry and ownership
+invariants remain domain validation, beyond structural JSON Schema validation.
+
+External bytes must enter through wire::parse: configurable byte, parser-event
+and nesting limits apply, with duplicate keys, invalid UTF-8 and malformed JSON
+rejected. Typed decoding rejects missing/unknown fields, unknown enum/variant
+tags, noncanonical integers and unsupported versions. These APIs run outside
+render/audio deadlines. Project restoration recomputes ownership and verifies
+stored derived counts, local static-child scope, typed bindings, rational intent,
+cycles, reachability and capacities before validating the combined stage/root.
+Restoration never launches an app, resumes a decoder or restores native resources.
+
+ProjectDocument is a complete control snapshot, including requested transport
+intent. It is not the durable project format or an automatic resume operation.
+M12 must apply persistence/checkpoint metadata and SQLite durability/migrations.
+The current wire command document is a typed payload, not the reliable M03
+request/session/deduplication/scheduling envelope. OSCQuery service, generated
+TypeScript exports, native capability reports and render application remain
+subsequent slices. This code is independent of OS/GPU headers and does not
+qualify M01 hardware requirements or M02 ahead of its dependency.
+
+Regenerate the checked schema after changing wire field registration:
+
+```powershell
+& out/build/windows-local/libs/control/Debug/mapgyver_control_wire_test.exe --write-schema schemas/control-model-v1.schema.json
+```
+
+control.wire compares the checked schema with generated definitions and tests
+complete 1/3/37-surface round trips, sharing/independent intent, unknown adapters,
+all parameter/command alternatives, registry inventory and malformed input.
+`--export-fixtures out/reports/wire-fixtures` exports all four document classes
+for an independent JSON Schema validator. No validator package is linked or
+bundled into MapGyver; local validation tool versions are retained as evidence.

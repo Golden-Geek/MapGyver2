@@ -169,6 +169,33 @@
   ac2e86a transactions, 0fcfaa0 registry, cd6c273 clean-source evidence and this
   hosted evidence record. Local ten-contract Debug/Release evidence stays tied
   to exact code SHA 0fcfaa0, independent of later documentation commits.
+- Queued work was pushed through 1345f17671599310dd123fd0952bfa0083f0b151;
+  CI 38814598276 is confirmed live. Working tree started clean on continuation.
+  Previous goal turn was progress (three tested implementation commits).
+- Current M02.C03/C04 wire/round-trip slice: restore logical InstancePool graphs
+  with recomputed/verified owner counts, stable-scope child sharing, typed ports,
+  transport/cycle/capacity/orphan validation; allow validated restored ProjectState
+  to enter ProjectController. Debug 10/10 passed; Release running. No native
+  process, SDK or decoder state is restored. Next: strict bounded JSON parser,
+  codecs sharing field registration with generated schemas, exact integer/rational
+  transport representation, command/registry/project round-trip tests. SQLite
+  durability and native resume remain M12/runtime work.
+- Wire slice implemented: same field registration encodes/decodes/generates
+  control-model-v1 schema; project, all commands/parameter types and registry API
+  descriptors export through it. Strict byte/event/depth parser rejects duplicate
+  keys and invalid encoding; uint64/int64 decimal strings preserve exact values.
+  Restored logical graphs validate scopes/counts/cycles/typed ports/orphans before
+  root+stage acceptance. Tests pass 1/3/37 surfaces and 2,048-deep ownership.
+  Debug/Release 11/11 passed; local jsonschema 4.26.0 independently validated
+  schema and four exported document classes. Owner counts changed to fixed uint64
+  to keep the wire format portable across pointer widths; final Debug/Release
+  reruns pass all eleven contracts after that change.
+  Next: commit, clean-source evidence and push after prior CI.
+  M12 still owns SQLite persistence/checkpoint filtering/durable recovery; M03
+  owns reliable envelope/service/subscriptions/OSCQuery/TypeScript exports.
+- Prior CI 38814598276 is now fully green at 1345f17: Windows Debug/Release,
+  Linux/macOS, plan and quality-gate; all ten pre-wire contracts. New wire and
+  restoration code has local eleven-contract results, not hosted results yet.
 
 ## Build/hardware commands
 

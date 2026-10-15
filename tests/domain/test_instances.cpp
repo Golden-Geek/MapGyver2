@@ -163,6 +163,8 @@ void deep_instantiation_and_retirement() {
     const auto before = pool.instances();
     check(pool.reconcile_definitions(pool.definitions()).empty() && pool.instances() == before,
           "Deep iterative reconciliation replaced unchanged source scopes");
+    check(InstancePool::restore(pool.definitions(),pool.instances(),pool.placements()).instances() == before,
+          "Deep iterative graph restoration changed scoped ownership");
     const auto retired = pool.remove_placement(root.id);
     check(retired.size() == depth && pool.instances().empty() && pool.ownership_bindings() == 0,
           "Deep iterative retirement failed or leaked source ownership");
@@ -258,12 +260,46 @@ void reconciliation_retirement_capacity_and_allocator() {
     check(first.id != next.id && first.source.instance != next.source.instance,
           "Restoring a snapshot rewound the allocator and reused issued identities");
 }
+void restored_graph_validation() {
+    std::size_t sequence = 0;
+    InstancePool pool{DefinitionSnapshot{fixture()},{},generator(sequence)};
+    const auto first = pool.place({id("root-asset"),id("program")});
+    const auto second = pool.place({id("root-asset"),id("program")});
+    const auto media = pool.instance(first.source.instance).layers.at(id("media-layer")).instance;
+    static_cast<void>(pool.bind_shared_input(first.source.instance,id("content"),{media,id("picture")}));
+    const auto shared = pool.place_shared({media,id("sound")});
+    pool.set_transport(media,{{9007199254740993LL,{1001,30000}},{-1,2},true,true});
+    auto restored = InstancePool::restore(pool.definitions(),pool.instances(),pool.placements(),{},generator(sequence));
+    check(restored.instances() == pool.instances() && restored.placements() == pool.placements() &&
+          restored.ownership_bindings() == pool.ownership_bindings(),"Logical graph restore changed identity, sharing or exact intent");
+    check(restored.remove_placement(shared.id).empty(),"Restored shared descendant retired before other owners released it");
+    const auto reject = [&](ErrorCode code, const std::function<void(std::map<Id,SourceInstance>&)>& mutate) {
+        auto nodes = pool.instances(); mutate(nodes);
+        rejects(code,[&]{static_cast<void>(InstancePool::restore(pool.definitions(),nodes,pool.placements()));});
+    };
+    reject(ErrorCode::invalid_definition,[&](auto& nodes){++nodes.at(media).owner_references;});
+    reject(ErrorCode::invalid_definition,[&](auto& nodes){
+        nodes.at(second.source.instance).layers.at(id("media-layer")).instance = media;
+    });
+    reject(ErrorCode::missing_reference,[&](auto& nodes){nodes.at(first.source.instance).layers.erase(id("media-layer"));});
+    reject(ErrorCode::type_mismatch,[&](auto& nodes){nodes.at(first.source.instance).inputs.at(id("content")).port = id("sound");});
+    reject(ErrorCode::dependency_cycle,[&](auto& nodes){nodes.at(first.source.instance).inputs.at(id("content")) = first.source;});
+    reject(ErrorCode::invalid_transport,[&](auto& nodes){nodes.at(media).transport.rate.denominator = 0;});
+    reject(ErrorCode::invalid_definition,[&](auto& nodes){nodes.emplace(id("orphan"),SourceInstance{id("orphan"),id("media"),{},false,0,{},{}});});
+    auto preloaded = pool.instances();
+    preloaded.emplace(id("preloaded"),SourceInstance{id("preloaded"),id("media"),{},true,0,{},{}});
+    check(InstancePool::restore(pool.definitions(),preloaded,pool.placements()).instance(id("preloaded")).keep_alive,
+          "Restoration discarded explicit preloaded state");
+    rejects(ErrorCode::capacity_exceeded,[&]{static_cast<void>(InstancePool::restore(pool.definitions(),pool.instances(),pool.placements(),{1,64,64}));});
+    rejects(ErrorCode::capacity_exceeded,[&]{static_cast<void>(InstancePool::restore(pool.definitions(),pool.instances(),pool.placements(),{64,64,1}));});
+}
 }
 int main() {
     try {
         independent_and_shared_transport(); nested_scopes(); input_binding_cycles_and_rollback();
         lifecycle_capacity_and_invalid_intent(); deep_instantiation_and_retirement();
         definition_reconciliation(); reconciliation_retirement_capacity_and_allocator();
+        restored_graph_validation();
         std::cout << "Passed portable source-instance ownership contracts\n"; return 0;
     } catch (const std::exception& error) {
         std::cerr << "Source-instance contract failed: " << error.what() << '\n'; return 1;

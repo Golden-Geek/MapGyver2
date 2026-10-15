@@ -19,10 +19,11 @@ template<class Map> const auto& find(const Map& values, const Id& id) {
     return found->second;
 }
 }
-ProjectController::ProjectController(DefaultProject project, ProjectLimits limits) : limits_(limits) {
+ProjectController::ProjectController(DefaultProject project, ProjectLimits limits)
+    : ProjectController(ProjectState{std::move(project.instances),std::move(project.stage),std::move(project.root_placement)},limits) {}
+ProjectController::ProjectController(ProjectState project, ProjectLimits limits) : limits_(limits) {
     require(limits_.history_entries > 0,ControlErrorCode::capacity_exceeded,"Undo history requires at least one entry");
-    auto state = std::make_shared<const ProjectState>(ProjectState{
-        std::move(project.instances),std::move(project.stage),std::move(project.root_placement)});
+    auto state = std::make_shared<const ProjectState>(std::move(project));
     static_cast<void>(validate(*state)); state_ = std::move(state);
 }
 ProjectController::Cost ProjectController::validate(const ProjectState& state) const {
