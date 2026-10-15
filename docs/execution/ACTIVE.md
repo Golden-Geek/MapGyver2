@@ -6,7 +6,7 @@
   tested local commits pushed directly to main. No release/policy changes.
 - M00 complete at 93be949919b6aedeccda365087f7b6b1781ce27f, green CI 38771335741;
   annotated milestone/m00 points there. M01 qualification and independent M02
-  portable implementation are in progress; M03-M19 remain planned.
+  portable/M03 control implementation are in progress; M04-M19 remain planned.
 - Follow backlog IDs/dependencies. Renderer stays provisional; do not qualify
   dependent milestones from missing physical/hardware evidence.
 
@@ -205,6 +205,22 @@
   named-pipe service. M01 remains unqualified, so dependent milestone completion
   is still disallowed. Renderer application/frame and durable save outcomes must
   stay separate from authored acceptance; never fabricate an applied GPU frame.
+- Wire/evidence pushed through 25de3514f73299374162929435713552bafe881e;
+  CI 38817597603 confirmed live; Linux/macOS portable and plan jobs passed,
+  Windows native jobs still running. Previous goal turn was progress.
+- Current independent M03.C01 portable core: strict versioned envelopes,
+  connection-bound service/client/session IDs, authored revision checks, one edit
+  owner with generation-controlled transfer, bounded terminal reply cache with
+  per-session sequence watermark retained beyond reply eviction, reconnect retention and bounded event
+  journal/full-snapshot resync. Native applied/save statuses remain unavailable.
+  Final Debug/Release 12/12 passed after fixing boundary revision_conflict
+  classification, including byte-cache eviction/remote batch rollback tests.
+  Next: final tests, commit, clean/hosted evidence; then real Windows named-pipe
+  adapter/engine CLI with bounded framing, IO deadlines, disconnect/reconnect and
+  actual separate-process integration tests. C01/M03 remain incomplete until then.
+- Prior wire CI 38817597603 is fully green at 25de351: all Windows Debug/Release,
+  Linux/macOS, plan and quality-gate jobs, eleven contracts. New M03 core has
+  local twelve-contract evidence only until its own source CI completes.
 
 ## Build/hardware commands
 

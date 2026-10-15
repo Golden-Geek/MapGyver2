@@ -67,6 +67,7 @@ target_include_directories(mapgyver_core PUBLIC libs/core/include PRIVATE "${CMA
 target_compile_definitions(mapgyver_core PRIVATE MAPGYVER_BUILD_CONFIGURATION="$<CONFIG>")
 add_subdirectory(libs/domain)
 add_subdirectory(libs/control)
+add_subdirectory(libs/protocol)
 add_executable(mapgyver_engine apps/engine/main.cpp)
 set_target_properties(mapgyver_engine PROPERTIES OUTPUT_NAME mapgyver-engine)
 target_link_libraries(mapgyver_engine PRIVATE mapgyver_core nlohmann_json::nlohmann_json)

@@ -146,7 +146,7 @@
       "id": "M03",
       "title": "Control service and remote contract",
       "track": "windows-v1",
-      "status": "planned",
+      "status": "in_progress",
       "depends_on": [
         "M02"
       ],

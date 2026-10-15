@@ -280,6 +280,8 @@ Command decode_command(const Json& document) {return Codec<CommandDocument>::dec
 Json encode_write(const ParameterWrite& write) {return Codec<WriteDocument>::encode({{},write});}
 ParameterWrite decode_write(const Json& document) {return Codec<WriteDocument>::decode(document).write;}
 Json describe(const ParameterRegistry& registry) {return Codec<RegistryDocument>::encode({{},registry.revision(),registry.inventory(),registry.actions()});}
+std::uint64_t read_unsigned(const Json& value) {return Codec<std::uint64_t>::decode(value);}
+MediaTime read_media_time(const Json& value) {return Codec<MediaTime>::decode(value);}
 Json schema() {
     SchemaContext context;
     Json roots = Json::array({Codec<ProjectDocument>::shape(context),Codec<CommandDocument>::shape(context),Codec<WriteDocument>::shape(context),Codec<RegistryDocument>::shape(context)});

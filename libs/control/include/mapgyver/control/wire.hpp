@@ -29,4 +29,6 @@ struct Limits {std::size_t bytes = 16777216, events = 1048576, depth = 64;};
 // Generated from the same field registration used by the codecs. Structural
 // schema validity does not replace domain graph/geometry/capacity validation.
 [[nodiscard]] Json schema();
+[[nodiscard]] std::uint64_t read_unsigned(const Json& value);
+[[nodiscard]] MediaTime read_media_time(const Json& value);
 } // namespace mapgyver::control::wire
