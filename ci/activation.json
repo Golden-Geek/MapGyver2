@@ -1,0 +1,45 @@
+{
+  "templates": [
+    {
+      "source": "ci/templates/ci.yml.in",
+      "destination": ".github/workflows/ci.yml",
+      "activate_at": "M00",
+      "requires": [
+        "tools/ci/bootstrap.py",
+        "CMakePresets.json",
+        "CMakeLists.txt"
+      ]
+    },
+    {
+      "source": "ci/templates/hardware.yml.in",
+      "destination": ".github/workflows/hardware.yml",
+      "activate_at": "M01",
+      "requires": [
+        "tools/qualification/run_lab.py",
+        "protected projection-hardware environment",
+        "isolated compatible lab runner"
+      ]
+    },
+    {
+      "source": "ci/templates/web.yml.in",
+      "destination": ".github/workflows/web.yml",
+      "activate_at": "M03",
+      "requires": [
+        "ui/.node-version",
+        "ui/package-lock.json",
+        "ui/package.json",
+        "real UI test and build scripts"
+      ]
+    },
+    {
+      "source": "ci/templates/release.yml.in",
+      "destination": ".github/workflows/release.yml",
+      "activate_at": "M13",
+      "requires": [
+        "tools/release/build_candidate.py",
+        "exact-revision qualification evidence",
+        "protected release-candidate environment"
+      ]
+    }
+  ]
+}

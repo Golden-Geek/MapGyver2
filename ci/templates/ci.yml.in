@@ -1,0 +1,107 @@
+# Activate in M00 only after bootstrap.py and the named CMake presets/targets exist.
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: python3 tools/validate_plan.py
+  windows-native:
+    name: windows-native (${{ matrix.configuration }})
+    runs-on: windows-2025
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Bootstrap pinned native dependencies
+        run: python tools/ci/bootstrap.py --triplet x64-windows
+      - name: Configure native build
+        run: cmake --preset windows-ci
+      - name: Build
+        run: cmake --build out/build/windows-ci --config ${{ matrix.configuration }} --parallel 2
+      - name: Test actual non-hardware contracts
+        run: ctest --test-dir out/build/windows-ci -C ${{ matrix.configuration }} --output-on-failure --no-tests=error -LE hardware --output-junit test-results.xml
+      - name: Retain test and configure diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-${{ matrix.configuration }}-${{ github.sha }}
+          path: |
+            test-results.xml
+            out/build/windows-ci/Testing/
+            out/build/windows-ci/CMakeFiles/CMakeConfigureLog.yaml
+          if-no-files-found: warn
+          retention-days: 7
+  portable-core:
+    name: portable-core (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            triplet: x64-linux
+          - os: macos-15
+            triplet: arm64-osx
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Bootstrap portable dependency subset
+        run: python3 tools/ci/bootstrap.py --triplet ${{ matrix.triplet }} --core-only
+      - name: Configure portable core
+        run: cmake --preset portable-ci -DPM_BUILD_PLATFORM=OFF -DPM_BUILD_MEDIA=OFF -DPM_BUILD_UI=OFF -DPM_BUILD_HARDWARE_TESTS=OFF
+      - name: Build
+        run: cmake --build out/build/portable-ci --parallel 2
+      - name: Test portable contracts
+        run: ctest --test-dir out/build/portable-ci --output-on-failure --no-tests=error --output-junit portable-results.xml
+      - name: Retain portable diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: portable-${{ matrix.os }}-${{ github.sha }}
+          path: |
+            portable-results.xml
+            out/build/portable-ci/Testing/
+          if-no-files-found: warn
+          retention-days: 7
+  quality-gate:
+    if: always()
+    needs: [plan, windows-native, portable-core]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      PLAN_RESULT: ${{ needs.plan.result }}
+      WINDOWS_RESULT: ${{ needs['windows-native'].result }}
+      PORTABLE_RESULT: ${{ needs['portable-core'].result }}
+    steps:
+      - name: Fail closed on missing or failed prerequisites
+        run: |
+          python3 - <<'CHECK'
+          import os, sys
+          names = ('PLAN_RESULT', 'WINDOWS_RESULT', 'PORTABLE_RESULT')
+          bad = {name: os.environ.get(name) for name in names if os.environ.get(name) != 'success'}
+          if bad:
+              print('Required checks did not succeed:', bad)
+              sys.exit(1)
+          print('Every required CI prerequisite succeeded.')
+          CHECK

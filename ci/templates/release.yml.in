@@ -1,0 +1,26 @@
+# Activate in M13 after packaging and source-revision qualification checks exist.
+# Builds a candidate artifact; does not publish releases, create tags or push commits.
+name: Windows release candidate
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  candidate:
+    if: github.ref == 'refs/heads/main'
+    environment: release-candidate
+    runs-on: windows-2025
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build only an exactly qualified candidate
+        run: python tools/release/build_candidate.py --configuration Release --output out/candidate --require-qualified-sha
+      - name: Upload candidate package and source materials
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-candidate-${{ github.sha }}
+          path: out/candidate/
+          if-no-files-found: error
+          retention-days: 30

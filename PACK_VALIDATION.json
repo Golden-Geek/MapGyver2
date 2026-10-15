@@ -1,0 +1,33 @@
+{
+  "result": "passed",
+  "scope": "Planning files, local helper behavior and YAML structure only",
+  "milestones": 20,
+  "commit_slices": 80,
+  "requirements": 16,
+  "acceptance_scenarios": 34,
+  "workflow_files_parsed": [
+    ".github/workflows/plan.yml",
+    "ci/templates/release.yml.in",
+    "ci/templates/hardware.yml.in",
+    "ci/templates/ci.yml.in",
+    "ci/templates/web.yml.in"
+  ],
+  "negative_cases_rejected": [
+    "unknown prerequisite",
+    "dependency cycle",
+    "duplicate milestone",
+    "invalid acceptance",
+    "duplicate commit",
+    "false completion"
+  ],
+  "milestone_context_cli_cases": 5,
+  "quality_gate_success_and_failure_paths": true,
+  "not_executed": [
+    "Application compilation",
+    "GitHub Actions runs",
+    "Actionlint expression linting",
+    "Windows or GPU execution",
+    "Application acceptance scenarios",
+    "Remote repository commits or tags"
+  ]
+}

@@ -1,0 +1,1333 @@
+{
+  "plan_version": 1,
+  "created": "2026-10-15",
+  "primary_platform": "windows-x64",
+  "project_name": "Projection Mapping Engine (working title)",
+  "license_intent": "GPL-3.0-or-later",
+  "implementation_status": "not_started",
+  "milestones": [
+    {
+      "id": "M00",
+      "title": "Repository and CI foundation",
+      "track": "windows-v1",
+      "status": "planned",
+      "depends_on": [],
+      "goal": "Make a clean checkout build and diagnose itself on Windows x64; establish portable core builds and honest completion evidence.",
+      "owned_paths": [
+        "CMakeLists.txt",
+        "CMakePresets.json",
+        "vcpkg.json",
+        "vcpkg-configuration.json",
+        "apps/engine",
+        "libs/core",
+        "tools/ci",
+        ".github/workflows",
+        "docs/progress"
+      ],
+      "acceptance": [
+        "ACC-030",
+        "ACC-031",
+        "ACC-032"
+      ],
+      "commits": [
+        {
+          "id": "M00.C01",
+          "subject": "build(m00): establish pinned C++20 and dependency manifests",
+          "outcome": "Add MSVC x64 build, portable C++ core target, explicit feature options, dependency revisions and SPDX inventory; no floating dependencies or global -march=native."
+        },
+        {
+          "id": "M00.C02",
+          "subject": "feat(m00): add diagnostic CLI and portable test entry points",
+          "outcome": "Implement --version and --diagnose --json --no-gpu using actual build/platform data; establish CTest with a meaningful CLI/schema smoke contract and nonzero failure exits."
+        },
+        {
+          "id": "M00.C03",
+          "subject": "ci(m00): gate Windows builds and portable core checks",
+          "outcome": "Activate adapted CI templates; Debug/Release Windows build and CTest, Linux/macOS portable core smoke, plan validation, artifact logs and one stable quality-gate."
+        },
+        {
+          "id": "M00.C04",
+          "subject": "docs(m00): record reproducible bootstrap and milestone evidence",
+          "outcome": "Verify commands from a fresh checkout, record runner/toolchain versions and real CI URLs, create progress evidence and completion checkpoint after all required checks pass."
+        }
+      ]
+    },
+    {
+      "id": "M01",
+      "title": "Graphics and sharing feasibility gate",
+      "track": "windows-v1",
+      "status": "planned",
+      "depends_on": [
+        "M00"
+      ],
+      "goal": "Prove the graphics abstraction, native frame sharing, presentation, and resource ownership before product architecture depends on them.",
+      "owned_paths": [
+        "experiments/graphics",
+        "libs/render",
+        "adapters/windows",
+        "tests/hardware",
+        "docs/adr"
+      ],
+      "acceptance": [
+        "ACC-009",
+        "ACC-010",
+        "ACC-026"
+      ],
+      "commits": [
+        {
+          "id": "M01.C01",
+          "subject": "feat(m01): render native D3D11 textures through the candidate backend",
+          "outcome": "Exercise bgfx D3D11 with a minimal internal render interface; verify owned and imported textures, formats, fences and resource lifetime without UI dependencies."
+        },
+        {
+          "id": "M01.C02",
+          "subject": "feat(m01): prove Spout receive and send interoperability",
+          "outcome": "Use real external sender/receiver processes, repeated resolution changes, producer restarts and stalled frames; count CPU readbacks and GPU copies separately."
+        },
+        {
+          "id": "M01.C03",
+          "subject": "test(m01): characterize multi-output and decoder texture paths",
+          "outcome": "Run physical two-output tests plus D3D11 hardware decode/import spike, paired-output synchronization and failure injection; produce machine-readable frame and memory metrics."
+        },
+        {
+          "id": "M01.C04",
+          "subject": "docs(m01): select the rendering backend from measured evidence",
+          "outcome": "Accept bgfx only if all critical interop/recovery gates pass without a private long-lived fork; otherwise record a bounded native-D3D11 implementation behind the same interface. Fix reference machines and initial performance thresholds."
+        }
+      ]
+    },
+    {
+      "id": "M02",
+      "title": "Domain model and parameter registry",
+      "track": "windows-v1",
+      "status": "planned",
+      "depends_on": [
+        "M01"
+      ],
+      "goal": "Define assets, instances, layers, compositions, cues, arbitrary surfaces and routing without GPU or UI object ownership.",
+      "owned_paths": [
+        "libs/domain",
+        "libs/control",
+        "schemas",
+        "tests/domain",
+        "docs/adr"
+      ],
+      "acceptance": [
+        "ACC-002",
+        "ACC-006",
+        "ACC-007",
+        "ACC-011",
+        "ACC-028"
+      ],
+      "commits": [
+        {
+          "id": "M02.C01",
+          "subject": "feat(m02): model stable assets instances and multi-output compositions",
+          "outcome": "Use stable IDs and typed ports; independent placements get independent transports by default; explicit sharing reuses one live instance; reject dependency cycles."
+        },
+        {
+          "id": "M02.C02",
+          "subject": "feat(m02): model surface groups layouts and projection patches",
+          "outcome": "Support arbitrary surface counts, optional adjacency/seams, independent or continuous content layout and many-to-many surface/projector patches; no hard-coded wall/floor concepts."
+        },
+        {
+          "id": "M02.C03",
+          "subject": "feat(m02): add typed parameter registry and command transactions",
+          "outcome": "One registration path supplies validation, access modes, units, ranges, persistence metadata and API descriptors; commands cover structural edits and parameter changes with undo/redo."
+        },
+        {
+          "id": "M02.C04",
+          "subject": "test(m02): prove model invariants and capability-preserving round trips",
+          "outcome": "Verify stable addressing across rename/reorder, reference scope, source instance independence, transactional rollback, unsupported-adapter placeholders and cyclic-graph rejection."
+        }
+      ]
+    },
+    {
+      "id": "M03",
+      "title": "Control service and remote contract",
+      "track": "windows-v1",
+      "status": "planned",
+      "depends_on": [
+        "M02"
+      ],
+      "goal": "Make the engine controllable and inspectable before building the full editor, including reliable structural commands and OSCQuery.",
+      "owned_paths": [
+        "apps/engine",
+        "libs/control",
+        "libs/protocol",
+        "adapters/osc",
+        "ui",
+        "schemas",
+        "tests/protocol"
+      ],
+      "acceptance": [
+        "ACC-008",
+        "ACC-011",
+        "ACC-012",
+        "ACC-020",
+        "ACC-034"
+      ],
+      "commits": [
+        {
+          "id": "M03.C01",
+          "subject": "feat(m03): expose versioned commands snapshots and subscriptions",
+          "outcome": "Implement authoritative control state, command IDs, revisions, accepted/applied/error responses, structural transactions and resumable full-snapshot recovery; use local named-pipe IPC plus documented messages."
+        },
+        {
+          "id": "M03.C02",
+          "subject": "feat(m03): expose complete OSC and OSCQuery trees",
+          "outcome": "Adapt libossia or a justified replacement; serve HOST_INFO and advertised extensions, exact-path LISTEN and structure updates; normalize network writes through the command validator."
+        },
+        {
+          "id": "M03.C03",
+          "subject": "feat(m03): add local web server and Svelte editor shell",
+          "outcome": "Serve packaged static UI, run Vite separately in development, generate TypeScript contract types, show real engine state and reconnect diagnostics; add a minimal encoded preview endpoint."
+        },
+        {
+          "id": "M03.C04",
+          "subject": "test(m03): verify control parity reconnection and bounded traffic",
+          "outcome": "Exercise create/edit/delete/save commands through remote APIs and OSC methods, duplicate command deduplication, conflicting revisions, subscriptions after reconnect, slow-client backpressure and malformed messages."
+        }
+      ]
+    },
+    {
+      "id": "M04",
+      "title": "Compositing and first projector output",
+      "track": "windows-v1",
+      "status": "planned",
+      "depends_on": [
+        "M03"
+      ],
+      "goal": "Deliver the first useful mapping path: a default composition, layers, one or several named outputs, simple surfaces and real output windows.",
+      "owned_paths": [
+        "libs/render",
+        "libs/runtime",
+        "adapters/windows",
+        "tests/render",
+        "tests/hardware"
+      ],
+      "acceptance": [
+        "ACC-001",
+        "ACC-003",
+        "ACC-005",
+        "ACC-010",
+        "ACC-017",
+        "ACC-021"
+      ],
+      "commits": [
+        {
+          "id": "M04.C01",
+          "subject": "feat(m04): compile composition graphs into immutable render snapshots",
+          "outcome": "Render images/test patterns and nested compositions; cache reusable work, cull inactive branches and allocate transient textures from bounded pools."
+        },
+        {
+          "id": "M04.C02",
+          "subject": "feat(m04): present named outputs on persistent logical targets",
+          "outcome": "Separate desired output identity/configuration from detected monitors; create independent swapchains, output enable/blackout/freeze controls and a native output path independent of the browser."
+        },
+        {
+          "id": "M04.C03",
+          "subject": "feat(m04): map surfaces with quad patches masks and color rules",
+          "outcome": "Implement four-corner homography, crop/fit/fill, simple masks, compositing blend modes, consistent premultiplied alpha and defined input/output transfer functions."
+        },
+        {
+          "id": "M04.C04",
+          "subject": "test(m04): verify default mapping multi-output composition and UI loss",
+          "outcome": "Run one-surface golden path, one composition over three surface regions, one surface across two projector patches and several surfaces on one projector; kill/reload UI and compare outputs within defined color tolerances."
+        }
+      ]
+    },
+    {
+      "id": "M05",
+      "title": "Media library and baseline playback",
+      "track": "windows-v1",
+      "status": "planned",
+      "depends_on": [
+        "M04"
+      ],
+      "goal": "Import and organize real content while keeping decoding and filesystem work off deadline-sensitive threads.",
+      "owned_paths": [
+        "libs/media",
+        "libs/assets",
+        "workers/media",
+        "ui/library",
+        "tests/media"
+      ],
+      "acceptance": [
+        "ACC-006",
+        "ACC-007",
+        "ACC-015",
+        "ACC-018"
+      ],
+      "commits": [
+        {
+          "id": "M05.C01",
+          "subject": "feat(m05): import organized assets with background probing",
+          "outcome": "Add folders/tags/search, drag import, thumbnails, metadata, relative paths, incremental hashes, offline placeholders, usage inspection and cancellable background jobs."
+        },
+        {
+          "id": "M05.C02",
+          "subject": "feat(m05): decode baseline video on the shared show clock",
+          "outcome": "Integrate pinned FFmpeg libraries, rational timestamps, video/audio synchronization, bounded decoded-frame queues, loops, play/pause/stop and explicit late-frame policies."
+        },
+        {
+          "id": "M05.C03",
+          "subject": "feat(m05): separate source definitions from playback instances",
+          "outcome": "Create independent clip transports from a shared asset, implement explicit shared instances, manage source/preload reference counts and expose real readiness/capacity state."
+        },
+        {
+          "id": "M05.C04",
+          "subject": "test(m05): verify playback timing import cancellation and relinking",
+          "outcome": "Use generated and legally redistributable CFR/VFR/audio/alpha/missing/corrupt fixtures, loop boundaries, independent playheads, shared-instance semantics and large-file paths."
+        }
+      ]
+    },
+    {
+      "id": "M06",
+      "title": "Composition editor and remote workflow",
+      "track": "windows-v1",
+      "status": "planned",
+      "depends_on": [
+        "M05"
+      ],
+      "goal": "Make common editing actions fast, discoverable and consistent across the local and remote browser.",
+      "owned_paths": [
+        "ui",
+        "libs/protocol",
+        "tests/e2e",
+        "docs/ux"
+      ],
+      "acceptance": [
+        "ACC-001",
+        "ACC-006",
+        "ACC-020",
+        "ACC-034"
+      ],
+      "commits": [
+        {
+          "id": "M06.C01",
+          "subject": "feat(m06): implement composition canvas and natural transform tools",
+          "outcome": "Add accurate selection, multiselect, gizmos, pivot/scale/rotate, snapping, alignment, keyboard nudging, zoom/pan and contextual inspectors with consistent undo."
+        },
+        {
+          "id": "M06.C02",
+          "subject": "feat(m06): make nested ownership and asset reuse visible",
+          "outcome": "Add hierarchy/breadcrumbs, reveal-in-library, find-usages, make-independent and promote-to-reusable actions; inline instances remain reachable from the hierarchy."
+        },
+        {
+          "id": "M06.C03",
+          "subject": "feat(m06): complete remote preview and media import workflow",
+          "outcome": "Use engine-authoritative previews with timestamps/revisions and client-rendered overlays; support resumable uploads, engine-side file browsing, large imports and single-writer edit ownership."
+        },
+        {
+          "id": "M06.C04",
+          "subject": "test(m06): qualify editing interactions and live development updates",
+          "outcome": "Playwright covers drag/drop, handles, shortcuts, focus/text-input rules, undo, reconnect and upload interruption; record a short interaction review on the real composition canvas and verify Vite reload does not stop output."
+        }
+      ]
+    },
+    {
+      "id": "M07",
+      "title": "Cues routing and transition bank",
+      "track": "windows-v1",
+      "status": "planned",
+      "depends_on": [
+        "M06"
+      ],
+      "goal": "Make launching simple or multi-output content one operation, with predictable preparation, timing and transitions.",
+      "owned_paths": [
+        "libs/show",
+        "libs/runtime",
+        "ui/cues",
+        "assets/transitions",
+        "tests/show"
+      ],
+      "acceptance": [
+        "ACC-002",
+        "ACC-003",
+        "ACC-009",
+        "ACC-019",
+        "ACC-033"
+      ],
+      "commits": [
+        {
+          "id": "M07.C01",
+          "subject": "feat(m07): add cue assignments and reusable routing presets",
+          "outcome": "Support Replace/Keep/Clear per destination, drag-to-create cues, semantic port matching with persisted overrides, independent surface actions and arbitrary groups."
+        },
+        {
+          "id": "M07.C02",
+          "subject": "feat(m07): stage prepare and atomically apply ready cues",
+          "outcome": "Prepare all required resources before GO, schedule one show-clock boundary, report accepted versus applied frame, enforce timeout/fallback policy and define re-trigger/interruption behavior."
+        },
+        {
+          "id": "M07.C03",
+          "subject": "feat(m07): add a curated editable shader transition bank",
+          "outcome": "Start with cut, dissolve, dip, wipe, luma and selected adapted shaders; version manifests, defaults, color/alpha behavior, license/attribution and deterministic seeds; compile off the render thread."
+        },
+        {
+          "id": "M07.C04",
+          "subject": "test(m07): verify grouped transitions partial changes and instance conflicts",
+          "outcome": "Validate one/three/curved surface sets, untouched destinations, synchronized clips, transition peak memory, parameter-state crossfades requiring duplicate app instances or frozen outgoing frames, and repeated GO deduplication."
+        }
+      ]
+    },
+    {
+      "id": "M08",
+      "title": "Managed apps and coherent multi-texture frames",
+      "track": "windows-v1",
+      "status": "planned",
+      "depends_on": [
+        "M07"
+      ],
+      "goal": "Deliver an explicit client protocol for discovery, process ownership, parameter control and named frame sets.",
+      "owned_paths": [
+        "libs/clients",
+        "adapters/spout",
+        "protocol/client",
+        "examples/client",
+        "ui/clients",
+        "tests/clients"
+      ],
+      "acceptance": [
+        "ACC-008",
+        "ACC-009",
+        "ACC-013",
+        "ACC-014"
+      ],
+      "commits": [
+        {
+          "id": "M08.C01",
+          "subject": "feat(m08): publish versioned app and output manifests",
+          "outcome": "Define app/package/instance/generation IDs, semantic output roles, dimensions, color/alpha, transport endpoints and supported lifecycle/control capabilities; ship a small reference client."
+        },
+        {
+          "id": "M08.C02",
+          "subject": "feat(m08): supervise launched and attached application instances",
+          "outcome": "Track real process handles, working directory and controlled environment, readiness beyond OSC connection, ownership, reference counts, graceful shutdown, crash-loop limits and restart generations."
+        },
+        {
+          "id": "M08.C03",
+          "subject": "feat(m08): publish and consume synchronized named frame sets",
+          "outcome": "Specify resource lifetime, publication order/fences, common frame identity and generation changes; support complete-set hold versus latest-per-port modes without claiming atomic capture from unrelated legacy senders."
+        },
+        {
+          "id": "M08.C04",
+          "subject": "test(m08): exercise discovery readiness source failure and routing",
+          "outcome": "Use one-output and three-output reference apps, missing/stalled ports, resolution changes, multiple app instances, old/new generation races, parameter mirroring without echo loops and reconnect after process death."
+        }
+      ]
+    },
+    {
+      "id": "M09",
+      "title": "Optimized codecs and accurate scrubbing",
+      "track": "windows-v1",
+      "status": "planned",
+      "depends_on": [
+        "M07",
+        "M08"
+      ],
+      "goal": "Meet the defined playback/scrubbing profiles and report the real decode path for every source.",
+      "owned_paths": [
+        "libs/media",
+        "adapters/decoders",
+        "workers/media",
+        "ui/media",
+        "tests/media",
+        "benchmarks"
+      ],
+      "acceptance": [
+        "ACC-015",
+        "ACC-016",
+        "ACC-017",
+        "ACC-018",
+        "ACC-026"
+      ],
+      "commits": [
+        {
+          "id": "M09.C01",
+          "subject": "perf(m09): implement hardware decode and HAP texture paths",
+          "outcome": "Add D3D11 hardware decode with supported format/profile queries, GPU color conversion and explicit fallback; use HAP reference decoding into compressed GPU textures with correct Q/alpha variants."
+        },
+        {
+          "id": "M09.C02",
+          "subject": "feat(m09): qualify ProRes DXV and professional format compatibility",
+          "outcome": "Exercise ProRes 422/4444, DXV variants, DNxHD/HR, CineForm, MJPEG, AV1 and common still/sequence formats; record import/playback/alpha/bit-depth/accelerated/scrub distinctions per fixture."
+        },
+        {
+          "id": "M09.C03",
+          "subject": "perf(m09): add indexed cancellable scrubbing and show proxies",
+          "outcome": "Use keyframe/PTS indices, generation-tagged requests, nearby/reverse caches and proxy-to-original mapping; settle accurately after dragging without stale seeks replacing newer frames."
+        },
+        {
+          "id": "M09.C04",
+          "subject": "test(m09): qualify codec workloads and disclose unsupported variants",
+          "outcome": "Run complete media corpus, exact settled-frame tests, rapid seek/reverse/loop cases and warm/cold throughput; optimize or document a bounded transcode path for DXV performance gaps, with unmet requirements still open."
+        }
+      ]
+    },
+    {
+      "id": "M10",
+      "title": "Network input and output integrations",
+      "track": "windows-v1",
+      "status": "planned",
+      "depends_on": [
+        "M08",
+        "M09"
+      ],
+      "goal": "Complete Spout, OMT and NDI send/receive paths with isolated queues, measured latency and explicit licensing decisions.",
+      "owned_paths": [
+        "adapters/spout",
+        "adapters/omt",
+        "adapters/ndi",
+        "ui/io",
+        "tests/integrations",
+        "docs/licenses"
+      ],
+      "acceptance": [
+        "ACC-008",
+        "ACC-010",
+        "ACC-015",
+        "ACC-028",
+        "ACC-030"
+      ],
+      "commits": [
+        {
+          "id": "M10.C01",
+          "subject": "feat(m10): harden bidirectional Spout as a production adapter",
+          "outcome": "Finish sender/receiver selection, duplicate names, sender loss/reappearance, resolution/format changes, per-GPU affinity and persistent logical endpoint identity."
+        },
+        {
+          "id": "M10.C02",
+          "subject": "feat(m10): integrate OMT discovery receiving and output",
+          "outcome": "Build pinned official dependencies, negotiate frame/audio/color formats and timestamps, measure encode/decode cost and provide bounded queue/drop/recovery policies."
+        },
+        {
+          "id": "M10.C03",
+          "subject": "feat(m10): add the approved NDI integration and distribution path",
+          "outcome": "Resolve current SDK terms and application exception/vendor-permission requirements before distributing combined binaries; implement supported receive/send modes and package only the approved configuration. Keep this commit blocked if licensing is unresolved."
+        },
+        {
+          "id": "M10.C04",
+          "subject": "test(m10): qualify transport round trips and slow consumers",
+          "outcome": "Test each direction using independent peers, absent runtimes, bandwidth pressure, stalled receivers, rediscovery and alpha/color correctness; publish a tested capability matrix and dependency notices."
+        }
+      ]
+    },
+    {
+      "id": "M11",
+      "title": "Curved surfaces and advanced manual mapping",
+      "track": "windows-v1",
+      "status": "planned",
+      "depends_on": [
+        "M06",
+        "M07"
+      ],
+      "goal": "Extend simple quad mapping to arbitrary connected geometry while keeping content layout separate from projector calibration.",
+      "owned_paths": [
+        "libs/mapping",
+        "libs/geometry",
+        "ui/stage",
+        "tests/mapping"
+      ],
+      "acceptance": [
+        "ACC-002",
+        "ACC-003",
+        "ACC-004",
+        "ACC-005",
+        "ACC-017"
+      ],
+      "commits": [
+        {
+          "id": "M11.C01",
+          "subject": "feat(m11): add mesh and Bezier surface editing",
+          "outcome": "Implement versioned tessellated geometry and UV charts with deterministic triangulation, selectable control points, constraints, numeric editing and reversibly refined detail."
+        },
+        {
+          "id": "M11.C02",
+          "subject": "feat(m11): add surface adjacency seams and continuous layouts",
+          "outcome": "Represent shared-edge correspondence and optional canvas continuity; allow local content to coexist with spanning content and reject invalid geometry with actionable diagnostics."
+        },
+        {
+          "id": "M11.C03",
+          "subject": "feat(m11): add projector blend masks and color correction",
+          "outcome": "Introduce overlap masks, blend/gamma profiles, per-projector color/LUT controls, test patterns and non-destructive calibration profiles independent of cues."
+        },
+        {
+          "id": "M11.C04",
+          "subject": "test(m11): verify curved multi-projector mapping and seam behavior",
+          "outcome": "Compare reference patterns on a curved mesh, three connected walls, a UV seam and overlapping projector patches; verify save/reopen and content replacement retain calibration exactly."
+        }
+      ]
+    },
+    {
+      "id": "M12",
+      "title": "Recovery persistence and long-run stability",
+      "track": "windows-v1",
+      "status": "planned",
+      "depends_on": [
+        "M09",
+        "M10",
+        "M11"
+      ],
+      "goal": "Qualify failure behavior already introduced in earlier milestones and make recovery observable and repeatable.",
+      "owned_paths": [
+        "libs/runtime",
+        "libs/persistence",
+        "adapters/windows",
+        "apps/supervisor",
+        "tests/faults",
+        "tools/qualification"
+      ],
+      "acceptance": [
+        "ACC-014",
+        "ACC-021",
+        "ACC-022",
+        "ACC-023",
+        "ACC-024",
+        "ACC-025",
+        "ACC-027"
+      ],
+      "commits": [
+        {
+          "id": "M12.C01",
+          "subject": "feat(m12): recover logical outputs through display topology changes",
+          "outcome": "Match OS device paths/EDID/connector/GPU signals with confidence, debounce events, rebuild affected sinks, retain absent targets and never silently bind an ambiguous output to an operator display."
+        },
+        {
+          "id": "M12.C02",
+          "subject": "feat(m12): add transactional project persistence and crash recovery",
+          "outcome": "Use SQLite snapshots/journal for authored state, separate transient telemetry, explicit checkpoint/dirty state and atomic save-as/portable export; preserve relative media paths and migrate with backups."
+        },
+        {
+          "id": "M12.C03",
+          "subject": "feat(m12): supervise engine workers and contain failures",
+          "outcome": "Detect heartbeat/deadline failure, recreate render/device resources with bounded attempts, keep UI/control responsive and apply configured fallback/blackout; maintain last applied runtime revision and resumable source state."
+        },
+        {
+          "id": "M12.C04",
+          "subject": "test(m12): qualify power loss hotplug faults and soak behavior",
+          "outcome": "Run interrupted writes, migration failures, killed UI/controller/source/render workers, GPU device loss, 100 topology cycles, decoder corruption and a 72-hour qualified workload with resource/queue budgets."
+        }
+      ]
+    },
+    {
+      "id": "M13",
+      "title": "Windows beta release qualification",
+      "track": "windows-v1",
+      "status": "planned",
+      "depends_on": [
+        "M12"
+      ],
+      "goal": "Ship an installable Windows x64 build whose supported behavior and limitations are backed by reproducible evidence.",
+      "owned_paths": [
+        "packaging/windows",
+        "docs/user",
+        "docs/releases",
+        "tools/qualification",
+        ".github/workflows"
+      ],
+      "acceptance": [
+        "ACC-001",
+        "ACC-015",
+        "ACC-020",
+        "ACC-026",
+        "ACC-027",
+        "ACC-030",
+        "ACC-031"
+      ],
+      "commits": [
+        {
+          "id": "M13.C01",
+          "subject": "build(m13): package standalone Windows binaries and dependencies",
+          "outcome": "Produce versioned ZIP/installable package, default configuration, embedded UI, dependency notices, corresponding-source/build materials and checksums; avoid undocumented runtime prerequisites."
+        },
+        {
+          "id": "M13.C02",
+          "subject": "test(m13): verify clean installation offline operation and upgrade",
+          "outcome": "Test non-developer machine, Unicode/long paths, no network access after installation, firewall/pairing behavior, project upgrade/rollback and runtime absence diagnostics."
+        },
+        {
+          "id": "M13.C03",
+          "subject": "perf(m13): certify reference workloads and resource budgets",
+          "outcome": "Publish exact source revision, hardware/driver/OS/media hashes, frame timings, seek latencies, capacity limits, network tests and recovery/soak results; unresolved mandatory Windows requirements block full beta qualification."
+        },
+        {
+          "id": "M13.C04",
+          "subject": "docs(m13): close Windows beta gates and prepare release artifacts",
+          "outcome": "Complete requirement traceability, operator guide, known limitations and changelog; tag only the final green commit. Build candidate artifacts; publish or push only within the active task authorization."
+        }
+      ]
+    },
+    {
+      "id": "M14",
+      "title": "Native Windows ARM64 port",
+      "track": "ports",
+      "status": "planned",
+      "depends_on": [
+        "M13"
+      ],
+      "goal": "Run the same Windows application natively on ARM64 and qualify adapters independently from x64 emulation.",
+      "owned_paths": [
+        "adapters/windows",
+        "cmake",
+        "packaging/windows",
+        "tests/hardware",
+        ".github/workflows"
+      ],
+      "acceptance": [
+        "ACC-008",
+        "ACC-015",
+        "ACC-028",
+        "ACC-029",
+        "ACC-031"
+      ],
+      "commits": [
+        {
+          "id": "M14.C01",
+          "subject": "build(m14): add native ARM64 dependency and toolchain builds",
+          "outcome": "Use current native Windows ARM runner/toolset, audit SIMD, calling conventions and third-party libraries; do not load x64 DLLs into an ARM64 process."
+        },
+        {
+          "id": "M14.C02",
+          "subject": "feat(m14): qualify native rendering decode and sharing capabilities",
+          "outcome": "Run D3D rendering and decode corpus on real ARM hardware; build/port Spout and OMT dependencies where supported and expose missing capabilities without losing project state."
+        },
+        {
+          "id": "M14.C03",
+          "subject": "test(m14): verify ARM64 playback recovery and package parity",
+          "outcome": "Run editor/control/mapping tests and physical-output/fault suite natively, with architecture identity captured in evidence and x64-emulation results labeled separately."
+        },
+        {
+          "id": "M14.C04",
+          "subject": "docs(m14): publish the tested Windows ARM64 feature matrix",
+          "outcome": "Add ARM64 artifacts, performance profiles and tested differences; keep unsupported adapters explicit and retain unfulfilled product requirements in the backlog."
+        }
+      ]
+    },
+    {
+      "id": "M15",
+      "title": "Linux x64 and PipeWire port",
+      "track": "ports",
+      "status": "planned",
+      "depends_on": [
+        "M13"
+      ],
+      "goal": "Deliver native Linux output and frame sharing using the same project, command and composition contracts.",
+      "owned_paths": [
+        "adapters/linux",
+        "adapters/pipewire",
+        "packaging/linux",
+        "tests/hardware",
+        ".github/workflows"
+      ],
+      "acceptance": [
+        "ACC-008",
+        "ACC-015",
+        "ACC-022",
+        "ACC-028",
+        "ACC-032"
+      ],
+      "commits": [
+        {
+          "id": "M15.C01",
+          "subject": "feat(m15): implement Linux presentation and decoder adapters",
+          "outcome": "Qualify Vulkan/GLES choices, Wayland/X11 installation behavior, GPU affinity and selected hardware-decoder paths; document kiosk/direct DRM/KMS as a distinct deployment mode where implemented."
+        },
+        {
+          "id": "M15.C02",
+          "subject": "feat(m15): integrate PipeWire receiving and publishing",
+          "outcome": "Expose direct app video streams, stable logical identities, format/modifier negotiation, synchronization and DMA-BUF import/export with bounded shared-memory fallback."
+        },
+        {
+          "id": "M15.C03",
+          "subject": "test(m15): qualify Linux topology and session recovery",
+          "outcome": "Test compositor/display changes, source reconnect, missing PipeWire/session services, multi-output placement and remote-only operation on fixed distro/driver profiles."
+        },
+        {
+          "id": "M15.C04",
+          "subject": "build(m15): package and qualify the Linux x64 release",
+          "outcome": "Run project round-trip and core parity suite, approved transport runtimes, clean installation and exact capability/feature matrix; publish source/build and dependency metadata."
+        }
+      ]
+    },
+    {
+      "id": "M16",
+      "title": "macOS ARM64 and Syphon port",
+      "track": "ports",
+      "status": "planned",
+      "depends_on": [
+        "M13"
+      ],
+      "goal": "Deliver a native Metal/Syphon implementation without changing the show model or remote contracts.",
+      "owned_paths": [
+        "adapters/macos",
+        "adapters/syphon",
+        "packaging/macos",
+        "tests/hardware",
+        ".github/workflows"
+      ],
+      "acceptance": [
+        "ACC-008",
+        "ACC-015",
+        "ACC-022",
+        "ACC-028",
+        "ACC-032"
+      ],
+      "commits": [
+        {
+          "id": "M16.C01",
+          "subject": "feat(m16): implement Metal presentation and VideoToolbox paths",
+          "outcome": "Integrate native resource import, color conversions, fullscreen outputs and timestamped decoding through the chosen renderer with explicit ownership and synchronization."
+        },
+        {
+          "id": "M16.C02",
+          "subject": "feat(m16): add bidirectional Syphon and managed-app lifecycle",
+          "outcome": "Expose named outputs through IOSurface/Metal-compatible paths, handle sender discovery/generation changes and implement macOS process/session behavior."
+        },
+        {
+          "id": "M16.C03",
+          "subject": "test(m16): qualify display reconnection media and UI independence",
+          "outcome": "Exercise physical display removal, app failure, multi-output frame sets, media corpus, project interchange, browser loss and native hardware identity."
+        },
+        {
+          "id": "M16.C04",
+          "subject": "build(m16): package and qualify the macOS ARM64 release",
+          "outcome": "Bundle required open dependencies and UI, define signing/notarization deployment procedure as available, run clean-machine tests and publish a capability/performance matrix."
+        }
+      ]
+    },
+    {
+      "id": "M17",
+      "title": "Linux ARM64 and Raspberry Pi profile",
+      "track": "ports",
+      "status": "planned",
+      "depends_on": [
+        "M15"
+      ],
+      "goal": "Run bounded installations and render-node workloads on qualified ARM64 boards with an honest hardware capability profile.",
+      "owned_paths": [
+        "adapters/linux",
+        "cmake",
+        "packaging/linux",
+        "tools/qualification",
+        "tests/hardware"
+      ],
+      "acceptance": [
+        "ACC-008",
+        "ACC-015",
+        "ACC-026",
+        "ACC-028",
+        "ACC-029"
+      ],
+      "commits": [
+        {
+          "id": "M17.C01",
+          "subject": "build(m17): add reproducible Linux ARM64 builds and board profiles",
+          "outcome": "Select named Pi/OS/driver/storage/thermal configurations; compile dependencies natively or cross-build with a pinned sysroot and keep ARM32 armhf as a separate optional target."
+        },
+        {
+          "id": "M17.C02",
+          "subject": "feat(m17): select board-appropriate decode shader and texture paths",
+          "outcome": "Query GPU compressed formats and decode capabilities, validate V4L2/platform paths where available, use precompiled effect variants and allow remote editor operation."
+        },
+        {
+          "id": "M17.C03",
+          "subject": "test(m17): qualify thermal storage network and output budgets",
+          "outcome": "Run sustained playback/seek/mapping/PipeWire/OMT cases on real boards, test throttling and reconnect, measure memory and preview encoding cost and avoid claiming desktop throughput."
+        },
+        {
+          "id": "M17.C04",
+          "subject": "docs(m17): publish ARM64 limits and decide the armhf extension",
+          "outcome": "Document qualified workloads, conversion presets and adapter availability. Add a separately scoped armhf milestone only if needed; official OMT AOT support cannot be assumed on ARM32."
+        }
+      ]
+    },
+    {
+      "id": "M18",
+      "title": "Camera-assisted calibration extension",
+      "track": "future",
+      "status": "planned",
+      "depends_on": [
+        "M13",
+        "M11"
+      ],
+      "goal": "Add automated calibration through the existing calibration-data interface without changing composition or cue semantics.",
+      "owned_paths": [
+        "libs/calibration",
+        "adapters/cameras",
+        "ui/calibration",
+        "tests/calibration"
+      ],
+      "acceptance": [
+        "ACC-004",
+        "ACC-005",
+        "ACC-017"
+      ],
+      "commits": [
+        {
+          "id": "M18.C01",
+          "subject": "feat(m18): define capture sessions and calibration observations",
+          "outcome": "Version camera/projector intrinsics, patterns, observations and confidence; preserve manual calibration and reproducible captures."
+        },
+        {
+          "id": "M18.C02",
+          "subject": "feat(m18): implement a bounded structured-light solver",
+          "outcome": "Start with a documented supported geometry/camera setup, robust correspondence and reprojection error; solver outputs normal versioned patches."
+        },
+        {
+          "id": "M18.C03",
+          "subject": "feat(m18): expose calibration review and refinement tools",
+          "outcome": "Provide operator confidence/error visualization, rejected points and reversible manual refinement; require intentional application of captured results."
+        },
+        {
+          "id": "M18.C04",
+          "subject": "test(m18): qualify calibration accuracy against physical references",
+          "outcome": "Record repeatability, residuals, invalid captures, moved devices and physical seam/color tests before expanding supported setup classes."
+        }
+      ]
+    },
+    {
+      "id": "M19",
+      "title": "Multiple GPUs and distributed render nodes",
+      "track": "future",
+      "status": "planned",
+      "depends_on": [
+        "M13"
+      ],
+      "goal": "Scale execution placement and coordinated presentation while preserving project identity and deterministic show actions.",
+      "owned_paths": [
+        "libs/distributed",
+        "libs/runtime",
+        "apps/node",
+        "adapters/sync",
+        "tests/cluster"
+      ],
+      "acceptance": [
+        "ACC-002",
+        "ACC-009",
+        "ACC-026",
+        "ACC-027",
+        "ACC-028"
+      ],
+      "commits": [
+        {
+          "id": "M19.C01",
+          "subject": "feat(m19): partition render work by GPU and node ownership",
+          "outcome": "Place source instances, compositions and patches explicitly; account for texture/asset movement and avoid hidden cross-GPU readback."
+        },
+        {
+          "id": "M19.C02",
+          "subject": "feat(m19): replicate versioned assets and scheduled show state",
+          "outcome": "Use content-verified local assets, prepare barriers, future show-clock execution, deterministic seeds and generation/revision reconciliation."
+        },
+        {
+          "id": "M19.C03",
+          "subject": "feat(m19): add node health synchronization and controlled failover",
+          "outcome": "Separate clock synchronization from physical scanout/genlock, expose drift/readiness and define backup/failure ownership without promising seamless recovery from all hardware faults."
+        },
+        {
+          "id": "M19.C04",
+          "subject": "test(m19): qualify cluster timing capacity and failure behavior",
+          "outcome": "Run measured multi-node latency/drift tests, network partitions, late preparation, node loss and supported hardware synchronization; publish supported installation profiles."
+        }
+      ]
+    }
+  ],
+  "acceptance_scenarios": [
+    {
+      "id": "ACC-001",
+      "title": "One simple surface",
+      "criterion": "Import an image/video, drop it on the default composition, adjust a quad and play; no manual routing/container setup."
+    },
+    {
+      "id": "ACC-002",
+      "title": "Arbitrary surface sets",
+      "criterion": "Operate one, three and many surfaces through the same unbounded collection model; no special two-output branches."
+    },
+    {
+      "id": "ACC-003",
+      "title": "Continuous and independent content",
+      "criterion": "Span one canvas over connected surfaces, then change one destination while others keep their content and transport."
+    },
+    {
+      "id": "ACC-004",
+      "title": "Curved geometry",
+      "criterion": "Render calibrated content on a curved/mesh surface with a stable UV chart and reversible point edits."
+    },
+    {
+      "id": "ACC-005",
+      "title": "Many-to-many projector patches",
+      "criterion": "One surface spans multiple projectors and one projector covers multiple surfaces without duplicating content ownership."
+    },
+    {
+      "id": "ACC-006",
+      "title": "Library and nested reuse",
+      "criterion": "Organize, search, relink and inspect asset usages; inline/nested content remains reachable and reusable references remain explicit."
+    },
+    {
+      "id": "ACC-007",
+      "title": "Instance ownership",
+      "criterion": "Independent placements have independent playheads; explicitly shared instances reuse one source and stop only when their lifecycle policy allows."
+    },
+    {
+      "id": "ACC-008",
+      "title": "Transport directions",
+      "criterion": "Receive and publish supported local/network transports through equivalent frame/port contracts; absent adapters retain configuration."
+    },
+    {
+      "id": "ACC-009",
+      "title": "Coherent frame sets",
+      "criterion": "A cooperating multi-output producer publishes common frame identity and completion; grouped routing never mixes resource generations."
+    },
+    {
+      "id": "ACC-010",
+      "title": "Native output independence",
+      "criterion": "Program output remains native and active without a browser; slow or absent output consumers cannot create unbounded queues."
+    },
+    {
+      "id": "ACC-011",
+      "title": "Complete parameter exposure",
+      "criterion": "Registry inventory and OSCQuery tree agree on every application parameter and structural command, including access modes and unavailable states."
+    },
+    {
+      "id": "ACC-012",
+      "title": "Reliable state changes",
+      "criterion": "Validate, deduplicate and atomically apply commands; distinguish accepted/applied revisions and resubscribe/resnapshot after reconnect."
+    },
+    {
+      "id": "ACC-013",
+      "title": "Managed-app protocol",
+      "criterion": "Discover, launch/attach, control parameters and bind named outputs for one-output and multi-output reference clients."
+    },
+    {
+      "id": "ACC-014",
+      "title": "App failure ownership",
+      "criterion": "Only owned processes follow shutdown/restart policy; simulate delayed readiness, process death, port stalls and restart generations."
+    },
+    {
+      "id": "ACC-015",
+      "title": "Codec and format matrix",
+      "criterion": "Use a versioned corpus covering H.264/H.265, ProRes, HAP variants, DXV variants and other relevant media with explicit bit-depth/alpha/decode-path results."
+    },
+    {
+      "id": "ACC-016",
+      "title": "Scrub accuracy",
+      "criterion": "Rapid obsolete seeks cancel; settled requests select the correct PTS/frame, including long-GOP, VFR, reverse, proxy and loop cases."
+    },
+    {
+      "id": "ACC-017",
+      "title": "Color alpha and blending",
+      "criterion": "Golden/reference renders verify colorspace/range/transfer, premultiplied alpha, transition endpoints, masks, blend seams and correction within declared tolerances."
+    },
+    {
+      "id": "ACC-018",
+      "title": "Show clock and audio",
+      "criterion": "Independent sources, audio and cue changes use one explicit rational/timestamp model; loop, pause, seek and clock changes have defined behavior."
+    },
+    {
+      "id": "ACC-019",
+      "title": "Transition bank",
+      "criterion": "Every shipped shader has a manifest, defaults, attribution, endpoint behavior, deterministic grouping and validated GPU variants."
+    },
+    {
+      "id": "ACC-020",
+      "title": "Local and remote editor",
+      "criterion": "Same UI can inspect/edit through documented command contracts, upload/relink content and recover after loss of connection."
+    },
+    {
+      "id": "ACC-021",
+      "title": "Editor failure",
+      "criterion": "Close/reload/crash the browser during active playback; output and show clock continue with no dependency on editor frame callbacks."
+    },
+    {
+      "id": "ACC-022",
+      "title": "Display reconnection",
+      "criterion": "Repeat unplug/replug and topology changes; retain calibration and desired modes, restore confident matches and leave ambiguous matches offline."
+    },
+    {
+      "id": "ACC-023",
+      "title": "GPU and worker recovery",
+      "criterion": "Inject device loss and worker hangs/death; record bounded retry, fallback behavior, lost-output interval and surviving control responsiveness."
+    },
+    {
+      "id": "ACC-024",
+      "title": "Save integrity",
+      "criterion": "Interrupt save/export, exhaust disk space, lose referenced media and reopen; preserve the last valid authored project and report unsaved changes."
+    },
+    {
+      "id": "ACC-025",
+      "title": "Project migrations",
+      "criterion": "Upgrade old fixtures, reject unsupported future formats without damage, back up before migration and verify no silent parameter/ID loss."
+    },
+    {
+      "id": "ACC-026",
+      "title": "Performance budgets",
+      "criterion": "Measure fixed qualified workloads with machine/media hashes, warm/cold separation, latency percentiles, missed deadlines, RAM/VRAM and transition peaks."
+    },
+    {
+      "id": "ACC-027",
+      "title": "Long-run operation",
+      "criterion": "Complete 72-hour qualified playback with scheduled faults and bounded memory/queue/resource use; classify all repeats/drops and recovery events."
+    },
+    {
+      "id": "ACC-028",
+      "title": "Capabilities and portability",
+      "criterion": "Missing GPU features, runtimes and adapters are discoverable in UI/API and do not delete saved objects or silently change output."
+    },
+    {
+      "id": "ACC-029",
+      "title": "Native ARM identity",
+      "criterion": "Compile and run native ARM builds and dependency probes; record architecture, SIMD choices and any separately labeled emulation results."
+    },
+    {
+      "id": "ACC-030",
+      "title": "GPL and dependency provenance",
+      "criterion": "Public-source reproducibility, SPDX inventory, corresponding build/source materials and approved optional-runtime distribution; NDI approval remains a real gate."
+    },
+    {
+      "id": "ACC-031",
+      "title": "CI and evidence integrity",
+      "criterion": "Required checks fail closed, never pass on zero tests, and associate reports with exact source revisions; software rendering is not labeled hardware qualification."
+    },
+    {
+      "id": "ACC-032",
+      "title": "Portable core builds",
+      "criterion": "Windows/Linux/macOS build and test domain/control/persistence contracts without platform GPU/UI headers; native platform ports have separate gates."
+    },
+    {
+      "id": "ACC-033",
+      "title": "Cue ownership and routing",
+      "criterion": "Replace/Keep/Clear semantics, group readiness and transition interruption preserve unaffected destinations; dual-state app transitions have an explicit resource strategy."
+    },
+    {
+      "id": "ACC-034",
+      "title": "Development feedback",
+      "criterion": "Vite interface updates and asynchronous shader development can refresh previews while engine output continues; production builds contain no development server."
+    }
+  ],
+  "requirements": [
+    {
+      "id": "R01",
+      "title": "High performance and scaling",
+      "milestones": [
+        "M01",
+        "M09",
+        "M12",
+        "M13",
+        "M19"
+      ],
+      "acceptance": [
+        "ACC-026",
+        "ACC-027"
+      ]
+    },
+    {
+      "id": "R02",
+      "title": "Elegant reactive editor and media explorer",
+      "milestones": [
+        "M03",
+        "M05",
+        "M06"
+      ],
+      "acceptance": [
+        "ACC-001",
+        "ACC-006",
+        "ACC-020",
+        "ACC-034"
+      ]
+    },
+    {
+      "id": "R03",
+      "title": "Complete OSC and OSCQuery control",
+      "milestones": [
+        "M02",
+        "M03",
+        "M08"
+      ],
+      "acceptance": [
+        "ACC-011",
+        "ACC-012"
+      ]
+    },
+    {
+      "id": "R04",
+      "title": "Simple to advanced projection mapping",
+      "milestones": [
+        "M04",
+        "M11",
+        "M18"
+      ],
+      "acceptance": [
+        "ACC-004",
+        "ACC-005",
+        "ACC-017"
+      ]
+    },
+    {
+      "id": "R05",
+      "title": "Compositions and reusable nested content",
+      "milestones": [
+        "M02",
+        "M04",
+        "M06"
+      ],
+      "acceptance": [
+        "ACC-006",
+        "ACC-007"
+      ]
+    },
+    {
+      "id": "R06",
+      "title": "Local and network receiving",
+      "milestones": [
+        "M08",
+        "M10",
+        "M15",
+        "M16"
+      ],
+      "acceptance": [
+        "ACC-008",
+        "ACC-009"
+      ]
+    },
+    {
+      "id": "R07",
+      "title": "Professional codec playback and scrubbing",
+      "milestones": [
+        "M05",
+        "M09"
+      ],
+      "acceptance": [
+        "ACC-015",
+        "ACC-016",
+        "ACC-018"
+      ]
+    },
+    {
+      "id": "R08",
+      "title": "Managed applications and dedicated protocol",
+      "milestones": [
+        "M08"
+      ],
+      "acceptance": [
+        "ACC-013",
+        "ACC-014"
+      ]
+    },
+    {
+      "id": "R09",
+      "title": "Arbitrary connected surfaces and multi-output sources",
+      "milestones": [
+        "M02",
+        "M07",
+        "M08",
+        "M11"
+      ],
+      "acceptance": [
+        "ACC-002",
+        "ACC-003",
+        "ACC-009",
+        "ACC-033"
+      ]
+    },
+    {
+      "id": "R10",
+      "title": "Local remote and headless operation",
+      "milestones": [
+        "M03",
+        "M04",
+        "M06",
+        "M12"
+      ],
+      "acceptance": [
+        "ACC-010",
+        "ACC-020",
+        "ACC-021"
+      ]
+    },
+    {
+      "id": "R11",
+      "title": "Stability and projector recovery",
+      "milestones": [
+        "M04",
+        "M12",
+        "M13"
+      ],
+      "acceptance": [
+        "ACC-022",
+        "ACC-023",
+        "ACC-024",
+        "ACC-025",
+        "ACC-027"
+      ]
+    },
+    {
+      "id": "R12",
+      "title": "Spout Syphon PipeWire NDI and OMT output",
+      "milestones": [
+        "M10",
+        "M15",
+        "M16",
+        "M17"
+      ],
+      "acceptance": [
+        "ACC-008",
+        "ACC-010",
+        "ACC-028"
+      ]
+    },
+    {
+      "id": "R13",
+      "title": "Required desktop architectures and optional ARM boards",
+      "milestones": [
+        "M00",
+        "M14",
+        "M15",
+        "M16",
+        "M17"
+      ],
+      "acceptance": [
+        "ACC-028",
+        "ACC-029",
+        "ACC-032"
+      ]
+    },
+    {
+      "id": "R14",
+      "title": "GPL source availability and extensibility",
+      "milestones": [
+        "M00",
+        "M02",
+        "M10",
+        "M13"
+      ],
+      "acceptance": [
+        "ACC-030"
+      ]
+    },
+    {
+      "id": "R15",
+      "title": "Curated and custom shader transitions",
+      "milestones": [
+        "M07",
+        "M09"
+      ],
+      "acceptance": [
+        "ACC-017",
+        "ACC-019"
+      ]
+    },
+    {
+      "id": "R16",
+      "title": "CI and milestone commits",
+      "milestones": [
+        "M00",
+        "M13"
+      ],
+      "acceptance": [
+        "ACC-031"
+      ]
+    }
+  ]
+}
