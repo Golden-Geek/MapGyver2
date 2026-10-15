@@ -18,7 +18,7 @@ from build_metadata import source_identity
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--preset", required=True, choices=("windows-local", "windows-ci", "windows-graphics", "windows-bgfx", "portable-ci"))
+    parser.add_argument("--preset", required=True, choices=("windows-local", "windows-ci", "windows-graphics", "windows-bgfx", "windows-spout", "portable-ci"))
     parser.add_argument("--configuration", default="Release", choices=("Debug", "Release"))
     parser.add_argument("--skip-bootstrap", action="store_true", help="Use an already bootstrapped pinned dependency root")
     args = parser.parse_args()
@@ -82,6 +82,30 @@ def main():
             raise RuntimeError("Bootstrapped dependency tool source does not match the pinned registry")
         run("configure", ["cmake", "--preset", args.preset], timeout=1800)
         run("build", ["cmake", "--build", build, "--config", args.configuration, "--parallel", "2"])
+        cache = (build / "CMakeCache.txt").read_text(encoding="utf-8")
+        def cached(name):
+            match = re.search(rf"^{re.escape(name)}:[^=]+=(.*)$", cache, re.MULTILINE)
+            if not match:
+                raise RuntimeError(f"Configured build is missing {name}")
+            return match.group(1).strip()
+        if cached("PM_BUILD_SPOUT_EXPERIMENT") == "ON":
+            # The independent SDK is /MD Release only. Never put its same-named
+            # DLL beside the application SDK or compile its C++ ABI in Debug.
+            run("spout-reference-inputs", [sys.executable, ROOT / "tools/qualification/prepare_spout_peer.py"], timeout=180)
+            manifest = json.loads((ROOT / "tests/hardware/spout-reference.json").read_text(encoding="utf-8"))
+            sdk_root = ROOT / "out/qualification" / f'spout-peer-{manifest["sdkVersion"]}'
+            reference_build = ROOT / "out/qualification/spout-reference-build"
+            command = ["cmake", "-S", ROOT / "tests/hardware/spout-reference", "-B", reference_build,
+                       "-G", cached("CMAKE_GENERATOR"), "-A", cached("CMAKE_GENERATOR_PLATFORM"),
+                       "-T", cached("CMAKE_GENERATOR_TOOLSET"),
+                       f"-DREFERENCE_SPOUT_SDK_ROOT={sdk_root.as_posix()}",
+                       f"-Dnlohmann_json_DIR={(build / 'vcpkg_installed' / cached('VCPKG_TARGET_TRIPLET') / 'share/nlohmann_json').as_posix()}"]
+            run("spout-reference-configure", command)
+            run("spout-reference-build", ["cmake", "--build", reference_build, "--config", "Release", "--parallel", "2"])
+            run("spout-reference-version", [reference_build / "Release/mapgyver-spout-reference.exe", "--version"])
+            run("spout-participant-version", [build / "experiments/graphics" / args.configuration / "mapgyver-spout-participant.exe", "--version"])
+            evidence["spoutReferenceInputs"] = json.loads((sdk_root / "inputs.json").read_text(encoding="utf-8"))
+            evidence["spoutReferenceConfiguration"] = "Release"
         run("test", ["ctest", "--test-dir", build, "-C", args.configuration,
                      "--output-on-failure", "--no-tests=error", "-LE", "hardware",
                      "--output-junit", reports / "test-results.xml"])

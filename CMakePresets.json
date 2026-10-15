@@ -15,7 +15,7 @@
       "name": "windows-ci", "inherits": "foundation",
       "generator": "Visual Studio 17 2022", "architecture": "x64", "toolset": "v143,host=x64",
       "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
-      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-windows", "PM_BUILD_GRAPHICS_EXPERIMENTS": "ON", "PM_BUILD_BGFX_EXPERIMENT": "ON" }
+      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-windows", "PM_BUILD_GRAPHICS_EXPERIMENTS": "ON", "PM_BUILD_BGFX_EXPERIMENT": "ON", "PM_BUILD_SPOUT_EXPERIMENT": "ON" }
     },
     {
       "name": "windows-local", "inherits": "foundation",
@@ -35,6 +35,10 @@
     {
       "name": "windows-bgfx", "inherits": "windows-graphics",
       "cacheVariables": { "PM_BUILD_BGFX_EXPERIMENT": "ON" }
+    },
+    {
+      "name": "windows-spout", "inherits": "windows-bgfx",
+      "cacheVariables": { "PM_BUILD_SPOUT_EXPERIMENT": "ON" }
     }
   ]
 }

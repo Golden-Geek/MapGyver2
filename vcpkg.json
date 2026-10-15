@@ -4,6 +4,12 @@
   "homepage": "https://github.com/Golden-Geek/MapGyver2", "license": "GPL-3.0-or-later",
   "dependencies": [ { "name": "nlohmann-json", "version>=": "3.12.0#2" } ],
   "features": {
+    "spout-experiments": {
+      "description": "M01 Windows SpoutDX independent-process feasibility",
+      "dependencies": [
+        { "name": "spout2", "version>=": "2.007.010#1", "default-features": false, "features": ["dx"], "platform": "windows" }
+      ]
+    },
     "graphics-experiments": {
       "description": "M01 Windows D3D11/bgfx/SDL3 feasibility only",
       "dependencies": [

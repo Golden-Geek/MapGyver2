@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-15T18:44:51.859679+00:00",
+  "scope": "Additional resolved optional M01 Spout qualification dependencies; graphics-dependencies.json records the other 11 ports. Not a release binary SBOM.",
+  "baseline": "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+  "packages": [
+    {
+      "name": "spout2",
+      "version": "2.007.010",
+      "portVersion": 1,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": null,
+      "reviewedLicense": "BSD-2-Clause",
+      "reviewNote": "Installed notice explicitly grants BSD-2-Clause; port omits SPDX metadata.",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/spout2",
+      "installedNoticeSha256": "124f739384955b3b87ca556f486be770299bf2dda7d5a7281347f035f511a8f4"
+    },
+    {
+      "name": "egl-registry",
+      "version": "2025-05-27",
+      "portVersion": 0,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": "Apache-2.0",
+      "reviewedLicense": "MIT AND Apache-2.0",
+      "reviewNote": "khrplatform.h is MIT-style; EGL registry materials declare Apache-2.0. Retain both notices.",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/egl-registry",
+      "installedNoticeSha256": "5d77554ffc974ce346430a01a30be8176ca5c46fb1b53a7233291195ded592d3"
+    },
+    {
+      "name": "opengl-registry",
+      "version": "2026-08-03",
+      "portVersion": 0,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": null,
+      "reviewedLicense": "MIT AND Apache-2.0",
+      "reviewNote": "Installed GL generated headers declare MIT; XML/registry generator materials declare Apache-2.0. Port copyright points to per-file notices.",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/opengl-registry",
+      "installedNoticeSha256": "c56ffb0cc40bd972c1b2d4759828b89f7860471f5ba52eedde7a4ddb4664cef5"
+    },
+    {
+      "name": "opengl",
+      "version": "2022-12-04",
+      "portVersion": 3,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": null,
+      "reviewedLicense": "LicenseRef-Windows-SDK",
+      "reviewNote": "Native Windows port copies installed SDK headers and import libraries, not an OpenGL runtime. Compiler/SDK prerequisite only; do not distribute SDK files as app content.",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/opengl",
+      "installedNoticeSha256": "222b59aa68905b150c26ece05550b48390ef40791ac9e13abbc194cdd60b5c54"
+    }
+  ],
+  "applicationSdk": {
+    "version": "2.007.010#1",
+    "sourceCommit": "62362774c96547d63b502d7efd5cfbf138eb7570",
+    "privateFork": false,
+    "patches": "Standard pinned vcpkg port patches only"
+  },
+  "referenceSdk": {
+    "version": "2.007.018",
+    "sourceCommit": "6b68a5b4fdeca6130b851e5f9366467a844860e5",
+    "license": "BSD-2-Clause",
+    "licenseSha256": "124f739384955b3b87ca556f486be770299bf2dda7d5a7281347f035f511a8f4",
+    "archiveSha256": "6b6101ad860b7c42128d715a6d8f2dfdfcc1df2a64dde7c04317c11d059d27ea",
+    "fixtureManifest": "../../tests/hardware/spout-reference.json",
+    "runtime": "Official x64 MD Release SDK DLL, isolated from application SDK; inputs ignored under out/qualification",
+    "redistributedInRepository": false
+  }
+}

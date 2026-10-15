@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Functional experiment, not a production deadline path. SDK types stay here.
 #include "probe.hpp"
+#include "bgfx_probe_device.hpp"
 #include "probe_shaders.hpp"
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
@@ -164,7 +165,7 @@ struct Session {
     }
 };
 
-void initialize(Session& session) {
+void initialize(Session& session, bool independent_producer = true) {
     if (!SDL_Init(SDL_INIT_VIDEO)) throw std::runtime_error(SDL_GetError());
     session.window = SDL_CreateWindow("MapGyver M01 texture experiment", 128, 128, SDL_WINDOW_HIDDEN);
     check(session.window != nullptr, SDL_GetError());
@@ -215,11 +216,13 @@ void initialize(Session& session) {
     check((session.adapter.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) == 0, "bgfx selected software rendering");
     check(session.adapter.AdapterLuid.HighPart == desired.AdapterLuid.HighPart &&
           session.adapter.AdapterLuid.LowPart == desired.AdapterLuid.LowPart, "bgfx selected a different GPU");
-    constexpr std::array levels{D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};
-    D3D_FEATURE_LEVEL actual{};
-    require(D3D11CreateDevice(adapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, D3D11_CREATE_DEVICE_BGRA_SUPPORT,
-                             levels.data(), static_cast<UINT>(levels.size()), D3D11_SDK_VERSION,
-                             &session.producer, &actual, &session.producer_context), "Create independent producer device");
+    if (independent_producer) {
+        constexpr std::array levels{D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};
+        D3D_FEATURE_LEVEL actual{};
+        require(D3D11CreateDevice(adapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+                                 levels.data(), static_cast<UINT>(levels.size()), D3D11_SDK_VERSION,
+                                 &session.producer, &actual, &session.producer_context), "Create independent producer device");
+    }
     session.vertex_shader = bgfx::createShader(bgfx::copy(shaders::vertex.data(), static_cast<std::uint32_t>(shaders::vertex.size())));
     session.fragment_shader = bgfx::createShader(bgfx::copy(shaders::fragment.data(), static_cast<std::uint32_t>(shaders::fragment.size())));
     check(bgfx::isValid(session.vertex_shader) && bgfx::isValid(session.fragment_shader), "Pinned shader creation failed");
@@ -382,3 +385,72 @@ nlohmann::json bgfx_texture_interop(bool hold_producer_key) {
             {"spoutInterop", "not_run"}, {"physicalOutputs", "not_tested"}, {"cases", std::move(cases)}};
 }
 } // namespace mapgyver::experiments
+
+namespace mapgyver::windows {
+using namespace mapgyver::experiments;
+struct BgfxProbeDevice::Impl {
+    Session session;
+    std::thread::id owner = std::this_thread::get_id();
+    bool active_sample = false;
+    Impl() { initialize(session, false); }
+};
+BgfxProbeDevice::BgfxProbeDevice() : impl_(std::make_unique<Impl>()) {}
+BgfxProbeDevice::~BgfxProbeDevice() = default;
+ID3D11Device* BgfxProbeDevice::device() const noexcept { return impl_->session.device; }
+BgfxProbeDevice::Sample BgfxProbeDevice::sample(ID3D11Texture2D* source) {
+    auto& state = *impl_;
+    auto& session = state.session;
+    check(std::this_thread::get_id() == state.owner, "Candidate sampling must run on its GPU owner thread");
+    check(!state.active_sample && source != nullptr, "Only one bounded candidate sample may be live");
+    ComPtr<ID3D11Device> source_device;
+    source->GetDevice(&source_device);
+    check(source_device.Get() == session.device, "Candidate import belongs to another D3D11 device");
+    D3D11_TEXTURE2D_DESC description{};
+    source->GetDesc(&description);
+    check(description.Width > 0 && description.Width <= 512 && description.Height > 0 && description.Height <= 512,
+          "Candidate fixture size unsupported");
+    check(description.Format == DXGI_FORMAT_R8G8B8A8_UNORM || description.Format == DXGI_FORMAT_B8G8R8A8_UNORM,
+          "Candidate fixture format unsupported");
+    const auto width = static_cast<std::uint16_t>(description.Width);
+    const auto height = static_cast<std::uint16_t>(description.Height);
+    const auto format = description.Format == DXGI_FORMAT_R8G8B8A8_UNORM ? bgfx::TextureFormat::RGBA8 : bgfx::TextureFormat::BGRA8;
+    constexpr std::uint64_t sampling = BGFX_SAMPLER_MIN_POINT | BGFX_SAMPLER_MAG_POINT | BGFX_SAMPLER_MIP_POINT |
+                                       BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP;
+    check(bgfx::isTextureValid(0, false, 1, format, BGFX_TEXTURE_RT | sampling), "Candidate format cannot be rendered");
+    auto& resources = session.cases[0];
+    state.active_sample = true;
+    resources.imported = source; // Explicit COM ownership until views and GPU use retire.
+    resources.source = bgfx::createTexture2D(width, height, false, 1, format, sampling);
+    resources.target = bgfx::createTexture2D(width, height, false, 1, format, BGFX_TEXTURE_RT | sampling);
+    check(bgfx::isValid(resources.source) && bgfx::isValid(resources.target), "Candidate sample allocation failed");
+    bgfx::frame();
+    check(bgfx::overrideInternal(resources.source, reinterpret_cast<uintptr_t>(source)) == reinterpret_cast<uintptr_t>(source),
+          "Candidate did not import the caller-owned texture");
+    const auto native = bgfx::overrideInternal(resources.target, width, height, 1, format, BGFX_TEXTURE_RT | sampling);
+    check(native != 0, "Candidate target is not ready");
+    resources.framebuffer = bgfx::createFrameBuffer(1, &resources.target, false);
+    check(bgfx::isValid(resources.framebuffer), "Candidate framebuffer allocation failed");
+    constexpr std::array<float, 16> identity{1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+    SDL_PumpEvents();
+    bgfx::setViewFrameBuffer(0, resources.framebuffer);
+    bgfx::setViewRect(0, 0, 0, width, height);
+    bgfx::setViewTransform(0, identity.data(), identity.data());
+    bgfx::setViewClear(0, BGFX_CLEAR_COLOR, 0);
+    bgfx::setTransform(identity.data()); bgfx::setVertexBuffer(0, session.vertices);
+    bgfx::setTexture(0, session.sampler, resources.source, static_cast<std::uint32_t>(sampling));
+    bgfx::setState(BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A);
+    bgfx::submit(0, session.program);
+    return {reinterpret_cast<ID3D11Texture2D*>(native), bgfx::frame()};
+}
+void BgfxProbeDevice::retire() {
+    auto& state = *impl_;
+    check(std::this_thread::get_id() == state.owner, "Candidate retirement must run on its GPU owner thread");
+    if (!state.active_sample) return;
+    state.session.retire(state.session.cases[0]);
+    bgfx::setViewFrameBuffer(0, BGFX_INVALID_HANDLE);
+    bgfx::frame(); bgfx::frame();
+    wait_gpu(state.session.device, state.session.context.Get());
+    state.session.cases[0].imported.Reset();
+    state.active_sample = false;
+}
+} // namespace mapgyver::windows

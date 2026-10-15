@@ -53,3 +53,37 @@ hardware counters or a zero-copy claim. Shaders are embedded from verified,
 licensed [upstream assets](shaders/README.md). This is functional texture
 interoperability, not Spout, hardware decoding, physical output or performance
 qualification. M01 remains open until those separate gates pass.
+
+## Spout with an independent SDK peer
+
+```powershell
+python tools/ci/check.py --preset windows-spout --configuration Release
+python tests/hardware/test_spout_interop.py --participant out/build/windows-spout/experiments/graphics/Release/mapgyver-spout-participant.exe --reference out/qualification/spout-reference-build/Release/mapgyver-spout-reference.exe --report-directory out/reports/spout-hardware-release
+```
+
+Repeat with the application Debug configuration and a different report directory.
+The wrapper builds the app against registry SpoutDX 2.007.010#1, verifies the
+[independent official 2.007.018 inputs](../../tests/hardware/spout-reference.json),
+then builds that peer in a separate Release-only /MD project. It runs both CLI
+version checks without initializing a GPU. Windows CI compiles both peers;
+the GPU contract stays manual. Keep the two same-named SpoutDX.dll files in
+their separate output directories. No downloaded SDK binary is committed.
+
+The fixture clients are authored qualification tools linked to different real
+SDK versions, rather than mocks. The app samples through bgfx before publishing
+and after receiving; the reference client uses native D3D11. The harness verifies
+actual DLL hashes, GPU LUIDs, source identity, exact pixels including alpha,
+24 resize/format cases, held frames, graceful producer restart and real producer
+and consumer mutex stalls. It uses unique sender names, hidden child processes,
+bounded command/report queues and deadlines, and cleans up only its own PIDs.
+
+Startup's ready event means the control participant initialized; frame readiness
+requires verified data. SDK connected/SendTexture success alone are insufficient.
+An outer nonblocking named-mutex lease and instance-only DisableFrameCount force
+the inspected pinned SDK copy paths; no global Spout registry setting is changed.
+Source CPU uploads, candidate draws, SDK GPU copy-path calls, validation GPU copies
+and CPU readbacks are reported separately. These counts describe this controlled
+non-keyed fixture, not arbitrary peers or physical transfer counters. This offline
+diagnostic allocates and reads back; it is not the production render deadline path.
+Cross-adapter sharing, crash/device-loss recovery, physical scanout, decoder import
+and performance qualification remain separate gates.

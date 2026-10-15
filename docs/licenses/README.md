@@ -29,3 +29,13 @@ when producing a release rather than treating its top-level license as an SBOM.
 The copied example shader binaries have their own provenance and BSD notice
 under experiments/graphics/shaders. They are experimental assets; their
 historical compiler build is not claimed as reproduced.
+
+The optional Spout experiment adds BSD-2-Clause SpoutDX 2.007.010#1 and an
+independent official 2.007.018 SDK fixture. [Spout inventory](spout-dependencies.json)
+records these inputs and the four additional resolved ports. Spout's port omits
+SPDX metadata; its installed BSD-2-Clause notice was inspected. Khronos headers
+use MIT notices and registry materials use Apache-2.0. The opengl port copies
+Windows SDK headers/import libraries for local compilation; these are SDK
+prerequisites, not an authorization to distribute SDK files. No proprietary
+runtime is committed or bundled. The fixture manifest pins the official SDK
+archive and source license hashes; retain that notice with any fixture package.
