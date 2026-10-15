@@ -164,6 +164,11 @@
   commands, capability-preserving model round trips with strict reference/ID/
   rational/topology/cycle/capacity validation, then M03 service integration.
   Do not claim an OSCQuery implementation from in-process inventory tests.
+- CI 38812032068 is now fully green at fd8cd6d (Windows Debug/Release,
+  Linux/macOS, plan/quality-gate; eight contracts). Queue is ready to push:
+  ac2e86a transactions, 0fcfaa0 registry, cd6c273 clean-source evidence and this
+  hosted evidence record. Local ten-contract Debug/Release evidence stays tied
+  to exact code SHA 0fcfaa0, independent of later documentation commits.
 
 ## Build/hardware commands
 
