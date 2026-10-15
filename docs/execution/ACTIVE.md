@@ -221,6 +221,14 @@
 - Prior wire CI 38817597603 is fully green at 25de351: all Windows Debug/Release,
   Linux/macOS, plan and quality-gate jobs, eleven contracts. New M03 core has
   local twelve-contract evidence only until its own source CI completes.
+- Core committed as b73b6be (full SHA in M03-C01-core-local.json).
+  Clean Windows Debug/Release wrappers pass 12/12, dirty=false. Evidence explicitly
+  classifies injected control-clock/in-process tests and does not claim IPC.
+  Next: push code/evidence and implement the Windows named-pipe adapter plus
+  --serve engine mode. Use private Windows SDK types, current-user ACL and remote
+  rejection, bounded length-prefixed frames/IO deadlines, real separate-process
+  tests including slow peers, partial frames, lost-ack reconnect and service
+  restart. Preserve outstanding source CI rather than routine docs cancellation.
 
 ## Build/hardware commands
 
