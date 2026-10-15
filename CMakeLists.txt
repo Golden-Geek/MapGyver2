@@ -66,6 +66,10 @@ if(BUILD_TESTING)
       --source "${CMAKE_CURRENT_SOURCE_DIR}" --cmake "${CMAKE_COMMAND}" --generator "${CMAKE_GENERATOR}")
   add_test(NAME planning.contract
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/validate_plan.py")
+  add_test(NAME ci.quality-gate
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_quality_gate.py"
+      --script "${CMAKE_CURRENT_SOURCE_DIR}/tools/ci/quality_gate.py")
+  set_tests_properties(ci.quality-gate PROPERTIES TIMEOUT 30)
   set_tests_properties(diagnostics.contract build.source-identity planning.contract PROPERTIES TIMEOUT 30)
   set_tests_properties(build.feature-rejection PROPERTIES TIMEOUT 150)
 endif()

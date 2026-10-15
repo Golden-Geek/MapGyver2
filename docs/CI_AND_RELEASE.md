@@ -28,6 +28,17 @@ Do not set blanket `continue-on-error` or silently skip all tests. Test quaranti
 
 M00 implements `python tools/ci/bootstrap.py --triplet <triplet> [--core-only]`, a pinned dependency root and CMake presets `windows-ci` and `portable-ci`. Windows uses the Visual Studio 2022 generator on `windows-2025`; the actual image currently supplies VS 2022 17.14. Record exact compiler/SDK/CMake versions per run. Portable core uses Ninja and an explicitly selected current compiler supporting the project's C++20 subset.
 
+The implementation adds `windows-local` for VS2026/v145, while hosted Windows
+remains VS2022/v143. Minimums are CMake 3.31 (4.2 for local VS2026), Python 3.11,
+MSVC 19.44, and C++20. `python tools/ci/check.py --preset <preset>
+--configuration <Debug|Release>` owns bootstrap/configure/build/CTest/diagnostics
+and records source, runner, compiler/SDK/dependency identity and command results
+under `out/reports/<preset>/<configuration>`. Upload these paths even on failure.
+JUnit paths are absolute because CTest otherwise resolves them from its test
+directory. The quality gate rejects missing, skipped, cancelled and failed jobs;
+its result combinations are exercised by CTest. Direct main pushes are explicitly
+authorized for this task; no repository rules are changed by CI activation.
+
 The project owns `PM_BUILD_PLATFORM`, `PM_BUILD_MEDIA`, `PM_BUILD_UI`, `PM_BUILD_HARDWARE_TESTS` and `BUILD_TESTING` options. Unknown/missing mandatory feature selections fail configuration rather than appearing as unused CMake variables. Presets use documented output paths. Dependencies resolve through a committed vcpkg baseline/feature manifest or a comparably reproducible alternative documented in M00. Do not pin a made-up vcpkg commit in this planning pack; choose and verify the actual dependency set during bootstrap.
 
 M03 adds `ui/.node-version` with a selected exact supported Node version, `package-lock.json` and scripts `check`, `lint`, `test:ci`, `build`, `test:e2e:ci`. Production assets are static; Node is not required on the show computer. Lock any Playwright/browser revisions used in reports.

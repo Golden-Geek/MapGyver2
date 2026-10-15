@@ -4,6 +4,8 @@
       "source": "ci/templates/ci.yml.in",
       "destination": ".github/workflows/ci.yml",
       "activate_at": "M00",
+      "state": "active",
+      "activated_in": "M00.C03",
       "requires": [
         "tools/ci/bootstrap.py",
         "CMakePresets.json",

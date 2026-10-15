@@ -15,8 +15,9 @@
 2. M00.C02 complete locally: diagnostic schema/CLI and four meaningful CTest
    contracts pass in Debug and Release; source identity, invalid commands,
    capability reasons and negative feature configuration are covered.
-3. M00.C03 pending: native Windows Debug/Release and Linux/macOS portable CI,
+3. M00.C03 implemented and locally tested: Windows Debug/Release and Linux/macOS portable CI,
    fail-closed quality gate, logs and exact environment/source identity.
+   Push and observe the first hosted application run before checkpointing M00.
 4. M00.C04 pending: fresh-checkout reproduction, progress evidence, checkpoint
    only after all required local/hosted checks succeed.
 5. M01 next: real D3D11/bgfx/Spout/decode experiments. Renderer provisional
@@ -29,6 +30,7 @@
 - `python tools/validate_plan.py`: passed at baseline (20 milestones / 80 slices /
   34 scenarios). This validates the planning contract, not application behavior.
 - M00.C01: `90faf2a`, pushed; local Debug/Release build and banner smoke passed.
+- M00.C02: `b47656a`, pushed; all four CTest contracts passed in both configurations.
 - Local M00: `python tools/ci/bootstrap.py --triplet x64-windows`,
   `cmake --preset windows-local`, build Debug/Release, CTest for each with
   `--output-on-failure --no-tests=error`.
