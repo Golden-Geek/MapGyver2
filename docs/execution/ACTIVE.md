@@ -24,9 +24,12 @@
    milestone/m00 tag created and pushed at that green commit.
 5. M01.C01 in progress: native D3D11 baseline then actual bgfx imports. Renderer provisional
    until critical tests pass; no speculative backends/plugin framework.
-   Baseline six real RTX 5080 shared-texture cases and Debug/Release wrapper
-   passed locally. Commit this partial C01 slice, rerun against the clean commit,
-   retain native GPU JSON and verify hosted compilation before bgfx integration.
+   Baseline partial C01 committed `e1bbfff7911e6abf7bd63284443995ae4a09382e`.
+   CI 38773362603 passed, including native experiment compilation. Clean-source
+   RTX 5080 Release run passed six raw-pixel cases; retained report is
+   docs/progress/M01-d3d11-baseline.json. Next: actual bgfx sampling/import path;
+   C01 and M01 remain incomplete. Pinned bgfx archive/ownership findings are in
+   docs/progress/M01.md; do not substitute latest docs for pinned API behavior.
 6. M02–M13 pending: follow contracts and continue independent work around
    unavailable hardware/legal evidence without qualifying dependents.
 

@@ -1,0 +1,96 @@
+{
+  "adapter": {
+    "dedicatedVideoMemoryBytes": 16780361728,
+    "deviceId": 11353,
+    "luidHigh": 0,
+    "luidLow": 89087,
+    "name": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "software": false,
+    "vendorId": 4318
+  },
+  "bgfxInterop": "not_run",
+  "buildConfiguration": "Release",
+  "cases": [
+    {
+      "format": "RGBA8",
+      "generation": 1,
+      "height": 64,
+      "pixelsMatch": true,
+      "submittedCpuUploads": 1,
+      "submittedGpuCopies": 1,
+      "validationCpuReadbacks": 1,
+      "width": 64
+    },
+    {
+      "format": "RGBA8",
+      "generation": 2,
+      "height": 128,
+      "pixelsMatch": true,
+      "submittedCpuUploads": 1,
+      "submittedGpuCopies": 1,
+      "validationCpuReadbacks": 1,
+      "width": 128
+    },
+    {
+      "format": "RGBA8",
+      "generation": 3,
+      "height": 256,
+      "pixelsMatch": true,
+      "submittedCpuUploads": 1,
+      "submittedGpuCopies": 1,
+      "validationCpuReadbacks": 1,
+      "width": 256
+    },
+    {
+      "format": "BGRA8",
+      "generation": 4,
+      "height": 64,
+      "pixelsMatch": true,
+      "submittedCpuUploads": 1,
+      "submittedGpuCopies": 1,
+      "validationCpuReadbacks": 1,
+      "width": 64
+    },
+    {
+      "format": "BGRA8",
+      "generation": 5,
+      "height": 128,
+      "pixelsMatch": true,
+      "submittedCpuUploads": 1,
+      "submittedGpuCopies": 1,
+      "validationCpuReadbacks": 1,
+      "width": 128
+    },
+    {
+      "format": "BGRA8",
+      "generation": 6,
+      "height": 256,
+      "pixelsMatch": true,
+      "submittedCpuUploads": 1,
+      "submittedGpuCopies": 1,
+      "validationCpuReadbacks": 1,
+      "width": 256
+    }
+  ],
+  "compiler": {
+    "id": "MSVC",
+    "version": "19.50.35730.0"
+  },
+  "counterMeaning": "API submissions in this probe, not hardware bus/copy-engine counters",
+  "evidenceClass": "native-gpu-shared-resource-baseline",
+  "featureLevel": 45312,
+  "physicalOutputs": "not_tested",
+  "platform": {
+    "architecture": "x64",
+    "targetOs": "Windows"
+  },
+  "result": "passed",
+  "schemaVersion": 1,
+  "sourceDirty": false,
+  "sourceRevision": "e1bbfff7911e6abf7bd63284443995ae4a09382e",
+  "spoutInterop": "not_run",
+  "videoMemory": {
+    "budgetBytes": 15927652352,
+    "currentUsageBytes": 17047552
+  }
+}
