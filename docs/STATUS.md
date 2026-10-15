@@ -16,6 +16,10 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
   device-loss recovery and sustained performance gates remain open. Renderer
   provisional; no M01 completion tag.
 - First architecture gate: M01, render/Spout/decode/presentation feasibility on Windows hardware.
+- M02 portable definitions, scoped source ownership and stage/calibration models
+  have green hosted builds. Atomic authored transactions/undo and typed registry
+  are implemented and undergoing native/hosted checks; API export/round trips
+  remain open. This does not qualify M02 ahead of M01.
 - Open product decisions: current NDI licensing/distribution path and exact reference hardware/workload budgets.
 - Later native targets: Windows ARM64, Linux x64/PipeWire, macOS ARM64/Syphon, Linux ARM64/Raspberry Pi.
 - Separate optional target: 32-bit Linux armhf.

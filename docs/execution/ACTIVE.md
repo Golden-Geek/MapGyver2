@@ -144,6 +144,18 @@
   Next: commit tested controller, then one typed registry path with metadata,
   access/validation/API descriptors and generated inventory checks. No native
   preparation/application/save completion is implied by authored revisions.
+- Transactions committed locally as ac2e86a; clean Windows Debug/Release 9/9
+  evidence retained in M02-C03-transactions-local.json. Waiting for source
+  CI 38812032068 before pushing queued slices to avoid cancelling Windows builds.
+- Current C03 registry slice registers current model fields and typed setters
+  with stable addresses/type/default/range/unit/access/persistence/description/
+  authored availability metadata, plus all typed command actions and undo/redo.
+  Compound writes use one combined candidate. Derived bindings stay read-only;
+  stale registry inventories reject even after undo restores an old pointer.
+  Debug/Release 10/10 pass including registered reconciliation/geometry space tests.
+  Initial dotted action IDs correctly failed validation and
+  were fixed without changing the ID contract. Next: commit, clean/hosted evidence,
+  then wire/type descriptors and capability-preserving round-trip coverage.
 
 ## Build/hardware commands
 
