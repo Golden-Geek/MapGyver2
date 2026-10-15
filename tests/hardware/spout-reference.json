@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Independent-process M01 Spout reference peer inputs; not a qualification result",
+  "sdkVersion": "2.007.018",
+  "sourceCommit": "6b68a5b4fdeca6130b851e5f9366467a844860e5",
+  "architecture": "x64",
+  "runtime": "MD Release; compile the reference peer in Release, isolated from application SDK DLLs",
+  "license": "BSD-2-Clause",
+  "licenseUrl": "https://raw.githubusercontent.com/leadedge/Spout2/6b68a5b4fdeca6130b851e5f9366467a844860e5/LICENSE",
+  "licenseSha256": "124f739384955b3b87ca556f486be770299bf2dda7d5a7281347f035f511a8f4",
+  "archive": {
+    "url": "https://github.com/leadedge/Spout2/releases/download/2.007.018/Spout-SDK-binaries_2-007-018.zip",
+    "sha256": "6b6101ad860b7c42128d715a6d8f2dfdfcc1df2a64dde7c04317c11d059d27ea",
+    "size": 5287838,
+    "root": "Spout-SDK-binaries/Libs_2-007-018/"
+  },
+  "optionalOfficialExamples": {
+    "url": "https://github.com/leadedge/Spout2/releases/download/2.007.018/Spout-SDK-examples_2-007-018.zip",
+    "sha256": "3b1a210da4f4a166a7cb55ce2b07e6c3d69e2fd4b1b73a0be2f14d8b0929173a"
+  }
+}

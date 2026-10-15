@@ -46,6 +46,16 @@
    GitHub's asset digest: 3b1a210da4f4a166a7cb55ce2b07e6c3d69e2fd4b1b73a0be2f14d8b0929173a.
    Header and sender source are already there for API/fixture inspection. Do not
    assume peer names, CLI options or visibility-independent cadence; inspect first.
+   C02 prerequisite: prepare_spout_peer.py verifies/extracts the independent
+   official 2.007.018 MD Release x64 SDK into its own ignored fixture directory.
+   The manifest pins source, archive/license hashes and PE architecture; this
+   validates inputs only, not SDK execution. Build the reference peer in a separate
+   Release project/output directory so Debug C++ ABI and same-named SDK DLLs do
+   not accidentally mix between versions.
+   Critical SDK finding: 2.007.010 SendTexture returns true even when texture
+   access fails; ReceiveTexture can report connected without copying a new frame.
+   Test actual frame/marker advancement and stalls, not just return values.
+   SDK-internal copy counts need explicit evidence.
 6. M02–M13 pending: follow contracts and continue independent work around
    unavailable hardware/legal evidence without qualifying dependents.
 
