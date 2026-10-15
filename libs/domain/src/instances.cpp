@@ -10,8 +10,8 @@ void require(bool valid, ErrorCode code, const char* message, std::vector<Id> in
 }
 }
 InstancePool::InstancePool(DefinitionSnapshot definitions, InstanceLimits limits, IdGenerator ids)
-    : definitions_(std::move(definitions)), limits_(limits), ids_(std::move(ids)) {
-    require(static_cast<bool>(ids_),ErrorCode::invalid_definition,"Instance ID generator is missing");
+    : definitions_(std::move(definitions)), limits_(limits), ids_(std::make_shared<IdGenerator>(std::move(ids))) {
+    require(static_cast<bool>(*ids_),ErrorCode::invalid_definition,"Instance ID generator is missing");
 }
 const SourceInstance& InstancePool::instance(const Id& id) const {
     const auto found = instances_.find(id);
@@ -20,7 +20,7 @@ const SourceInstance& InstancePool::instance(const Id& id) const {
 }
 Id InstancePool::fresh_id() {
     for (int attempt = 0; attempt < 8; ++attempt) {
-        auto id = ids_();
+        auto id = (*ids_)();
         if (!instances_.contains(id) && !placements_.contains(id)) return id;
     }
     throw ModelError(ErrorCode::duplicate_id,"Instance ID generation repeatedly collided");
@@ -29,15 +29,15 @@ void InstancePool::acquire(const Id& id) {
     require(bindings_ < limits_.ownership_bindings,ErrorCode::capacity_exceeded,"Source ownership-binding capacity exceeded",{id});
     ++instances_.at(id).owner_references; ++bindings_;
 }
+Id InstancePool::create_instance(const Id& asset, bool keep_alive) {
+    static_cast<void>(definitions_.asset(asset));
+    require(instances_.size() < limits_.instances,ErrorCode::capacity_exceeded,"Live source-instance capacity exceeded",{asset});
+    auto id = fresh_id();
+    instances_.emplace(id,SourceInstance{id,asset,{},keep_alive,0,{},{}});
+    return id;
+}
 Id InstancePool::instantiate(const Id& asset, bool keep_alive) {
-    const auto create = [&](const Id& definition, bool keep) {
-        static_cast<void>(definitions_.asset(definition));
-        require(instances_.size() < limits_.instances,ErrorCode::capacity_exceeded,"Live source-instance capacity exceeded",{definition});
-        auto id = fresh_id();
-        instances_.emplace(id,SourceInstance{id,definition,{},keep,0,{},{}});
-        return id;
-    };
-    const auto root = create(asset,keep_alive);
+    const auto root = create_instance(asset,keep_alive);
     std::vector<Id> pending{root};
     while (!pending.empty()) {
         const auto parent = pending.back(); pending.pop_back();
@@ -54,7 +54,7 @@ Id InstancePool::instantiate(const Id& asset, bool keep_alive) {
                 if (found != local_shared.end()) child = found->second;
             }
             if (!child) {
-                child = create(source->asset,false);
+                child = create_instance(source->asset,false);
                 pending.push_back(*child);
                 if (layer.shared_group) local_shared.emplace(*layer.shared_group,*child);
             }
@@ -178,6 +178,98 @@ void InstancePool::set_transport(const Id& id, TransportIntent intent) {
     require(intent.position.ticks >= 0 && intent.position.time_base.numerator > 0 && intent.position.time_base.denominator > 0 &&
             intent.rate.denominator > 0,ErrorCode::invalid_transport,"Transport intent needs nonnegative position and valid rational time/rate",{id});
     instances_.at(id).transport = intent;
+}
+std::vector<Id> InstancePool::reconcile_definitions(DefinitionSnapshot definitions) {
+    InstancePool candidate = *this;
+    candidate.definitions_ = std::move(definitions);
+    std::map<Id,SourceInstance> rebuilt;
+    std::vector<Id> pending;
+    const auto enqueue = [&](const Id& id) {
+        if (rebuilt.contains(id)) return;
+        auto node = candidate.instance(id);
+        static_cast<void>(candidate.definitions_.asset(node.asset));
+        node.layers.clear(); node.inputs.clear(); node.owner_references = 0;
+        rebuilt.emplace(id,std::move(node)); pending.push_back(id);
+    };
+    for (const auto& [id,placement] : placements_) {
+        static_cast<void>(id); enqueue(placement.source.instance);
+    }
+    for (const auto& [id,node] : instances_) if (node.keep_alive) enqueue(id);
+    while (!pending.empty()) {
+        const auto parent = pending.back(); pending.pop_back();
+        const auto original = instances_.find(parent);
+        const auto& next_asset = candidate.definitions_.asset(rebuilt.at(parent).asset);
+        const auto* next_source = std::get_if<CompositionSource>(&next_asset.source);
+        if (next_source == nullptr) {
+            require(original == instances_.end() || original->second.inputs.empty(),ErrorCode::type_mismatch,
+                    "Unbind composition inputs before changing the source to another kind",{parent});
+            continue;
+        }
+        const Composition* old_composition = nullptr;
+        if (original != instances_.end()) {
+            const auto& old_asset = definitions_.asset(original->second.asset);
+            if (const auto* old_source = std::get_if<CompositionSource>(&old_asset.source))
+                if (old_source->composition == next_source->composition) old_composition = &definitions_.composition(old_source->composition);
+            require(old_composition != nullptr || original->second.inputs.empty(),ErrorCode::type_mismatch,
+                    "Unbind inputs before replacing their composition definition scope",{parent});
+        }
+        const auto& next_composition = candidate.definitions_.composition(next_source->composition);
+        if (original != instances_.end()) {
+            for (const auto& [input,source] : original->second.inputs) {
+                require(candidate.input_port(parent,input).kind == candidate.output_port(source).kind,ErrorCode::type_mismatch,
+                        "A definition edit changed a bound input/source kind",{parent,input,source.instance,source.port});
+                enqueue(source.instance);
+                rebuilt.at(parent).inputs.emplace(input,source);
+            }
+        }
+        std::map<Id,Id> old_groups, next_groups;
+        if (old_composition != nullptr)
+            for (const auto& layer : old_composition->layers)
+                if (layer.shared_group && std::holds_alternative<AssetPort>(layer.source))
+                    old_groups.emplace(*layer.shared_group,original->second.layers.at(layer.id).instance);
+        for (const auto& layer : next_composition.layers) {
+            const auto* source = std::get_if<AssetPort>(&layer.source);
+            if (source == nullptr) continue;
+            std::optional<Id> child;
+            if (layer.shared_group) {
+                const auto current = next_groups.find(*layer.shared_group);
+                if (current != next_groups.end()) child = current->second;
+                else {
+                    const auto previous = old_groups.find(*layer.shared_group);
+                    if (previous != old_groups.end() && instance(previous->second).asset == source->asset) child = previous->second;
+                }
+            } else if (old_composition != nullptr) {
+                const auto previous = std::find_if(old_composition->layers.begin(),old_composition->layers.end(),
+                    [&](const Layer& value){return value.id == layer.id;});
+                if (previous != old_composition->layers.end() && !previous->shared_group)
+                    if (const auto* old_source = std::get_if<AssetPort>(&previous->source))
+                        if (old_source->asset == source->asset) child = original->second.layers.at(layer.id).instance;
+            }
+            if (!child) child = candidate.create_instance(source->asset,false);
+            enqueue(*child);
+            rebuilt.at(parent).layers.emplace(layer.id,InstancePort{*child,source->port});
+            if (layer.shared_group) next_groups.insert_or_assign(*layer.shared_group,*child);
+        }
+    }
+    std::vector<Id> retired;
+    for (const auto& [id,node] : instances_) {
+        static_cast<void>(node);
+        if (!rebuilt.contains(id)) retired.push_back(id);
+    }
+    candidate.instances_ = std::move(rebuilt); candidate.bindings_ = 0;
+    const auto reference = [&](const InstancePort& source) {
+        static_cast<void>(candidate.output_port(source));
+        candidate.acquire(source.instance);
+    };
+    for (const auto& [id,placement] : candidate.placements_) { static_cast<void>(id); reference(placement.source); }
+    for (const auto& [id,node] : candidate.instances_) {
+        static_cast<void>(id);
+        for (const auto& [layer,source] : node.layers) { static_cast<void>(layer); reference(source); }
+        for (const auto& [input,source] : node.inputs) { static_cast<void>(input); reference(source); }
+    }
+    candidate.validate_live_graph();
+    *this = std::move(candidate);
+    return retired;
 }
 void InstancePool::validate_live_graph() const {
     std::map<Id,std::vector<Id>> edges;

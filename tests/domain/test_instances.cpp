@@ -160,15 +160,110 @@ void deep_instantiation_and_retirement() {
     InstancePool pool{DefinitionSnapshot{std::move(definitions)},{depth,4,depth},generator(sequence)};
     const auto root = pool.place({id("asset-0"),id("program")});
     check(pool.instances().size() == depth && pool.ownership_bindings() == depth,"Deep instance expansion was incomplete");
+    const auto before = pool.instances();
+    check(pool.reconcile_definitions(pool.definitions()).empty() && pool.instances() == before,
+          "Deep iterative reconciliation replaced unchanged source scopes");
     const auto retired = pool.remove_placement(root.id);
     check(retired.size() == depth && pool.instances().empty() && pool.ownership_bindings() == 0,
           "Deep iterative retirement failed or leaked source ownership");
+}
+void definition_reconciliation() {
+    std::size_t sequence = 0;
+    InstancePool pool{DefinitionSnapshot{fixture()},{},generator(sequence)};
+    const auto root = pool.place({id("root-asset"),id("program")});
+    const auto app = pool.instance(root.source.instance).layers.at(id("app-a")).instance;
+    const auto media = pool.instance(root.source.instance).layers.at(id("media-layer")).instance;
+    pool.set_transport(app,{{77,{1,24}},{1,2},true,true});
+    static_cast<void>(pool.bind_input(root.source.instance,id("content"),{id("media"),id("picture")}));
+    auto edited = fixture();
+    edited.assets.at(id("app")).name = "Renamed app";
+    auto& composition = edited.compositions.at(id("root"));
+    composition.outputs.front().name = "Renamed program";
+    std::reverse(composition.layers.begin(),composition.layers.end());
+    composition.canvases.emplace(id("program"),Canvas{3840,2160});
+    const auto before = pool.instances(); const auto bindings = pool.ownership_bindings();
+    check(pool.reconcile_definitions(DefinitionSnapshot{edited}).empty() && pool.instances() == before &&
+          pool.ownership_bindings() == bindings,"Rename/reorder/canvas edit reset live identity, input ownership or transport");
+
+    // A surviving local group keeps its source even when the first layer changes.
+    std::erase_if(composition.layers,[](const Layer& layer){return layer.id == id("app-a");});
+    composition.layers.push_back({id("app-c"),"Third port consumer",StreamKind::video,
+                                 AssetPort{id("app"),id("a")},id("app-group")});
+    check(pool.reconcile_definitions(DefinitionSnapshot{edited}).empty(),"Surviving group unexpectedly retired its source");
+    check(pool.instance(root.source.instance).layers.at(id("app-c")).instance == app &&
+          pool.instance(app).transport == before.at(app).transport,"Local group identity depended on layer order or first layer");
+
+    // Externally owned children survive replacement of the definition's layer.
+    const auto consumer = pool.place_shared({media,id("picture")});
+    auto& layer = *std::find_if(composition.layers.begin(),composition.layers.end(),
+                               [](const Layer& value){return value.id == id("media-layer");});
+    layer.source = AssetPort{id("app"),id("a")};
+    check(pool.reconcile_definitions(DefinitionSnapshot{edited}).empty(),"Explicit external owner was lost during layer replacement");
+    const auto replacement = pool.instance(root.source.instance).layers.at(id("media-layer")).instance;
+    check(replacement != media && replacement != app && pool.instance(media).owner_references == 1,
+          "Independent replacement reused another live source or dropped an external owner");
+    check(pool.remove_placement(consumer.id) == std::vector<Id>{media},"Old layer source did not retire after its last consumer");
+
+    // A new share group is explicit new state, rather than an arbitrary old playhead.
+    layer.shared_group = id("new-group");
+    const auto retired = pool.reconcile_definitions(DefinitionSnapshot{edited});
+    check(retired == std::vector<Id>{replacement} &&
+          pool.instance(root.source.instance).layers.at(id("media-layer")).instance != replacement,
+          "Changing sharing scope silently selected an existing independent playhead");
+    const auto current = pool.instances(); const auto definitions = pool.definitions().data();
+    auto invalid = edited;
+    auto& invalid_root = invalid.compositions.at(id("root"));
+    invalid_root.inputs.clear();
+    std::erase_if(invalid_root.layers,[](const Layer& value){return std::holds_alternative<InputPort>(value.source);});
+    rejects(ErrorCode::missing_reference,[&]{static_cast<void>(pool.reconcile_definitions(DefinitionSnapshot{invalid}));});
+    check(pool.instances() == current && pool.definitions().data() == definitions,
+          "Removing a bound input partially published definitions or source state");
+    invalid = edited;
+    invalid.compositions.at(id("root")).outputs.clear();
+    invalid.compositions.at(id("root")).canvases.clear();
+    // Remove the unrelated definition reference so only a live placement rejects it.
+    invalid.compositions.at(id("outer")).layers.clear();
+    rejects(ErrorCode::missing_reference,[&]{static_cast<void>(pool.reconcile_definitions(DefinitionSnapshot{invalid}));});
+    check(pool.instances() == current && pool.definitions().data() == definitions,
+          "Removing a placed output partially changed state");
+}
+void reconciliation_retirement_capacity_and_allocator() {
+    std::size_t sequence = 0;
+    auto definitions = fixture();
+    InstancePool pool{DefinitionSnapshot{definitions},{},generator(sequence)};
+    const auto root = pool.place({id("root-asset"),id("program")},true);
+    const auto media = pool.instance(root.source.instance).layers.at(id("media-layer")).instance;
+    static_cast<void>(pool.remove_placement(root.id));
+    auto& layers = definitions.compositions.at(id("root")).layers;
+    std::erase_if(layers,[](const Layer& layer){return layer.id == id("media-layer");});
+    definitions.assets.erase(id("media"));
+    check(pool.reconcile_definitions(DefinitionSnapshot{definitions}) == std::vector<Id>{media} &&
+          pool.instance(root.source.instance).keep_alive && pool.instance(root.source.instance).owner_references == 0,
+          "Removing an unused definition failed to retire its child or preserve a preloaded root");
+
+    InstancePool limited{DefinitionSnapshot{fixture()},{3,4,16},generator(sequence)};
+    const auto placed = limited.place({id("root-asset"),id("program")});
+    auto replacement = fixture();
+    replacement.compositions.at(id("root")).layers.back().source = AssetPort{id("app"),id("a")};
+    const auto before = limited.instances();
+    rejects(ErrorCode::capacity_exceeded,[&]{static_cast<void>(limited.reconcile_definitions(DefinitionSnapshot{replacement}));});
+    check(limited.instances() == before && limited.placements().at(placed.id) == placed,
+          "Replacement did not reserve peak capacity before retiring the old source");
+
+    InstancePool allocated{DefinitionSnapshot{fixture()},{},[next = 0]() mutable {return Id{"owned-"+std::to_string(++next)};}};
+    const auto snapshot = allocated;
+    const auto first = allocated.place({id("media"),id("picture")});
+    allocated = snapshot;
+    const auto next = allocated.place({id("media"),id("picture")});
+    check(first.id != next.id && first.source.instance != next.source.instance,
+          "Restoring a snapshot rewound the allocator and reused issued identities");
 }
 }
 int main() {
     try {
         independent_and_shared_transport(); nested_scopes(); input_binding_cycles_and_rollback();
         lifecycle_capacity_and_invalid_intent(); deep_instantiation_and_retirement();
+        definition_reconciliation(); reconciliation_retirement_capacity_and_allocator();
         std::cout << "Passed portable source-instance ownership contracts\n"; return 0;
     } catch (const std::exception& error) {
         std::cerr << "Source-instance contract failed: " << error.what() << '\n'; return 1;

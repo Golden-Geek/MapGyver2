@@ -67,6 +67,9 @@ public:
     [[nodiscard]] std::vector<Id> unbind_input(const Id& owner, const Id& input);
     [[nodiscard]] std::vector<Id> set_keep_alive(const Id& instance, bool keep_alive);
     void set_transport(const Id& instance, TransportIntent intent);
+    // Reconcile definition-owned children by stable scope/layer/share-group IDs.
+    // Replacements reserve capacity before old scopes retire; failure is atomic.
+    [[nodiscard]] std::vector<Id> reconcile_definitions(DefinitionSnapshot definitions);
     [[nodiscard]] const SourceInstance& instance(const Id& id) const;
     [[nodiscard]] const std::map<Id,SourceInstance>& instances() const noexcept { return instances_; }
     [[nodiscard]] const std::map<Id,Placement>& placements() const noexcept { return placements_; }
@@ -74,6 +77,7 @@ public:
     [[nodiscard]] const DefinitionSnapshot& definitions() const noexcept { return definitions_; }
 private:
     [[nodiscard]] Id fresh_id();
+    [[nodiscard]] Id create_instance(const Id& asset, bool keep_alive);
     [[nodiscard]] Id instantiate(const Id& asset, bool keep_alive);
     [[nodiscard]] const Port& input_port(const Id& owner, const Id& port) const;
     [[nodiscard]] const Port& output_port(const InstancePort& source) const;
@@ -83,7 +87,9 @@ private:
     void validate_live_graph() const;
     DefinitionSnapshot definitions_;
     InstanceLimits limits_;
-    IdGenerator ids_;
+    // Allocation context survives candidate/history copies; restoring a model
+    // snapshot must not rewind a stateful ID allocator and reuse issued IDs.
+    std::shared_ptr<IdGenerator> ids_;
     std::map<Id,SourceInstance> instances_;
     std::map<Id,Placement> placements_;
     std::size_t bindings_ = 0;

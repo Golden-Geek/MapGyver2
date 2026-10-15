@@ -31,9 +31,14 @@ adapters can have retained intent without claiming readiness or decoded frames.
 Actual decoder position/status remains a separate runtime report.
 
 The pool has one control owner and is pinned to an immutable definition revision.
-It is not a render-thread data source. Command-driven definition editing must
-reconcile scoped instance ownership and publish separately compiled immutable
-render state; definition rename/reorder must preserve live IDs and transport.
+It is not a render-thread data source. reconcile_definitions builds a candidate
+ownership graph: unchanged composition scope/layer/share-group IDs retain their
+instances and transport intent through rename/reorder. Changed asset or sharing
+scope creates independent state; surviving external owners and keep-alive roots
+retain their source. Removed bound inputs/outputs reject the edit. Replacement
+reserves peak instance capacity before old sources retire. Snapshot copies share
+the ID allocation context, so undo cannot rewind a stateful allocator. Native
+resource preparation and immutable render-state publication remain separate.
 
 Canonical parameter descriptors/commands, advanced mapping and persistence
 are subsequent slices; no empty backend/plugin abstractions are
