@@ -39,3 +39,12 @@ Windows SDK headers/import libraries for local compilation; these are SDK
 prerequisites, not an authorization to distribute SDK files. No proprietary
 runtime is committed or bundled. The fixture manifest pins the official SDK
 archive and source license hashes; retain that notice with any fixture package.
+
+The optional decoder experiment adds FFmpeg 9.0.2#1 with avcodec/core only;
+actual configured/runtime license is LGPL-2.1-or-later. GPL/nonfree and external
+codec features are disabled. [Decoder inventory](decoder-dependencies.json)
+records the six additional resolved packages and archive/notice hashes. pkgconf
+has mixed per-file terms (including BSD-4-Clause and an Autoconf macro exception)
+and remains a host build tool, never an app runtime. Meson's acquired tool uses
+Apache-2.0; the installed vcpkg helper uses MIT. The test MPEG-2 media is generated
+by newly authored code and its exact encoded bytes are hashed per run.

@@ -82,6 +82,9 @@ The `windows-spout` profile also builds the bgfx/Spout participant and a separat
 Release-only peer against pinned official SDK inputs. Windows CI compiles both
 SDK versions; it does not execute the manual native GPU contract. The wrapper
 downloads only checksum-verified fixture inputs under ignored out/qualification.
+The `windows-decode` profile adds pinned FFmpeg avcodec/core and a strict native
+D3D11VA decoder/import probe. Windows CI compiles it and checks its version CLI;
+the real decode/GPU pixel and fallback-refusal contract remains manual.
 
 Run `python tools/validate_plan.py` for document/backlog validation and
 `python tools/show_milestone.py Mxx` for focused milestone contracts. These

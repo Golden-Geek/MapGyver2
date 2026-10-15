@@ -18,7 +18,7 @@ from build_metadata import source_identity
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--preset", required=True, choices=("windows-local", "windows-ci", "windows-graphics", "windows-bgfx", "windows-spout", "portable-ci"))
+    parser.add_argument("--preset", required=True, choices=("windows-local", "windows-ci", "windows-graphics", "windows-bgfx", "windows-spout", "windows-decode", "portable-ci"))
     parser.add_argument("--configuration", default="Release", choices=("Debug", "Release"))
     parser.add_argument("--skip-bootstrap", action="store_true", help="Use an already bootstrapped pinned dependency root")
     args = parser.parse_args()
@@ -106,6 +106,8 @@ def main():
             run("spout-participant-version", [build / "experiments/graphics" / args.configuration / "mapgyver-spout-participant.exe", "--version"])
             evidence["spoutReferenceInputs"] = json.loads((sdk_root / "inputs.json").read_text(encoding="utf-8"))
             evidence["spoutReferenceConfiguration"] = "Release"
+        if cached("PM_BUILD_DECODER_EXPERIMENT") == "ON":
+            run("decoder-probe-version", [build / "experiments/graphics" / args.configuration / "mapgyver-decoder-probe.exe", "--version"])
         run("test", ["ctest", "--test-dir", build, "-C", args.configuration,
                      "--output-on-failure", "--no-tests=error", "-LE", "hardware",
                      "--output-junit", reports / "test-results.xml"])

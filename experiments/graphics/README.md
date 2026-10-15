@@ -87,3 +87,39 @@ non-keyed fixture, not arbitrary peers or physical transfer counters. This offli
 diagnostic allocates and reads back; it is not the production render deadline path.
 Cross-adapter sharing, crash/device-loss recovery, physical scanout, decoder import
 and performance qualification remain separate gates.
+
+## Native decoder texture import
+
+```powershell
+python tools/ci/check.py --preset windows-decode --configuration Release
+python tests/hardware/test_decoder_import.py --executable out/build/windows-decode/experiments/graphics/Release/mapgyver-decoder-probe.exe --report-directory out/reports/decoder-hardware-release
+```
+
+Repeat with Debug and a fresh report directory. Windows CI compiles the pinned
+FFmpeg avcodec/core dependency and probe, and runs only its non-GPU version CLI.
+The native hardware contract is manual. No external codec pack is needed.
+
+The probe creates bounded synthetic MPEG-2 packets and a software decode reference.
+Hardware decode strictly selects AV_PIX_FMT_D3D11; all software fallback formats
+are refused. Each real NV12 decoder texture must belong to bgfx's actual D3D11
+device, carry D3D11_BIND_DECODER, and expose a valid array slice. The native video
+processor converts BT.601 limited-range NV12 to full BGRA8, then bgfx samples it.
+The decoded AVFrame remains retained until conversion/rendering/validation GPU
+use completes, so the decoder cannot reuse its slice early. Three independently
+created decoder generations (128, 256, 128) each verify 18 rational PTS identities
+and every pixel against the software reference. The two-code-value tolerance is
+fixed for color-conversion rounding; it is not an arbitrary visual comparison.
+
+The report includes actual encoded fixture SHA256/bytes, native resource slices,
+applied bgfx frames, separate conversion/draw/validation-copy/readback calls,
+process RAM and DXGI local/nonlocal memory snapshots. First/warm timing percentiles
+are offline CPU wall times for conversion/render/validation, including allocation,
+GPU waits and readback. Receive-frame call time excludes packet submission; these
+are not full decode, show deadline, throughput or physical scanout latency metrics.
+No hardware bus/decoder-engine counter is invented. The negative test refuses the
+offered hardware pixel format and requires the real FFmpeg error, exit 1 and no
+success JSON. Support/failure remains explicit.
+
+This establishes one MPEG-2/NV12 path on the tested GPU. It does not qualify H.264,
+HEVC, AV1, 10-bit/HDR, seeks, dynamic in-stream resize, sustained workloads,
+device-loss recovery or physical multi-output presentation. M01 stays open.

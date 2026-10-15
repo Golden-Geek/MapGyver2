@@ -4,6 +4,12 @@
   "homepage": "https://github.com/Golden-Geek/MapGyver2", "license": "GPL-3.0-or-later",
   "dependencies": [ { "name": "nlohmann-json", "version>=": "3.12.0#2" } ],
   "features": {
+    "decoder-experiments": {
+      "description": "M01 strict native D3D11VA decoding and candidate sampling",
+      "dependencies": [
+        { "name": "ffmpeg", "version>=": "9.0.2#1", "default-features": false, "features": ["avcodec"], "platform": "windows" }
+      ]
+    },
     "spout-experiments": {
       "description": "M01 Windows SpoutDX independent-process feasibility",
       "dependencies": [

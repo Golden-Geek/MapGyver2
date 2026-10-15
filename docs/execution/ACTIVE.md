@@ -49,7 +49,8 @@ Implement the independently testable decoder/import/recovery experiments;
 keep unavailable physical two-output requirements open. Do not tag M01 yet.
 The working tree adds optional windows-decode/FFmpeg avcodec 9.0.2#1, no
 proprietary decoder dependency. Pinned source SHA512 is recorded by the port;
-standard port patches only. Dependency Debug/Release compilation is running.
+standard port patches only. Dependency Debug/Release compilation passed; resolved
+LGPL-2.1-or-later runtime and six additional build package notices were inspected.
 
 The offline probe authors a bounded in-memory MPEG-2 fixture, retains a software
 decode reference, strictly selects D3D11VA with no software fallback, consumes
@@ -57,9 +58,11 @@ the actual native NV12 array slice on the same bgfx GPU, converts via native
 video processor and samples through bgfx. Validation waits/readback are separate.
 It records rational PTS, applied bgfx frame, pixel errors, source/fixture hashes,
 API submissions, RAM/VRAM snapshots and offline first/warm timing percentiles.
-This is a working implementation, not yet compiled or qualified. Next: compile,
-investigate actual failures, add manual positive/strict-format-negative contracts,
-inspect resolved licenses, then local/CI/clean-source evidence. Full C03 still
+Debug/Release native trials passed all 54 frames each (maximum color error 1,
+fixed tolerance 2) and genuine FFmpeg format-refusal errors, exit 1/no success
+payload. Final Debug/Release wrappers passed 5/5 CTest and the non-GPU version
+CLI. Both final GPU contracts passed. Next: commit, hosted/clean-source evidence.
+Full C03 still
 requires physical two-output, paired frame identity/scanout and recovery evidence.
 
 ## Commands
