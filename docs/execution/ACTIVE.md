@@ -56,17 +56,32 @@
 ## Current slice status and next work
 
 1. M03.C02 portable codec/projection: implemented/tested/hosted green.
-2. M03.C02 actual native sockets: implemented/tested clean locally; code and
-   evidence prepared for push. Collect its own hosted Windows/Linux/macOS results.
-3. M03.C03 next: generated TypeScript contracts, authenticated reliable browser
-   WebSocket channel sharing ControlService, packaged Svelte/TypeScript/Vite shell
-   showing actual state/ownership/reconnect, static serving and preview contract.
-   Keep development Vite separate and production assets static. Preview must report
-   unavailable until an actual native renderer/encoder supplies it; no fake frame.
-4. M03.C04: extend actual remote parity/retry/reconnect/traffic tests through the
-   browser channel. Durable save needs M12; rendered applied-frame outcomes need
-   runtime integration. Unsupported operations must reject with a reason.
-5. Discovery/authenticated remote access, UI, encoded preview/rendered application,
+2. M03.C02 native sockets were pushed at 51772cb. CI 38831905273 is terminal:
+   Windows Debug/Release, Linux and plan passed; macOS socket-stall assertion and
+   quality-gate failed. Other macOS contracts/compilation passed. Replace the
+   assumed one-message pressure with bounded actual saturation (up to 16 x 240 KB),
+   retaining the same deadline/partial-drain assertions and socket-buffer readbacks.
+   Windows passes; the next hosted macOS result is still required.
+3. M03.C03 working slice: OS-generated local capability + reliable browser route,
+   generated model types, packaged Svelte shell, immutable preloaded assets,
+   validated edits/history/placements, observers/reconnect and explicit preview
+   503. Native clients pass authorization/UTF-8/preload/lost-ACK/validation/
+   structural/subscription/malformed/deadline phases. Chromium passes three
+   scenarios including accepted-ACK drop/exact replay and separate Vite full
+   reload. The test found/fixed lost engine endpoint on development reload.
+   Final Debug/Release wrappers (21 contracts) and commit/clean source evidence are
+   next. Encoded preview and native output/HMR/shader qualification remain open;
+   do not claim C03/M03 complete. No Node server is required in production.
+   Shutdown review added actual cancellation-completion draining. Initial drain
+   failed because raw socket close left Beast idle/TCP timers armed; disabling
+   the WS timer and using tcp_stream.close fixes the cause. Both focused native
+   fixture tests now pass, including shutdown with live clients. Final wrappers
+   are rerunning; preserve the five-second drain deadline and owned buffers.
+4. M03.C04 current coverage includes actual browser/native create/edit/delete,
+   duplicate replay, revision/owner/readonly/atomic failure and subscriptions.
+   Durable save still needs M12; rendered applied-frame/preview outcomes need
+   runtime integration. Unsupported operations reject with an explicit reason.
+5. Discovery/authenticated remote access, complete editor, encoded preview/rendered application,
    durable saves and prerequisite qualification remain open. No M01/M02/M03 tag.
 
 ## Validation and continuation

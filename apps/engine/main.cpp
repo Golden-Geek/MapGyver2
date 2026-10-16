@@ -13,13 +13,15 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <filesystem>
 
 namespace {
 constexpr std::string_view usage =
     "MapGyver native engine\n"
     "Usage: mapgyver-engine --version\n"
     "       mapgyver-engine --diagnose [--json] [--no-gpu]\n"
-    "       mapgyver-engine --serve --pipe-name <stable-id> [--oscquery] (Windows)\n"
+    "       mapgyver-engine --serve --pipe-name <stable-id> [--oscquery]\n"
+    "         [--editor-dir <static-assets>] [--dev-origin http://127.0.0.1:<port>] (Windows)\n"
     "       mapgyver-engine --help\n";
 
 nlohmann::json diagnose(bool no_gpu) {
@@ -48,12 +50,18 @@ nlohmann::json diagnose(bool no_gpu) {
 }
 } // namespace
 
-int main(int argc, char** argv) {
+int engine_main(int argc, char** argv) {
     try {
         bool version = false, diagnostic = false, json = false, no_gpu = false, help = false, serve = false, oscquery = false;
         std::optional<std::string> pipe_name;
+        mapgyver::network::Options network_options;
         for (int index = 1; index < argc; ++index) {
             const std::string_view arg{argv[index]};
+            if (arg == "--editor-dir" || arg == "--dev-origin") {
+                auto& value = arg == "--editor-dir" ? network_options.editor_directory : network_options.development_origin;
+                if (!value.empty() || index+1 >= argc || std::string_view{argv[index+1]}.empty() || std::string_view{argv[index+1]}.starts_with("--")) {std::cerr << "Missing or repeated network option\n" << usage; return 2;}
+                value = argv[++index]; continue;
+            }
             if (arg == "--pipe-name") {
                 if (pipe_name || index+1 >= argc) {std::cerr << "Missing or repeated pipe name\n" << usage; return 2;}
                 pipe_name = argv[++index];
@@ -76,7 +84,8 @@ int main(int argc, char** argv) {
             *flag = true;
         }
         const auto modes = static_cast<int>(version) + static_cast<int>(diagnostic) + static_cast<int>(help) + static_cast<int>(serve);
-        if ((argc > 1 && modes != 1) || ((json || no_gpu) && !diagnostic) || (pipe_name.has_value() != serve) || (oscquery && !serve)) {
+        if ((argc > 1 && modes != 1) || ((json || no_gpu) && !diagnostic) || (pipe_name.has_value() != serve) || (oscquery && !serve) ||
+            ((!network_options.editor_directory.empty() || !network_options.development_origin.empty()) && (!serve || !oscquery))) {
             std::cerr << "Choose one command; --json and --no-gpu require --diagnose.\n" << usage;
             return 2;
         }
@@ -89,14 +98,20 @@ int main(int argc, char** argv) {
 #ifdef _WIN32
             mapgyver::protocol::ControlService service{mapgyver::control::ProjectController{mapgyver::domain::make_default_project()}};
             std::unique_ptr<mapgyver::network::OscQueryServer> network;
-            if (oscquery) network = std::make_unique<mapgyver::network::OscQueryServer>(service);
+            if (network_options.editor_directory.empty()) {
+                for (const auto& feature : mapgyver::feature_info()) if (feature.name == "ui" && feature.available) {
+                    const auto path = (std::filesystem::path{std::u8string{argv[0],argv[0]+std::char_traits<char>::length(argv[0])}}.parent_path()/"ui").u8string();
+                    network_options.editor_directory.assign(path.begin(),path.end());
+                }
+            }
+            if (oscquery) network = std::make_unique<mapgyver::network::OscQueryServer>(service,network_options);
             mapgyver::windows::serve_named_pipe(service,*pipe_name,[&](const std::string& endpoint) {
                 const auto build = mapgyver::build_info();
                 auto ready = mapgyver::windows::pipe_capabilities();
                 ready.update({{"event","control_ready"},{"transport","windows_named_pipe"},{"endpoint",endpoint},
                     {"sourceRevision",build.revision.empty() ? nlohmann::json(nullptr) : nlohmann::json(build.revision)},
                     {"sourceDirty",build.dirty.has_value() ? nlohmann::json(*build.dirty) : nlohmann::json(nullptr)}});
-                if (network) ready["oscquery"] = network->endpoints();
+                if (network) {ready["oscquery"] = network->endpoints(); ready["editor"] = network->editor_bootstrap();}
                 std::cout << ready.dump() << '\n' << std::flush;
             },[&] {if (network) network->poll();});
 #else
@@ -122,3 +137,6 @@ int main(int argc, char** argv) {
         return 1;
     }
 }
+#ifndef _WIN32
+int main(int argc,char** argv) {return engine_main(argc,argv);}
+#endif

@@ -57,3 +57,16 @@ default transitive Asio features also install context/date-time. Resolved packag
 presence is not a binary linkage/distribution claim. M13 owns the actual binary
 SBOM, notices and matching source/build materials. No proprietary runtime or
 license exception is introduced.
+
+The M03 static editor pins Svelte 5.57.2, Vite 8.3.4, TypeScript 6.0.2,
+vite-plugin-svelte 7.3.1, svelte-check 4.7.6 and Playwright 1.64.1. The
+[npm source inventory](editor-dependencies.json) retains lockfile integrity,
+package license metadata, installed notice hashes and optional platform packages.
+Uninstalled platform packages are not qualified by metadata. Runtime Svelte,
+esm-env and clsx have inspected MIT notices copied beside the static editor;
+the application GPL license is also copied. TypeScript/Playwright use Apache-2.0;
+Lightning CSS and its native bindings use MPL-2.0 and are development build tools,
+not application runtime dependencies. Other resolved licenses are MIT/ISC/BSD-3-Clause.
+Node/npm, Chromium and Playwright's FFmpeg download remain development/test inputs,
+never installed with the native application. This source inventory is not the M13
+distributed binary/bundle SBOM or its matching source package.

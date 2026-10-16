@@ -15,6 +15,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--engine", required=True, type=Path)
 parser.add_argument("--source", required=True, type=Path)
 parser.add_argument("--configuration", required=True)
+parser.add_argument("--ui-built", choices=['0', '1'], default='0')
 args, remaining = parser.parse_known_args()
 
 def validate(value, schema, document, path="$Report"):
@@ -93,9 +94,10 @@ class Diagnostics(unittest.TestCase):
         report = self.report()
         self.assertEqual(report["gpu"], {"status": "unavailable", "reason": "gpu_probe_not_implemented"})
         self.assertEqual(set(report["features"]), {"platform", "media", "ui", "hardwareTests", "ndi"})
-        for feature in report["features"].values():
-            self.assertIs(feature["configured"], False)
-            self.assertIs(feature["available"], False)
+        for name, feature in report["features"].items():
+            expected = name == 'ui' and args.ui_built == '1'
+            self.assertIs(feature["configured"], expected)
+            self.assertIs(feature["available"], expected)
             self.assertTrue(feature["reason"])
         self.assertEqual(report["features"]["ndi"]["reason"], "owner_approval_required")
 
@@ -107,7 +109,10 @@ class Diagnostics(unittest.TestCase):
                       ("--pipe-name", "unused"), ("--serve", "--pipe-name", "../invalid"),
                       ("--serve", "--pipe-name", "one", "--pipe-name", "two"),
                       ("--serve", "--pipe-name", "one", "--diagnose"), ("--oscquery",),
-                      ("--diagnose", "--oscquery"), ("--serve", "--pipe-name", "one", "--oscquery", "--oscquery")]:
+                      ("--diagnose", "--oscquery"), ("--serve", "--pipe-name", "one", "--oscquery", "--oscquery"),
+                      ("--editor-dir",), ("--dev-origin",), ("--diagnose", "--editor-dir", "unused"),
+                      ("--serve", "--pipe-name", "one", "--editor-dir", "unused"),
+                      ("--serve", "--pipe-name", "one", "--oscquery", "--dev-origin", "--help")]:
             with self.subTest(flags=flags):
                 result = self.run_cli(*flags)
                 self.assertEqual(result.returncode, 2)

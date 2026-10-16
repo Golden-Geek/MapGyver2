@@ -8,7 +8,7 @@
       "toolchainFile": "${sourceDir}/out/deps/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "cacheVariables": {
         "BUILD_TESTING": "ON", "PM_BUILD_PLATFORM": "OFF", "PM_BUILD_MEDIA": "OFF",
-        "PM_BUILD_UI": "OFF", "PM_BUILD_HARDWARE_TESTS": "OFF", "PM_BUILD_NDI": "OFF"
+        "PM_BUILD_UI": "ON", "PM_BUILD_HARDWARE_TESTS": "OFF", "PM_BUILD_NDI": "OFF"
       }
     },
     {

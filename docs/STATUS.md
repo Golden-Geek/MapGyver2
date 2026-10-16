@@ -26,8 +26,11 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
   builds. The Windows engine now serves bounded named-pipe control; independent
   native client/fault tests pass locally. OSCQuery HTTP/UDP/WebSocket loopback
   transport and registry parity now have independent native socket tests; remote
-  authorization/discovery, browser UI, native applied frames and durable saving
-  remain open.
+  authorization/discovery remain open. A capability-bound local browser channel
+  and packaged Svelte shell now have native socket/Chromium tests. Actual encoded
+  preview/native applied frames, complete editor workflows and durable saving
+  remain open. Socket CI found a macOS single-message backpressure fixture failure;
+  the bounded saturation fix awaits its own hosted verification.
 - Open product decisions: current NDI licensing/distribution path and exact reference hardware/workload budgets.
 - Later native targets: Windows ARM64, Linux x64/PipeWire, macOS ARM64/Syphon, Linux ARM64/Raspberry Pi.
 - Separate optional target: 32-bit Linux armhf.

@@ -30,7 +30,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
       - name: Build and test native Windows contracts
+        # Node is a build/test tool; production serves static assets.
         run: python tools/ci/check.py --preset windows-ci --configuration ${{ matrix.configuration }}
       - name: Retain source, environment, command and test evidence
         if: always()
@@ -56,6 +62,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
       - name: Build and test native portable core
         run: python3 tools/ci/check.py --preset portable-ci --configuration Release
       - name: Retain source, environment, command and test evidence

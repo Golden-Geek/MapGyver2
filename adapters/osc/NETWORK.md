@@ -26,11 +26,13 @@ does not acquire deduplication or reliable delivery; structural operations carry
 their explicit authored revision. All writes use the same domain validator.
 
 HTTP Host must match the bound loopback endpoint (`127.0.0.1` or `localhost`
-with its port). Requests with Origin are rejected. This adapter has no browser
-editing channel, CORS authorization, TLS, authenticated remote endpoint or Bonjour
-advertisement. Those capabilities remain open rather than being inferred from a
-local socket test. The upcoming editor channel needs its own concrete access
-policy and reliable sessions. Unknown configured source adapters remain visible.
+with its port). Same-origin HTTP requests are allowed; cross-origin HTTP and browser
+bare-OSC upgrades reject. The separate capability-bound `/control` browser channel
+and preloaded `/editor/` assets follow [ADR-020](../../docs/adr/ADR-020-local-browser-control.md)
+and [editor instructions](../../ui/README.md). It shares ControlService while keeping
+private bootstrap credentials out of OSCQuery metadata. TLS, individually
+authenticated remote users and Bonjour remain open. Unknown configured adapters
+remain visible. `/preview` currently returns explicit 503/unavailable, never a fake frame.
 
 Capacity and liveness policy:
 
@@ -43,6 +45,9 @@ Capacity and liveness policy:
   deadline. Capacity or deadline failure closes that peer. Outstanding handlers
   retain exact buffer ownership through cancellation/completion; no buffer reuse
   based only on requesting cancellation.
+- Shutdown drains actual cancelled completion handlers for up to 5 s while all
+  member/peer buffers remain alive. An incomplete drain fails the owned process;
+  it never frees a still-pending buffer to continue shutdown.
 - A valid model value can exceed OSC's 256 KiB per-string encoding capacity.
   That subscriber closes with a notification-rejection counter; the accepted
   model edit and healthy clients continue, and HTTP can still query the value.

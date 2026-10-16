@@ -14,6 +14,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
 from build_metadata import source_identity
+from build_ui import npm_command
 
 
 def main():
@@ -111,6 +112,13 @@ def main():
         if cached("PM_BUILD_BGFX_EXPERIMENT") == "ON":
             run("frame-set-probe-version", [build / "experiments/graphics" / args.configuration / "mapgyver-frame-set-probe.exe", "--version"])
             run("window-probe-version", [build / "experiments/graphics" / args.configuration / "mapgyver-window-probe.exe", "--version"])
+        if cached("PM_BUILD_UI") == "ON":
+            run("node-version", ["node", "--version"])
+            run("npm-version", npm_command("--version"))
+            install = npm_command("--prefix", str(ROOT/"ui"), "exec", "--", "playwright", "install", "chromium")
+            if platform.system() == "Linux" and evidence["hosted"]:
+                install.append("--with-deps")
+            run("browser-test-inputs", install, timeout=600)
         run("test", ["ctest", "--test-dir", build, "-C", args.configuration,
                      "--output-on-failure", "--no-tests=error", "-LE", "hardware",
                      "--output-junit", reports / "test-results.xml"])

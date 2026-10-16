@@ -1,0 +1,21 @@
+{
+  "name": "mapgyver-editor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
+    "check": "svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
+    "build": "vite build",
+    "test": "playwright test"
+  },
+  "dependencies": {"svelte": "5.57.2"},
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "7.3.1",
+    "@playwright/test": "1.64.1",
+    "svelte-check": "4.7.6",
+    "typescript": "6.0.2",
+    "vite": "8.3.4"
+  }
+}

@@ -42,7 +42,7 @@ foreach(variable IN LISTS cache_variables)
     message(FATAL_ERROR "Unknown MapGyver feature selection: ${variable}")
   endif()
 endforeach()
-foreach(feature PLATFORM MEDIA UI HARDWARE_TESTS NDI)
+foreach(feature PLATFORM MEDIA HARDWARE_TESTS NDI)
   if(PM_BUILD_${feature})
     message(FATAL_ERROR "PM_BUILD_${feature} is not implemented/qualified yet; it cannot be silently enabled.")
   endif()
@@ -69,20 +69,29 @@ target_compile_definitions(mapgyver_core PRIVATE MAPGYVER_BUILD_CONFIGURATION="$
 add_subdirectory(libs/domain)
 add_subdirectory(libs/control)
 add_subdirectory(libs/protocol)
-add_library(mapgyver_network STATIC adapters/osc/network.cpp)
+add_library(mapgyver_network STATIC adapters/osc/network.cpp adapters/osc/capability.cpp)
 target_include_directories(mapgyver_network PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(mapgyver_network PUBLIC mapgyver_protocol PRIVATE Boost::beast)
 if(WIN32)
   target_compile_definitions(mapgyver_network PRIVATE _WIN32_WINNT=0x0A00)
+  target_link_libraries(mapgyver_network PRIVATE bcrypt)
 endif()
 if(MSVC)
   target_compile_options(mapgyver_network PRIVATE /bigobj)
 endif()
 add_executable(mapgyver_engine apps/engine/main.cpp)
 set_target_properties(mapgyver_engine PROPERTIES OUTPUT_NAME mapgyver-engine)
+if(PM_BUILD_UI)
+  add_custom_target(mapgyver_ui
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/build_ui.py"
+      --output "$<TARGET_FILE_DIR:mapgyver_engine>/ui"
+    COMMENT "Build and check packaged static MapGyver editor" VERBATIM)
+  add_dependencies(mapgyver_engine mapgyver_ui)
+  install(DIRECTORY "$<TARGET_FILE_DIR:mapgyver_engine>/ui/" DESTINATION bin/ui)
+endif()
 target_link_libraries(mapgyver_engine PRIVATE mapgyver_core mapgyver_protocol mapgyver_network nlohmann_json::nlohmann_json)
 if(WIN32)
-  target_sources(mapgyver_engine PRIVATE adapters/windows/pipe_service.cpp)
+  target_sources(mapgyver_engine PRIVATE adapters/windows/pipe_service.cpp adapters/windows/entry.cpp)
   target_include_directories(mapgyver_engine PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   target_link_libraries(mapgyver_engine PRIVATE advapi32)
 endif()
@@ -101,8 +110,24 @@ if(PM_BUILD_GRAPHICS_EXPERIMENTS)
   add_subdirectory(experiments/graphics)
 endif()
 if(BUILD_TESTING)
+  add_test(NAME ui.generated-contracts COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/generate_types.py" --check)
   add_executable(mapgyver_network_fixture tests/protocol/network_fixture.cpp)
+  if(WIN32)
+    target_sources(mapgyver_network_fixture PRIVATE adapters/windows/entry.cpp)
+    target_compile_definitions(mapgyver_network_fixture PRIVATE MAPGYVER_ENTRYPOINT=fixture_main)
+  endif()
   target_link_libraries(mapgyver_network_fixture PRIVATE mapgyver_network mapgyver_core)
+  if(PM_BUILD_UI)
+    if(WIN32)
+      set(ui_process --engine "$<TARGET_FILE:mapgyver_engine>")
+    else()
+      set(ui_process --fixture "$<TARGET_FILE:mapgyver_network_fixture>")
+    endif()
+    add_test(NAME ui.browser COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ui.py"
+      ${ui_process} --assets "$<TARGET_FILE_DIR:mapgyver_engine>/ui"
+      --report "${CMAKE_CURRENT_SOURCE_DIR}/out/reports/ui-$<CONFIG>")
+    set_tests_properties(ui.browser PROPERTIES TIMEOUT 120)
+  endif()
   if(MSVC)
     target_compile_options(mapgyver_network_fixture PRIVATE /W4 /WX /permissive- /utf-8)
   else()
@@ -113,17 +138,27 @@ if(BUILD_TESTING)
       --fixture "$<TARGET_FILE:mapgyver_network_fixture>"
       --report "${CMAKE_CURRENT_SOURCE_DIR}/out/reports/network-$<CONFIG>.json")
   set_tests_properties(protocol.network PROPERTIES TIMEOUT 120)
+  add_test(NAME protocol.browser-network
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/protocol/test_browser_transport.py"
+      --fixture "$<TARGET_FILE:mapgyver_network_fixture>"
+      --report "${CMAKE_CURRENT_SOURCE_DIR}/out/reports/browser-network-$<CONFIG>.json")
+  set_tests_properties(protocol.browser-network PROPERTIES TIMEOUT 90)
   if(WIN32)
     add_test(NAME protocol.engine-network
       COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/protocol/test_network.py"
         --engine "$<TARGET_FILE:mapgyver_engine>"
         --report "${CMAKE_CURRENT_SOURCE_DIR}/out/reports/engine-network-$<CONFIG>.json")
     set_tests_properties(protocol.engine-network PROPERTIES TIMEOUT 120)
+    add_test(NAME protocol.engine-browser-network
+      COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/protocol/test_browser_transport.py"
+        --engine "$<TARGET_FILE:mapgyver_engine>"
+        --report "${CMAKE_CURRENT_SOURCE_DIR}/out/reports/engine-browser-network-$<CONFIG>.json")
+    set_tests_properties(protocol.engine-browser-network PROPERTIES TIMEOUT 90)
   endif()
   add_test(NAME diagnostics.contract
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_diagnostics.py"
       --engine "$<TARGET_FILE:mapgyver_engine>" --source "${CMAKE_CURRENT_SOURCE_DIR}"
-      --configuration "$<CONFIG>")
+      --configuration "$<CONFIG>" --ui-built "$<BOOL:${PM_BUILD_UI}>")
   add_test(NAME build.source-identity
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_build_metadata.py"
       --script "${CMAKE_CURRENT_SOURCE_DIR}/tools/build_metadata.py")

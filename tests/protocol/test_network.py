@@ -55,27 +55,34 @@ def drain_closed(stream):
 
 
 class WebSocket:
-    def __init__(self, port, small=False, origin=None):
+    def __init__(self, port, small=False, origin=None, path='/', capability=None, expected_status=101):
         self.socket = socket.socket()
         if small:
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 1024)
         self.socket.settimeout(8)
         self.socket.connect(('127.0.0.1', port))
         key = base64.b64encode(uuid.uuid4().bytes).decode('ascii')
-        request = (f'GET / HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nUpgrade: websocket\r\n'
+        request = (f'GET {path} HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nUpgrade: websocket\r\n'
                    f'Connection: Upgrade\r\nSec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\n')
         if origin:
             request += 'Origin: '+origin+'\r\n'
+        if capability is not None:
+            request += 'Sec-WebSocket-Protocol: mapgyver.control.v1, token.'+capability+'\r\n'
         self.socket.sendall((request+'\r\n').encode('ascii'))
         response = bytearray()
         while not response.endswith(b'\r\n\r\n'):
             response.extend(self.exact(1))
             assert len(response) <= 16384
-        assert response.startswith(b'HTTP/1.1 101'), response
+        assert response.startswith(f'HTTP/1.1 {expected_status}'.encode()), response
+        self.response = bytes(response)
+        if expected_status != 101:
+            return
         accept = base64.b64encode(hashlib.sha1((key+'258EAFA5-E914-47DA-95CA-C5AB0DC85B11').encode()).digest())
         headers = {key.lower(): value.strip() for line in bytes(response).split(b'\r\n')[1:] if b':' in line
                    for key, value in [line.split(b':', 1)]}
         assert headers[b'sec-websocket-accept'] == accept, response
+        if path == '/control':
+            assert headers[b'sec-websocket-protocol'] == b'mapgyver.control.v1'
 
     def exact(self, size):
         data = bytearray()
@@ -335,15 +342,25 @@ def run(args):
             slow.message({'COMMAND': 'LISTEN', 'DATA': locator})
             slow.barrier()
             baseline = info()['websocketWriteTimeouts']
-            large = 'x'*200000
-            writer.frame(2, osc(locator, large))
-            until(lambda: value(locator) == large)
+            # Socket autotuning differs across OSes. Fill real flow-control
+            # capacity rather than assuming one 200 KB message must stall.
+            # Sixteen 240 KB messages remain below the 4 MiB queue capacity even
+            # if none complete. A whole-write timeout is still mandatory.
+            sent = 0
+            receive_buffer = slow.socket.getsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF)
+            for index in range(16):
+                if info()['websocketWriteTimeouts'] > baseline:
+                    break
+                large = str(index).zfill(4)+'x'*239996
+                writer.frame(2, osc(locator, large))
+                until(lambda: value(locator) == large)
+                sent += len(osc(locator, large))
             until(lambda: info()['websocketWriteTimeouts'] > baseline, timeout=7)
             # Verify an actual socket EOF after draining the bounded kernel data.
             drained, close_class = drain_closed(slow.socket)
-            assert drained < len(osc(locator, large)), 'The write completed; this was not a stalled partial frame'
+            assert drained < sent, 'All writes completed; this was not a stalled partial frame'
             writer.barrier()
-            phases.append({'name': 'actual-kernel-write-stall-deadline-healthy-client-progress', 'status': 'passed', 'drainedBytes': drained, 'closeClass': close_class})
+            phases.append({'name': 'actual-kernel-write-stall-deadline-healthy-client-progress', 'status': 'passed', 'sentBytes': sent, 'drainedBytes': drained, 'closeClass': close_class, 'clientReceiveBufferBytes': receive_buffer, 'serverSendBufferBytes': info()['socketSendBufferObservedBytes']})
             partial = socket.create_connection(('127.0.0.1', port), timeout=8)
             clients.append(partial)
             partial.sendall(b'GET / HTTP/1.1\r\nHost: ')
@@ -385,8 +402,10 @@ def run(args):
             writer.barrier()
             assert info()['peerLimit'] == endpoint['peerLimit']
             phases.append({'name': 'actual-peer-capacity-refusal-existing-client-progress-recovery', 'status': 'passed', 'heldPartialRequests': len(held)})
+            public_ready = copy.deepcopy(ready)
+            public_ready.pop('editor', None)
             result = {'schemaVersion': 1, 'evidenceClass': 'native-loopback-sockets-independent-stdlib-clients',
-                      'ready': ready, 'phases': phases, 'scope': 'Actual HTTP/UDP/WebSocket sockets. Fixture ownership grant is test-only; engine mode grants over actual ACL-protected named pipe. No remote, Bonjour, GPU or durable-save qualification.'}
+                      'ready': public_ready, 'readyOmittedFields': ['editor'], 'phases': phases, 'scope': 'Actual HTTP/UDP/WebSocket sockets. Fixture ownership grant is test-only; engine mode grants over actual ACL-protected named pipe. No remote, Bonjour, GPU or durable-save qualification.'}
             args.report.write_text(json.dumps(result, indent=2)+'\n', encoding='utf-8')
             print(f'Passed {len(phases)} native network phases')
         finally:
