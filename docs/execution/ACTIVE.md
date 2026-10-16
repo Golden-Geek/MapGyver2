@@ -170,7 +170,8 @@ M04.C01 current working slice:
    regressions, dirty=false, in M04-native-target-binding-local.json. Its patch
    bytes match the committed Git blob; source/notice hashes are retained in
    docs/licenses/bgfx-native-import.json. Published at 8546a55; CI 38874570680
-   is running. Prepared composition graph banks are now implemented: native
+   is fully green on Windows Debug/Release, Linux/macOS, plan and quality-gate.
+   Prepared composition graph banks are now implemented: native
    textures/exports/images allocate on preparation; each owner frame performs
    one placeholder or import/framebuffer step. A frame-boundary container/node-
    route swap preserves the clock, then actual old-GPU completion gates bounded
@@ -182,8 +183,13 @@ M04.C01 current working slice:
    composition graph edit/undo pass actual GPU/browser-loss checks. Release
    graph-bank checks also pass. Loaded unavailable-source recovery clears actual
    status in a separate 120-frame/three-capture run. Both configurations pass
-   thirteen main engine phases/900 frames and six adapter graph goldens. Finish
-   clean-source regressions/evidence and commit.
+   thirteen main engine phases/900 frames and six adapter graph goldens. Code
+   4b93b39282689841e8abe0547f9240f9d66c8121 has clean Debug/Release 23/23,
+   all graph/engine/source-recovery/compositor/window checks, dirty=false, retained
+   in M04-graph-handoff-local.json. Publish this tested slice/evidence. Next
+   implement native window target creation/replacement/mode/binding changes and
+   C03 many-to-many quad mapping. Fix the adapter probe's older top-level scope
+   text when extending its scenarios; the new graphHandoff subsection is exact.
    Window replacement and C03 mapping remain required, not covered by graph banks.
    C03 homography/masks/color rules, encoded preview and C04 full scenarios remain.
 
