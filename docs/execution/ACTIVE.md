@@ -75,17 +75,15 @@ M04.C01 current working slice:
    hardware identity/capacity checks and prepared authored shader binaries.
    Source uploads cache by resource/generation. Dense pass views support hundreds
    of independent leaves; empty branches share a transparent constant.
-3. Passed before code commit: windows-render Debug/Release wrappers, 22 contracts;
-   Debug/Release actual GPU eight cases/160 frames/sixteen captures each,
-   tolerance 2/255. Final capacity preflight compiles in both configurations.
-   Release exposed native capture COM references outliving the unloaded D3D11
-   module; release the extra refs before bgfx shutdown while bgfx retains ownership.
-   Both GPU runs now pass with normal process exit. Next retain clean committed-
-   source Debug/Release wrappers and hardware reports at the actual source SHA.
+3. Code `c8a986054fca05f5328979d26a001e0e7817bf89`: clean windows-render Debug/Release wrappers
+   each pass 22/22, dirty=false. Actual GPU runs each pass eight cases/160 frames/
+   sixteen captures, maximum error 1/255 at fixed tolerance 2/255, normal exit.
+   M04-C01-local.json retains source/binary/shader/compiler/environment/JUnit and
+   GPU evidence. Release cleanup regression was fixed by dropping extra capture
+   COM references before bgfx unloads D3D11; bgfx retains actual resource ownership.
 4. Six additional offline bgfx tool dependencies/notices inspected and inventoried.
    No application exception/proprietary runtime. Source inventory is not M13 SBOM.
-5. Next: commit tested C01, collect clean-source evidence, push and inspect source
-   CI; then C02 persistent native targets and actual engine output/runtime handoff.
+5. Next: push tested C01/evidence and inspect source CI; then C02 persistent native targets and actual engine output/runtime handoff.
    C03 quad mapping/masks/color rules and C04 UI-loss/multi-output remain open.
 
 This is static offscreen real-GPU evidence, not the engine's program path. No
