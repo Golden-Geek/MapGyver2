@@ -1,8 +1,8 @@
 # OSC/OSCQuery adapter contract
 
-This portable slice owns wire parsing, typed conversion, metadata projection and
-subscription filtering. It does not open HTTP, UDP or WebSocket sockets. Runtime
-transport/client qualification remains open. [ADR-019](../../docs/adr/ADR-019-oscquery-adapter.md)
+This portable library owns wire parsing, typed conversion, metadata projection
+and subscription filtering. The separate [native transport](../../adapters/osc/NETWORK.md)
+opens HTTP, UDP and WebSocket sockets on the control owner. [ADR-019](../../docs/adr/ADR-019-oscquery-adapter.md)
 records the reviewed proposal/libossia sources and direct-registry choice.
 
 OSC packets use explicit big-endian values and four-byte string/blob padding.
@@ -44,9 +44,9 @@ the editing owner. Structural payloads must match the invoked registered action.
 query implements full/subtree and single-attribute projections, HOST_INFO (path
 independent), known absent attributes, write-only VALUE=204, bad query=400 and
 missing path=404. A URL fragment is disregarded and percent encoding is checked.
-Streaming flags are false by default; a bound implemented transport must enable
-them. In-process projection alone is not a complete OSCQuery service. No Bonjour
-discovery or remote/network success is claimed by these tests.
+Streaming flags are false by default; the bound native transport enables them.
+In-process projection alone is not a complete OSCQuery service. No Bonjour or
+remote success is claimed by the portable tests.
 
 Subscription accepts only the proposal's LISTEN/IGNORE shape and existing paths.
 Its bounded set is exact: a container subscription does not cover descendants.

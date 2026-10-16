@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include <mapgyver/build_info.hpp>
 #include <mapgyver/protocol/service.hpp>
+#include "adapters/osc/network.hpp"
 #ifdef _WIN32
 #include "adapters/windows/pipe_service.hpp"
 #endif
@@ -18,7 +19,7 @@ constexpr std::string_view usage =
     "MapGyver native engine\n"
     "Usage: mapgyver-engine --version\n"
     "       mapgyver-engine --diagnose [--json] [--no-gpu]\n"
-    "       mapgyver-engine --serve --pipe-name <stable-id> (Windows)\n"
+    "       mapgyver-engine --serve --pipe-name <stable-id> [--oscquery] (Windows)\n"
     "       mapgyver-engine --help\n";
 
 nlohmann::json diagnose(bool no_gpu) {
@@ -49,7 +50,7 @@ nlohmann::json diagnose(bool no_gpu) {
 
 int main(int argc, char** argv) {
     try {
-        bool version = false, diagnostic = false, json = false, no_gpu = false, help = false, serve = false;
+        bool version = false, diagnostic = false, json = false, no_gpu = false, help = false, serve = false, oscquery = false;
         std::optional<std::string> pipe_name;
         for (int index = 1; index < argc; ++index) {
             const std::string_view arg{argv[index]};
@@ -67,6 +68,7 @@ int main(int argc, char** argv) {
             else if (arg == "--no-gpu") flag = &no_gpu;
             else if (arg == "--help") flag = &help;
             else if (arg == "--serve") flag = &serve;
+            else if (arg == "--oscquery") flag = &oscquery;
             if (flag == nullptr || *flag) {
                 std::cerr << "Invalid or repeated argument: " << arg << '\n' << usage;
                 return 2;
@@ -74,7 +76,7 @@ int main(int argc, char** argv) {
             *flag = true;
         }
         const auto modes = static_cast<int>(version) + static_cast<int>(diagnostic) + static_cast<int>(help) + static_cast<int>(serve);
-        if ((argc > 1 && modes != 1) || ((json || no_gpu) && !diagnostic) || (pipe_name.has_value() != serve)) {
+        if ((argc > 1 && modes != 1) || ((json || no_gpu) && !diagnostic) || (pipe_name.has_value() != serve) || (oscquery && !serve)) {
             std::cerr << "Choose one command; --json and --no-gpu require --diagnose.\n" << usage;
             return 2;
         }
@@ -86,14 +88,17 @@ int main(int argc, char** argv) {
         } else if (serve) {
 #ifdef _WIN32
             mapgyver::protocol::ControlService service{mapgyver::control::ProjectController{mapgyver::domain::make_default_project()}};
-            mapgyver::windows::serve_named_pipe(service,*pipe_name,[](const std::string& endpoint) {
+            std::unique_ptr<mapgyver::network::OscQueryServer> network;
+            if (oscquery) network = std::make_unique<mapgyver::network::OscQueryServer>(service);
+            mapgyver::windows::serve_named_pipe(service,*pipe_name,[&](const std::string& endpoint) {
                 const auto build = mapgyver::build_info();
                 auto ready = mapgyver::windows::pipe_capabilities();
                 ready.update({{"event","control_ready"},{"transport","windows_named_pipe"},{"endpoint",endpoint},
                     {"sourceRevision",build.revision.empty() ? nlohmann::json(nullptr) : nlohmann::json(build.revision)},
                     {"sourceDirty",build.dirty.has_value() ? nlohmann::json(*build.dirty) : nlohmann::json(nullptr)}});
+                if (network) ready["oscquery"] = network->endpoints();
                 std::cout << ready.dump() << '\n' << std::flush;
-            });
+            },[&] {if (network) network->poll();});
 #else
             std::cerr << "Windows named-pipe control transport is unavailable on this platform\n"; return 3;
 #endif

@@ -48,3 +48,12 @@ has mixed per-file terms (including BSD-4-Clause and an Autoconf macro exception
 and remains a host build tool, never an app runtime. Meson's acquired tool uses
 Apache-2.0; the installed vcpkg helper uses MIT. The test MPEG-2 media is generated
 by newly authored code and its exact encoded bytes are hashed per run.
+
+The M03 OSCQuery transport adds Boost.Beast/Asio 1.92.0 from the same pinned
+baseline. [Network inventory](network-dependencies.json) retains the resolved
+56-package Boost/build-helper closure, source archive hashes and installed notice
+hashes (BSL-1.0 and MIT). Application transport uses asynchronous callbacks;
+default transitive Asio features also install context/date-time. Resolved package
+presence is not a binary linkage/distribution claim. M13 owns the actual binary
+SBOM, notices and matching source/build materials. No proprietary runtime or
+license exception is introduced.

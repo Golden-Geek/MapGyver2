@@ -2,7 +2,10 @@
   "name": "mapgyver", "version-string": "0.1.0-dev",
   "description": "MapGyver native projection mapping engine",
   "homepage": "https://github.com/Golden-Geek/MapGyver2", "license": "GPL-3.0-or-later",
-  "dependencies": [ { "name": "nlohmann-json", "version>=": "3.12.0#2" } ],
+  "dependencies": [
+    { "name": "nlohmann-json", "version>=": "3.12.0#2" },
+    { "name": "boost-beast", "version>=": "1.92.0" }
+  ],
   "features": {
     "decoder-experiments": {
       "description": "M01 strict native D3D11VA decoding and candidate sampling",

@@ -1,0 +1,679 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-16T00:35:14.937830+00:00",
+  "baseline": "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+  "scope": "Resolved Boost.Beast/Asio dependency closure and installed notices. Default transitive Asio features also install context/date-time; application uses asynchronous callbacks, no stackful coroutines. Matching source/notices remain required for M13 packaging.",
+  "packages": [
+    {
+      "name": "boost-algorithm",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-algorithm",
+      "sourceArchiveSha512": [
+        "59bdbe34e88c35969c1885d7c8856dbbcc521e206c96ae5b505f73d8c2439894afc630db6a82f0fc601e6abcec1a4fb50b596b3c9037bc4aef660f34943a7027"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-align",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-align",
+      "sourceArchiveSha512": [
+        "c2b0d19de3750826c700db23cedbe3ab809beee66e5235bb83054fc000b3637a8191628c950f5833d2b156ea24df5ce731e47dd77e8c64a51234e146e176e9ed"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-array",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-array",
+      "sourceArchiveSha512": [
+        "10308251844e54bd2573c13706ff1167123ddeebdb57476ea4157dd10e9bbaf87fbe65e6db6f1dd1c318d957d7d187d7ae942c6b057dd3e291c445869b275a09"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-asio",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-asio",
+      "sourceArchiveSha512": [
+        "9660b986c164597d571c0acbf5b2de98f8c3876b748a7053c32ad04bfd5e2e6d2f216edeec9f92298522ea7004fd0911bfbc75e868fa9e22a949821dc7378442"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-assert",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-assert",
+      "sourceArchiveSha512": [
+        "9814998329daddb87db3a7b59ec6d6c5c2a8b6bccfcf6626fb621b924c953990084be6fabea344a64f85af13a481546e2cef2270b7b5ff8c3437605d6654dfeb"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-beast",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-beast",
+      "sourceArchiveSha512": [
+        "8b2e9376996d1bc1ab498e73da22dc9518802034f1ee8b6f7b50e2302aae4583af7723d935e24573c7b8de6972a56ca3595cb5ecaeffb0586674440806f5d666"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-bind",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-bind",
+      "sourceArchiveSha512": [
+        "4f45018ed44d6df23e8d1bad3dd4d43ca59ec1da1252743330be5a146f5b51ef77d30e811f130d2726f1881af357d9859b727a805e5db91b70f7a3440b87957a"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-cmake",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-cmake",
+      "sourceArchiveSha512": [
+        "7b15f7f428666b60daccd37c860f139cf1bd3f9ad19dd391134127fa245daaac895248b3415067839f1f8ab029b39a9f8260d93497d9d943f281da15fa21c4e4",
+        "d6078467835dba8932314c1c1e945569a64b065474d7aced27c9a7acc391d52e9f234138ed9f1aa9cd576f25f12f557e0b733c14891d42c16ecdc4a7bd4d60b8"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-compat",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-compat",
+      "sourceArchiveSha512": [
+        "5baa26d4119a9b00ef12f0ca1bf49300a4d7f37dc16d96f4c2b89d5f341425a08337ccebced59dbb7a2f0da63e0b295f9e0462836e1dd0a2a28f8b87e02472f5"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-concept-check",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-concept-check",
+      "sourceArchiveSha512": [
+        "5db6791a932b7533ab11089c022bea54b29426d4d4d08f1e3f5ea2611a3603ecc1566e83c1ab17f15adf4526ac708cb46fa8e8cc04747245bca17ec7fdd6c1c5"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-config",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-config",
+      "sourceArchiveSha512": [
+        "fe36403a2292dfb3496027101e6d101d6553bc31e59393a2339248130553ed10d9153ed37591c6f1601b55059a23dc4a52babf6744e718cb314986049c2fab7c"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-container",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-container",
+      "sourceArchiveSha512": [
+        "f28ed9808b0ff143b979704fb2e432b9e22e86ebc1ceb3f6e7f9ed6be0d686b77e664193ace6bdeaffd6dfa20187bf0a4ae15d6c246040c92732268c0adabe56"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-container-hash",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-container-hash",
+      "sourceArchiveSha512": [
+        "1616cb831e621a344b61dd78af9e894c1fe942da943936676ed1425ba0337a2842f2c57dfcf26de7dad4b77c5434585b1868b415ae157ddc4404288d19e95de5"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-context",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-context",
+      "sourceArchiveSha512": [
+        "56fda97c398cf4d3d40d54da5e50634035bb37c806bc68aba1a28b3af6c3cf3551ddf17c7e9adec29734bf1567dbc9bfc8c0bf4da632a29297f316db095b9aa8"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-conversion",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-conversion",
+      "sourceArchiveSha512": [
+        "18dcb7f2b677ff84709ee034ad047fda15073d8c159e165888908866c9a2d04d973a52c66673babbfc395256d83abef9c8e2bee8f2c6929db204402247c616e7"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-core",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-core",
+      "sourceArchiveSha512": [
+        "b57c6559d374f6f2d26800a274bac61a7d7d4aa8f04c0a563c678d10130e2507f789ba6ebccf3f29311e66057dd1b1bf2d1e73dbf6d0b6cc2997fcc4f1d6f217"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-date-time",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-date-time",
+      "sourceArchiveSha512": [
+        "d3572e9a7ea27e0e21bddea4ab517ba9ff2f3dd2214a51950e3f0d6e1c6a777c7a783c66b6ccac2f9041413ff72f6407ed8d16332d454bfbe7bb6d164b3f6660"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-describe",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-describe",
+      "sourceArchiveSha512": [
+        "a8a93b488a119561be38594afb6de9c804164efcec3c35300d96cc699369dfc21c69b9533ec51a26a4335e7924fd52524e12beb49ad7a44eca9dc835e3378d2d"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-detail",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-detail",
+      "sourceArchiveSha512": [
+        "f924b3394ffc5542113286fa2dbda350864dff483db62d0639693cae83f2d55fb74d032f57092db23a7815cbce03107b26cb497a20a3464d6bfe51b119a77fe4"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-endian",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-endian",
+      "sourceArchiveSha512": [
+        "1a451b9e918af3b29f30079a518b5ab3f82e8a2b1c1ec6a5874e9d22fe625e48c7cc4b5af87cceaa3a8416edec93aa38d96849041c293213a0e9deea4f4731ca"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-exception",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-exception",
+      "sourceArchiveSha512": [
+        "088e0f8d12c1399d450e02c76cded6903fef9b78833321f80a9593f3bf859d4f8126255eb566e64a5bf5b594dffd3d3b408f08af518dccae21c587bd6e35fc3f"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-function",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-function",
+      "sourceArchiveSha512": [
+        "0ed3264a6d689025ef93f38f9ba32ceb83e8fbb7cb17c1fc86e5de0140212beff64e89430b1ba8813d467b1c8474a989ad6a89a85d7238160bd2aa0b7f43b9da"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-function-types",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-function-types",
+      "sourceArchiveSha512": [
+        "ad16bb74c44c2a3104f5513e6a989073d5fe43b649fcfcfd82da6beaf760fe49a3b9d666106ad12a631048cf1081f31aa82dd2c48ff314043d0933b4500fa104"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-fusion",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-fusion",
+      "sourceArchiveSha512": [
+        "05c9c3461a4ffdb37373a7bc542c9cf0433e5cba3870ab36a53fbea65d85488a20a6a55ba1a91a0c96dddb010614aed82593e692867734e2412e5e353ae0f9de"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-headers",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-headers",
+      "sourceArchiveSha512": [
+        "13ca5b7a6fa51da40859635a316763b6efaa3097898b5122c2e8280648753768cb91b8a7a4a83e4aed7f2f06420ad6e1711779b3e96a77a2326ba5e04a4b5f87"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-integer",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-integer",
+      "sourceArchiveSha512": [
+        "8647bc08d172e193777a4c512c061f7358b884a58e70f7cbe88970d6329c4a762eb6de33ffef4345a8705f931c6bbe49da30f2ead2c1f313861ba0cb56b4943c"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-intrusive",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-intrusive",
+      "sourceArchiveSha512": [
+        "0354336128e7547e8bec8d1ec9f91e03bd36531af416e58cbea8778d363eebf4040a8a78d46166676fd40637818b517758fba436847a0a4655a7a2e0d4204203"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-io",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-io",
+      "sourceArchiveSha512": [
+        "fd5fc5ba728f0b2c68d865e738ebaf1c2298b04279d06689d49567706ed44d1bb3abfa2d753a5dae4a38faf4cb236953d98fb1c31feaaeadd0c780de9fa625bb"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-iterator",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-iterator",
+      "sourceArchiveSha512": [
+        "ed5b074e5623ec20aea2bf5e4169564cc53c813a7e6379f774d21315853cb0b6e3105826c31acb388b0c354d4580b1a35c1b1f3cb743d6fbfcdd572c69d31ade"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-lexical-cast",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-lexical-cast",
+      "sourceArchiveSha512": [
+        "0fe59bb233158219920c19aa1d4321ff69a5bfcd9ca6d491531e099d65106c5b135b1c81d0ebf38cf64959009f3c62c9197cc3af52330f154bd89fbe3af4418b"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-logic",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-logic",
+      "sourceArchiveSha512": [
+        "32d872dd5d1dfe557dfdc4d76b99e0f9ebda3b6c1604274a2f2874c4ddd40b017b0587cf139d6e44c928b2f831094ded0c68164c04296e28ad8e030f68a1a269"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-move",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-move",
+      "sourceArchiveSha512": [
+        "0b84b7b583ac7dc89aa8340003351c613610b271e88d33ab2ce097274e349dcd54437c323622592d75944169fd6463ca930a04c52c81dd0807ffa6fc99313e45"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-mp11",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-mp11",
+      "sourceArchiveSha512": [
+        "dc5a89370e2807534de85938c426252b9eeaa3c7f739871e4e57e3acb7e6507090036c96bc8d77f3ab698e1071f3e17935de36707463702fefe853a59378ff2b"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-mpl",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-mpl",
+      "sourceArchiveSha512": [
+        "872ad59455044c96f86b35b23b2f496705ddf0421bc76cbf9025f55dc02bab510d9ead2e2b8726d5cebaa9d75aedc178512768fea827f828bbb7f5e0573693ed"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-numeric-conversion",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-numeric-conversion",
+      "sourceArchiveSha512": [
+        "2bcc9c6b34b7e3ca47cb27ab859ab76e55be7226dc6cd46a4489fd64790578699fb81d0f7c33cca82274babb62acc88251966d9e3045976e9e1543be3e25191a"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-optional",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-optional",
+      "sourceArchiveSha512": [
+        "94ff913504297e534e16dd20ed7608378e008646a729f9773b10c7b63890ea48d314a93c88c57da12bc34ba08cee508007327c06a49a7cd2f07ac78c61de6120"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-pool",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-pool",
+      "sourceArchiveSha512": [
+        "93dddbf90bc86b4ba9fd9aec318eb472b4f3c7e7421c8132bc7e523ebfd023abed0cf55ab33c80875016223a254431a9dda2359deb9653f3e565c46c1a051c1a"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-predef",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-predef",
+      "sourceArchiveSha512": [
+        "e64a7e6608e8c73e1ee4d73a54cbee178e90cba94fe88682badfea810dbbc4de5c312d6566e99dd3ec7e5c311c38a1abf945090c7acffd2f6518269f8ebc2709"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-preprocessor",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-preprocessor",
+      "sourceArchiveSha512": [
+        "c153ada75f4b2fe43d001e5a1e44dec082b51dde94c6ee02c998a30622fc40b691e0f71f9502df900de92fc9eec30640a12b28438c03710a6e17df996b047ed0"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-range",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-range",
+      "sourceArchiveSha512": [
+        "9915698008d40a1e007158953beca9e25fdb041e722676a8a04aa533e6f1bb88fe95f43e37fac4372ac56d22fe24325486ef9a207ea29b3c1c8d63bf80ce5c7a"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-regex",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-regex",
+      "sourceArchiveSha512": [
+        "acbf193d462a12cd079e47d9876ec07774c6673d1886908868584c31f6011f7000b5012aed88778df42d60fb930b45135cc5b6e65f89a8a77f5eb53b7cb9da94"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-smart-ptr",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-smart-ptr",
+      "sourceArchiveSha512": [
+        "e72b5001bdfb1ec49c468094e89e122f19d53b4df389577905db9e4be7f7f8314ed3cc544acc187ebfcaccd2d713a5942fb70020dff59b3f21ab69b855684451"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-static-assert",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-static-assert",
+      "sourceArchiveSha512": [
+        "6953ca096e06d23c15b600f30d9e0efb2e402194a0e3dcb7824e58df0f2cb8e7eee90bddfaf4174e641cabb1cfae78cfe10411f43fd7341f27429a89363fc3d7"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-static-string",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-static-string",
+      "sourceArchiveSha512": [
+        "ecc1a9b6e0a32846afded64cdcf6b60a49f2a0fb1e7740ae45b90813f1fb1fce91f401e39aadab6d996e58ed261daf0bb416a9d383037c7031ec7fdb7595c94c"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-system",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-system",
+      "sourceArchiveSha512": [
+        "006359738833fdbca19a51c038e5d909527dea8c3262b40ec90841b0fc6117c615ebb351247203329f1580830bf6940c0bf89c640bffbfbc727773fd52089d7a"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-throw-exception",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-throw-exception",
+      "sourceArchiveSha512": [
+        "db8b60a1ed193056db2397eea2201784116c90023f7a7ba7a0e0a2968df38b247809f3f174c09969f8f891654e8ce1b2e125c21a4aba2e009a7dbcca65e65da5"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-tokenizer",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-tokenizer",
+      "sourceArchiveSha512": [
+        "0af3c38bf9c72a7c624d37fbb32ea0b081f2d5cff55ee595803d0515a6a6564ce8e42bb83fccbc59a7e755ba60fe1f01b573c71bd09e8ec11a1d930fb2812687"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-tuple",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-tuple",
+      "sourceArchiveSha512": [
+        "043ca23c43021056997f955c8b1d34adbf5c73851d54bc6dd77e57498311d0efc99f6de981ea6546f91b3d8237a8717693e115197fd21686f76eeeffee4d73a7"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-type-index",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-type-index",
+      "sourceArchiveSha512": [
+        "d169c542bb1d3d2a126015a429b219af9d8cecc77aaa48973191dd43e6fe46abf705c376538505cd0508d74702e0d85cbd8d8a0c8aff91ccb8810b75ed03d174"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-type-traits",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-type-traits",
+      "sourceArchiveSha512": [
+        "3d0163fc99691e181c97f830a96b28e03e89209120bbba818795c18bc426cf90e91994925df15bcf48e75c26c253973a49af299f028a4ee71b824fcb212edc31"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-typeof",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-typeof",
+      "sourceArchiveSha512": [
+        "0b39db925e35de9f51f58c5e3afdf20beadf31760633c65348b7b79c6ef095475c0661d5390825be04971cec8b84697336f3402ec8acab40131b5ee7dbd9ca30"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-unordered",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-unordered",
+      "sourceArchiveSha512": [
+        "9b388a718a680bcfc2e5efe51f33727712fceebb40e5be38522a7cf03f8e82685260d6784a8babec64e1d2345247366bf166f90152e3f74f28373cdd0e12406f"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-utility",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-utility",
+      "sourceArchiveSha512": [
+        "887f5c18b939308facf307792a240e470c2224b16741f0b13df052f2760ad4692acb5992608168dd86d7542f219d4627c6fef8b28fe2da442b4bb2c17971f84d"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-variant2",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-variant2",
+      "sourceArchiveSha512": [
+        "30f1802a9cd43d7f9f42fcb60d638498c6550ebb1edc7c531be7fe3a0fdcb808abea7581f22935be4839ff9cd9384110d0369fee2b41d69c34c3a47b9c7b8a66"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "boost-winapi",
+      "version": "1.92.0",
+      "portVersion": 0,
+      "portDeclaredLicense": "BSL-1.0",
+      "installedNoticeSha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/boost-winapi",
+      "sourceArchiveSha512": [
+        "e25986ffa330706068ba38f69f42e25d4ddf4ea3b8240f934f6dbef3bd4d63d380fb63cf6a843e92793378588706d0f0564d7a2474f6d1e36c87e5579b8c4f9b"
+      ],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    },
+    {
+      "name": "vcpkg-boost",
+      "version": "2026-08-21",
+      "portVersion": 0,
+      "portDeclaredLicense": "MIT",
+      "installedNoticeSha256": "1ee376fc340e0aa6ad6a3581c94126e741468705096ac92263048a21daa86460",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/vcpkg-boost",
+      "sourceArchiveSha512": [],
+      "linkageScope": "resolved dependency; only Beast/Asio header paths used by network adapter; not a release binary SBOM"
+    }
+  ]
+}

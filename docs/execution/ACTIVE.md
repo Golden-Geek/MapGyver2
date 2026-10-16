@@ -1,5 +1,17 @@
 # Active execution plan - MapGyver Windows beta
 
+M03.C02 current socket slice: actual Boost.Beast/Asio HTTP/UDP/WebSocket
+loopback adapter, optional --oscquery, single control owner, strict Host/Origin
+policy and explicit pipe editing-owner transfer to shared external OSC channel.
+Independent Python clients pass tree/metadata/parity, atomic UDP rejection,
+fragmented WebSocket exact subscriptions/reconnect, structural PATH_CHANGED,
+actual stalled native write timeout and partial HTTP timeout, oversized-message
+rejection and peer-capacity refusal/recovery. Review added actual pipe edit of a
+valid value above OSC string capacity: only the subscriber closes, and the model
+and healthy IO remain available. Final Debug/Release wrappers are running. No remote/discovery/
+browser/authenticated-network/rendered/durable claim. Next: complete clean-source
+evidence/commit, source CI, then M03.C03 reliable browser channel and Svelte shell.
+
 Current continuation: M03.C02 portable adapter code is
 0680d44dbb62e6e03e5f2416d1afe445d9b14ff4, with clean Debug/Release 15/15
 wrapper results retained in M03-C02-adapter-local.json. Next implementation:

@@ -273,7 +273,7 @@ struct Peer {
     }
 };
 }
-void serve_named_pipe(protocol::ControlService& service,std::string_view name,const std::function<void(const std::string&)>& ready) {
+void serve_named_pipe(protocol::ControlService& service,std::string_view name,const std::function<void(const std::string&)>& ready,const std::function<void()>& poll) {
     static_cast<void>(domain::Id{std::string{name}});
     const std::string endpoint = "\\\\.\\pipe\\MapGyver."+std::string{name};
     const std::wstring wide(endpoint.begin(),endpoint.end()); Security security;
@@ -285,6 +285,7 @@ void serve_named_pipe(protocol::ControlService& service,std::string_view name,co
     struct Handler {bool enabled; ~Handler() {if (enabled) SetConsoleCtrlHandler(console_stop,FALSE);}} handler{console};
     ready(endpoint);
     while (!stopping.load()) {
+        if (poll) poll();
         for (auto& peer : peers) if (peer->tick(service)) {
             peer.reset(); peer = std::make_unique<Peer>(wide,security,false);
         }

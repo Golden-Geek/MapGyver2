@@ -29,10 +29,11 @@ No third-party implementation code is copied into the new codec/projection.
 
 Network transport should use an established HTTP/WebSocket implementation rather
 than another custom framing stack. Boost.Beast/Asio is the selected next transport
-candidate: the pinned vcpkg registry provides 1.92.0 under BSL-1.0. It is not yet a
-linked dependency in this first portable slice. Review and retain every resolved
-package/source/license when adding it; do not infer an installed runtime or
-successful network service from this decision.
+implementation: the pinned vcpkg registry provides 1.92.0 under BSL-1.0. The
+native loopback adapter now uses it, with resolved package/source/license notices
+retained in [network inventory](../licenses/network-dependencies.json). The first
+portable slice added no dependency; the subsequent socket slice adds this closure.
+Native socket tests remain separate from remote/discovery qualification.
 
 Required validation includes independent OSC byte fixtures; complete registry/tree
 inventory and addressing; strict type/access/range checks; exact-path LISTEN/IGNORE

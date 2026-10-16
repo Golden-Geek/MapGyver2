@@ -106,7 +106,8 @@ class Diagnostics(unittest.TestCase):
                       ("--diagnose", "unexpected-file"), ("--serve",), ("--pipe-name",),
                       ("--pipe-name", "unused"), ("--serve", "--pipe-name", "../invalid"),
                       ("--serve", "--pipe-name", "one", "--pipe-name", "two"),
-                      ("--serve", "--pipe-name", "one", "--diagnose")]:
+                      ("--serve", "--pipe-name", "one", "--diagnose"), ("--oscquery",),
+                      ("--diagnose", "--oscquery"), ("--serve", "--pipe-name", "one", "--oscquery", "--oscquery")]:
             with self.subTest(flags=flags):
                 result = self.run_cli(*flags)
                 self.assertEqual(result.returncode, 2)
