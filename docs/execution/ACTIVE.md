@@ -124,8 +124,15 @@ M04.C01 current working slice:
    reports concurrent creation support. All immediate-context/bgfx calls still
    belong to one render owner. Local dirty-source wrappers pass 23/23, and the
    existing compositor/window/900-frame browser-loss checks pass in both configs.
-   Commit this tested preparation foundation, retain clean-source evidence, then
-   implement runtime generation adoption/retirement and graph/window handoff.
+   Code e83b8947a8848ebb2f13dbe5f6edd7664733ebd9 now has clean Debug/Release
+   23/23 and all GPU/engine regressions, dirty=false, retained in
+   M04-preparation-device-local.json. Next implement runtime generation adoption/
+   retirement and graph/window handoff. A first fixed-layout image handoff can
+   prepare immutable sources on the background device, then copy into preallocated
+   mutable sampled textures on the immediate-context owner before drawing. This
+   would avoid per-update bgfx handle/SRV creation, but must report the additional
+   GPU-copy submissions and keep candidates until actual completion. It remains
+   a proposed next experiment, not an implemented/qualified path.
    C03 homography/masks/color rules, encoded preview and C04 full scenarios remain.
 
 The engine now has a static-pattern native program path and actual browser-loss

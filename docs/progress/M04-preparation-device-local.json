@@ -1,0 +1,3636 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-16T06:11:27.915360+00:00",
+  "commitIds": [
+    "M04.C01",
+    "M04.C02"
+  ],
+  "codeRevision": "e83b8947a8848ebb2f13dbe5f6edd7664733ebd9",
+  "sourceDirty": false,
+  "scope": "Actual owned thread-safe D3D11 hardware device, background immutable image preparation, existing native compositor/window/engine/browser-loss regressions. No runtime generation adoption/retirement, graph/window handoff, deadline-budget, physical scanout, device-loss or encoded-preview qualification.",
+  "runs": [
+    {
+      "configuration": "Debug",
+      "environment": {
+        "schemaVersion": 1,
+        "evidenceClass": "native-build-and-non-hardware-tests",
+        "startedUtc": "2026-10-16T06:07:10.186328+00:00",
+        "sourceRevision": "e83b8947a8848ebb2f13dbe5f6edd7664733ebd9",
+        "sourceDirty": false,
+        "hosted": false,
+        "ciRunUrl": null,
+        "host": {
+          "system": "Windows",
+          "release": "11",
+          "version": "10.0.26300",
+          "machine": "AMD64",
+          "python": "3.14.6"
+        },
+        "runner": {
+          "ImageOS": null,
+          "ImageVersion": null,
+          "RUNNER_OS": null,
+          "RUNNER_ARCH": null
+        },
+        "preset": "windows-render",
+        "configuration": "Debug",
+        "dependencyBaseline": "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+        "commands": [
+          {
+            "name": "cmake-version",
+            "command": [
+              "cmake",
+              "--version"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "cmake-version.log"
+          },
+          {
+            "name": "git-version",
+            "command": [
+              "git",
+              "--version"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "git-version.log"
+          },
+          {
+            "name": "dependency-identity",
+            "command": [
+              "git",
+              "-C",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\deps\\vcpkg",
+              "rev-parse",
+              "HEAD"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "dependency-identity.log"
+          },
+          {
+            "name": "configure",
+            "command": [
+              "cmake",
+              "--preset",
+              "windows-render"
+            ],
+            "timeoutSeconds": 1800,
+            "exitCode": 0,
+            "log": "configure.log"
+          },
+          {
+            "name": "build",
+            "command": [
+              "cmake",
+              "--build",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render",
+              "--config",
+              "Debug",
+              "--parallel",
+              "2"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "build.log"
+          },
+          {
+            "name": "composition-probe-version",
+            "command": [
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\Debug\\mapgyver-composition-probe.exe",
+              "--version"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "composition-probe-version.log"
+          },
+          {
+            "name": "output-probe-version",
+            "command": [
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\Debug\\mapgyver-output-probe.exe",
+              "--version"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "output-probe-version.log"
+          },
+          {
+            "name": "preparation-probe-version",
+            "command": [
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\Debug\\mapgyver-preparation-probe.exe",
+              "--version"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "preparation-probe-version.log"
+          },
+          {
+            "name": "node-version",
+            "command": [
+              "node",
+              "--version"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "node-version.log"
+          },
+          {
+            "name": "npm-version",
+            "command": [
+              "C:\\Program Files\\nodejs\\node.EXE",
+              "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+              "--version"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "npm-version.log"
+          },
+          {
+            "name": "browser-test-inputs",
+            "command": [
+              "C:\\Program Files\\nodejs\\node.EXE",
+              "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+              "--prefix",
+              "D:\\Projects\\Dev\\MapGyver2\\ui",
+              "exec",
+              "--",
+              "playwright",
+              "install",
+              "chromium"
+            ],
+            "timeoutSeconds": 600,
+            "exitCode": 0,
+            "log": "browser-test-inputs.log"
+          },
+          {
+            "name": "test",
+            "command": [
+              "ctest",
+              "--test-dir",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render",
+              "-C",
+              "Debug",
+              "--output-on-failure",
+              "--no-tests=error",
+              "-LE",
+              "hardware",
+              "--output-junit",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\reports\\windows-render\\Debug\\test-results.xml"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "test.log"
+          },
+          {
+            "name": "diagnostics",
+            "command": [
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\Debug\\mapgyver-engine.exe",
+              "--diagnose",
+              "--json",
+              "--no-gpu"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "diagnostics.log"
+          }
+        ],
+        "result": "passed",
+        "diagnostics": {
+          "build": {
+            "cmakeVersion": "4.4.1",
+            "compiler": {
+              "id": "MSVC",
+              "version": "19.50.35730.0"
+            },
+            "configuration": "Debug",
+            "dirty": false,
+            "revision": "e83b8947a8848ebb2f13dbe5f6edd7664733ebd9"
+          },
+          "features": {
+            "hardwareTests": {
+              "available": false,
+              "configured": false,
+              "reason": "no_hardware_suite"
+            },
+            "media": {
+              "available": false,
+              "configured": false,
+              "reason": "not_implemented"
+            },
+            "ndi": {
+              "available": false,
+              "configured": false,
+              "reason": "owner_approval_required"
+            },
+            "platform": {
+              "available": false,
+              "configured": false,
+              "reason": "not_implemented"
+            },
+            "renderer": {
+              "available": true,
+              "configured": true,
+              "reason": "provisional_native_compositor_built"
+            },
+            "ui": {
+              "available": true,
+              "configured": true,
+              "reason": "static_editor_built"
+            }
+          },
+          "gpu": {
+            "reason": "disabled_by_request",
+            "status": "not_probed"
+          },
+          "platform": {
+            "architecture": "x64",
+            "byteOrder": "little",
+            "os": "Windows",
+            "pointerBits": 64
+          },
+          "product": {
+            "name": "MapGyver",
+            "version": "0.1.0-dev"
+          },
+          "schemaVersion": 1
+        },
+        "windowsSdk": "10.0.26100.0",
+        "resolvedPackages": [
+          {
+            "Package": "vcpkg-cmake-config",
+            "Version": "2026-07-21",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "vcpkg-cmake",
+            "Version": "2025-08-07",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "vcpkg-boost",
+            "Version": "2026-08-21",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-uninstall",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-cmake",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-headers",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-config",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-predef",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-winapi",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-type-traits",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-assert",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-throw-exception",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-mp11",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-describe",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-container-hash",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-type-index",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-variant2",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-compat",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-system",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-preprocessor",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-io",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-core",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-utility",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-static-string",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-smart-ptr",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-optional",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-logic",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-move",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-intrusive",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-endian",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-container",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-bind",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-integer",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-pool",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-context",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-mpl",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-typeof",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-tuple",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-detail",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-function-types",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-fusion",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-concept-check",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-iterator",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-tokenizer",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-static-assert",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-regex",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-conversion",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-array",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-range",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-numeric-conversion",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-lexical-cast",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-unordered",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-function",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-exception",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-algorithm",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-date-time",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-align",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-asio",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-asio",
+            "Version": null,
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-asio",
+            "Version": null,
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-beast",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "nlohmann-json",
+            "Version": "3.12.0",
+            "Port-Version": "2",
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "spirv-headers",
+            "Version": "1.4.357.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "spirv-tools",
+            "Version": "1.4.357.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "spirv-cross",
+            "Version": "1.4.363.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "meshoptimizer",
+            "Version": "1.3",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "glslang",
+            "Version": "16.4.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "glslang",
+            "Version": null,
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "cgltf",
+            "Version": "1.15",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "miniz",
+            "Version": "3.1.2",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "tinyexr",
+            "Version": "3.2.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "stb",
+            "Version": "2026-08-02",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "mgnlibs",
+            "Version": "2019-09-29",
+            "Port-Version": "2",
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "lodepng",
+            "Version": "2021-12-04",
+            "Port-Version": "1",
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "libsquish",
+            "Version": "1.15",
+            "Port-Version": "15",
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "bgfx",
+            "Version": "1.129.8940-496",
+            "Port-Version": "1",
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "bgfx",
+            "Version": null,
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "sdl3",
+            "Version": "3.4.18",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          }
+        ],
+        "finishedUtc": "2026-10-16T06:08:14.698953+00:00"
+      },
+      "junit": {
+        "sha256": "a60731e553065a979ad07cc497440811485fbd3e2607fa17d88c8e123d8d33ad",
+        "summary": {
+          "name": "Win32-MSBuild",
+          "tests": "23",
+          "failures": "0",
+          "disabled": "0",
+          "skipped": "0",
+          "hostname": "BenPortable",
+          "time": "49",
+          "timestamp": "2026-10-16T08:07:24"
+        }
+      },
+      "commandLogs": [
+        {
+          "name": "cmake-version",
+          "sha256": "9b43434d276203740883de08da29b9589f8763cc898dfb90aff8af429cbbad65"
+        },
+        {
+          "name": "git-version",
+          "sha256": "a0bef3335cdbc9a4a7733503ecdb281e91319f5a15e22026bfbef750ce76aaba"
+        },
+        {
+          "name": "dependency-identity",
+          "sha256": "21bdcc8bf88da15341a61f154179253e490aa0c4ebb55093e93846d0cb8504e3"
+        },
+        {
+          "name": "configure",
+          "sha256": "b52cc88e0e814fa667f8bc31cc7bed164a4e9711706493aee139f1afcb382de3"
+        },
+        {
+          "name": "build",
+          "sha256": "e93b26886a08f0e5717fdc391546261bf11241ed031272ef25bf486761df20b9"
+        },
+        {
+          "name": "composition-probe-version",
+          "sha256": "8b10186fdcf70727862cf46dc1f1ee4d2b07a1aa336141fbf05d76ee78d0f51a"
+        },
+        {
+          "name": "output-probe-version",
+          "sha256": "0a53d1f992ae57d0e4d37ea8f48d2abda40b1470192ed3c7fb7fb31e07e5670d"
+        },
+        {
+          "name": "preparation-probe-version",
+          "sha256": "56b6de8d055fb2815ca715d08d3e11f3c18603bafce191021b5a7b5905d7c389"
+        },
+        {
+          "name": "node-version",
+          "sha256": "70d4ab241afc5dfdc2bdbd7969d78a32b02eefb736735861133c71c313cdb189"
+        },
+        {
+          "name": "npm-version",
+          "sha256": "a38e383f1e9080b0dd9001481f6e56b341000de90a05061b66734350ad3adc41"
+        },
+        {
+          "name": "browser-test-inputs",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "test",
+          "sha256": "dda1367fe43dd936977568ee04f01660f745ba1a8762285ec4ec36d4c662a019"
+        },
+        {
+          "name": "diagnostics",
+          "sha256": "e129c3a95791333a03f4df69b6af1f157d5aebfe257a5febb8bdee47c8303840"
+        }
+      ],
+      "qualification": {
+        "preparation": {
+          "activeOutputMaxChannelError": 0,
+          "activeOutputTolerance": 2,
+          "backgroundCpuUploadBytes": 16777216,
+          "backgroundGpuCopySubmissions": 0,
+          "backgroundImageBitwiseFloatReadback": true,
+          "backgroundImageGenerations": 128,
+          "configuration": "Debug",
+          "deviceCreationFlags": 32,
+          "deviceId": 11353,
+          "driverCommandLists": true,
+          "driverConcurrentCreates": true,
+          "evidenceClass": "native-hardware-owned-D3D11-device-concurrent-image-preparation",
+          "framesSubmitted": 120,
+          "invalidRequestsRejected": 5,
+          "luidHigh": 0,
+          "luidLow": 89087,
+          "postCompositorShutdownPreparation": true,
+          "preparedAtFirstFrame": 0,
+          "preparedAtLastFrame": 128,
+          "retainedGenerationCapacity": 8,
+          "retainedImagePayloadCapacityBytes": 1048576,
+          "schemaVersion": 1,
+          "scope": "Actual owned hardware device and immutable image CPU uploads concurrent with native composition frames. Immediate context/bgfx remain on their render owner. Final offline GPU completion/readbacks only. No runtime image-generation adoption, graph/window handoff, deadline budget, physical scanout or device-loss qualification.",
+          "sourceDirty": false,
+          "sourceRevision": "e83b8947a8848ebb2f13dbe5f6edd7664733ebd9",
+          "validationCpuReadbackBytes": 163840,
+          "validationGpuCopySubmissions": 2,
+          "vendorId": 4318,
+          "command": [
+            "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\Debug\\mapgyver-preparation-probe.exe",
+            "--json"
+          ],
+          "probeSha256": "1fa6f59665e1e571c2abd6146b61b9f457e953364649642cb08e8e377704f175"
+        },
+        "composition": {
+          "cases": [
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "14367886471282303875",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 64,
+                  "maxChannelError": 0,
+                  "node": 2,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "417156089417555810",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 0,
+                  "node": 3,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 100,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 0,
+              "lastMonotonicTicks": "3892200",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 0,
+              "planNodes": 4,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 83416,
+              "sourceCpuUploadBytes": 32768,
+              "targetSlots": 3,
+              "unavailableSources": 0,
+              "vendorId": 4318
+            },
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "14367886471282303875",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 64,
+                  "maxChannelError": 0,
+                  "node": 3,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "417156089417555810",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 0,
+                  "node": 4,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 140,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 0,
+              "lastMonotonicTicks": "5541300",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 1,
+              "planNodes": 5,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 83416,
+              "sourceCpuUploadBytes": 65536,
+              "targetSlots": 3,
+              "unavailableSources": 0,
+              "vendorId": 4318
+            },
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "6355575903811549555",
+                  "alpha": "straight",
+                  "colourSpace": "linear-srgb",
+                  "height": 64,
+                  "maxChannelError": 1,
+                  "node": 3,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "15306258156899033581",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 1,
+                  "node": 4,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 140,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 0,
+              "lastMonotonicTicks": "3453200",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 2,
+              "planNodes": 5,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 83416,
+              "sourceCpuUploadBytes": 65536,
+              "targetSlots": 3,
+              "unavailableSources": 0,
+              "vendorId": 4318
+            },
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "14251358008418771403",
+                  "alpha": "premultiplied",
+                  "colourSpace": "srgb",
+                  "height": 64,
+                  "maxChannelError": 1,
+                  "node": 3,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "15306258156899033581",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 1,
+                  "node": 4,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 140,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 0,
+              "lastMonotonicTicks": "4174800",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 3,
+              "planNodes": 5,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 83416,
+              "sourceCpuUploadBytes": 65536,
+              "targetSlots": 3,
+              "unavailableSources": 0,
+              "vendorId": 4318
+            },
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "3585945034534470579",
+                  "alpha": "premultiplied",
+                  "colourSpace": "linear-srgb",
+                  "height": 64,
+                  "maxChannelError": 1,
+                  "node": 3,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "15306258156899033581",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 1,
+                  "node": 4,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 140,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 0,
+              "lastMonotonicTicks": "3486000",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 4,
+              "planNodes": 5,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 83416,
+              "sourceCpuUploadBytes": 65536,
+              "targetSlots": 3,
+              "unavailableSources": 0,
+              "vendorId": 4318
+            },
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "11885972555386188811",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 64,
+                  "maxChannelError": 1,
+                  "node": 10,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "15306258156899033581",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 1,
+                  "node": 11,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 260,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 0,
+              "lastMonotonicTicks": "4276200",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 5,
+              "planNodes": 12,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 99800,
+              "sourceCpuUploadBytes": 65536,
+              "targetSlots": 4,
+              "unavailableSources": 0,
+              "vendorId": 4318
+            },
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "14367886471282303875",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 64,
+                  "maxChannelError": 0,
+                  "node": 303,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "417156089417555810",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 0,
+                  "node": 304,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 12140,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 0,
+              "lastMonotonicTicks": "8265400",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 6,
+              "planNodes": 305,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 83416,
+              "sourceCpuUploadBytes": 98304,
+              "targetSlots": 3,
+              "unavailableSources": 0,
+              "vendorId": 4318
+            },
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "2092149027815752579",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 64,
+                  "maxChannelError": 0,
+                  "node": 3,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "6034152062451920915",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 0,
+                  "node": 4,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 40,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 16,
+              "lastMonotonicTicks": "2911600",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 7,
+              "planNodes": 5,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 0,
+              "sourceCpuUploadBytes": 0,
+              "targetSlots": 0,
+              "unavailableSources": 2,
+              "vendorId": 4318
+            }
+          ],
+          "configuration": "Debug",
+          "evidenceClass": "native-hardware-GPU-offscreen-bgfx-D3D11-composition-goldens",
+          "schemaVersion": 1,
+          "scope": "Actual GPU rasterization and offline CPU readback. Static prepared render plans, no browser/native output windows or physical scanout. Resource preparation and synchronous validation are outside frame(). Runtime graph handoff, encoded preview, deadline/performance and hardware recovery qualification remain open.",
+          "sourceDirty": false,
+          "sourceRevision": "e83b8947a8848ebb2f13dbe5f6edd7664733ebd9",
+          "command": [
+            "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\Debug\\mapgyver-composition-probe.exe",
+            "--json"
+          ],
+          "probeSha256": "7fa5181beeb08a53b9248e8a52e4b5071d13532c84d90dfc26862ea669c49dab",
+          "shaderBuild": {
+            "compilerVersion": "shaderc, bgfx shader compiler tool, version 1.18.129.",
+            "compilerSha256": "c463d912e2c720aaa9a8a9da39b823d49dc9202c24eefb523e4b0a21a658b156",
+            "varyingDefinitionSha256": "e255161739af3072ac22395eae118e7df091381b73a22ebf1338d51191de00ea",
+            "bgfxShaderHeaderSha256": "93441aea21714b45d370768261783dbdb908f6eb713edee8b3daf96d4ec53024",
+            "shaders": [
+              {
+                "name": "fullscreen",
+                "command": [
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\tools\\bgfx\\shaderc.exe",
+                  "-f",
+                  "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\fullscreen.sc",
+                  "-o",
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\generated\\fullscreen.bin",
+                  "--type",
+                  "vertex",
+                  "--platform",
+                  "windows",
+                  "-p",
+                  "s_5_0",
+                  "--varyingdef",
+                  "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\varying.def.sc",
+                  "-i",
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\include\\bgfx",
+                  "-O",
+                  "3",
+                  "--Werror"
+                ],
+                "sourceSha256": "6bb761a457774e0535ea7a93ed9bbe2b31529d45944855aebeeab1c7b143d30e",
+                "binarySha256": "70fcdbefafd6edded6ec9886f92642ff77949df8e7b14e00d1857858b5e662c1"
+              },
+              {
+                "name": "composite",
+                "command": [
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\tools\\bgfx\\shaderc.exe",
+                  "-f",
+                  "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\composite.sc",
+                  "-o",
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\generated\\composite.bin",
+                  "--type",
+                  "fragment",
+                  "--platform",
+                  "windows",
+                  "-p",
+                  "s_5_0",
+                  "--varyingdef",
+                  "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\varying.def.sc",
+                  "-i",
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\include\\bgfx",
+                  "-O",
+                  "3",
+                  "--Werror"
+                ],
+                "sourceSha256": "9a7110c132292d062d8bcb0c251de9fad48e0d51e23c946f6c85638059332b37",
+                "binarySha256": "d73365aaa55a0e06e2511be4c2c1bcaafb3f6c6c87a0c6f2d8346914911ea417"
+              },
+              {
+                "name": "encode",
+                "command": [
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\tools\\bgfx\\shaderc.exe",
+                  "-f",
+                  "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\encode.sc",
+                  "-o",
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\generated\\encode.bin",
+                  "--type",
+                  "fragment",
+                  "--platform",
+                  "windows",
+                  "-p",
+                  "s_5_0",
+                  "--varyingdef",
+                  "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\varying.def.sc",
+                  "-i",
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\include\\bgfx",
+                  "-O",
+                  "3",
+                  "--Werror"
+                ],
+                "sourceSha256": "5b5358404aa9411a95530d546c7bc1d9583812ed4153c79d0dcc5d9ec6c389b4",
+                "binarySha256": "e4b938b1df10e461da6b1fc53321391d150607e8778a662505d20af137abed33"
+              }
+            ]
+          }
+        },
+        "outputs": {
+          "captures": [
+            {
+              "black": true,
+              "height": 64,
+              "heldSoftwareFrame": 0,
+              "maxChannelError": 0,
+              "output": "one",
+              "phase": "initial-freeze",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 32768,
+              "validationGpuCopySubmissions": 1,
+              "width": 128
+            },
+            {
+              "black": false,
+              "height": 53,
+              "heldSoftwareFrame": 1,
+              "maxChannelError": 2,
+              "output": "two",
+              "phase": "active",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 20564,
+              "validationGpuCopySubmissions": 1,
+              "width": 97
+            },
+            {
+              "black": false,
+              "height": 32,
+              "heldSoftwareFrame": 1,
+              "maxChannelError": 1,
+              "output": "three",
+              "phase": "active",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 8192,
+              "validationGpuCopySubmissions": 1,
+              "width": 64
+            },
+            {
+              "black": false,
+              "height": 64,
+              "heldSoftwareFrame": 6,
+              "maxChannelError": 1,
+              "output": "one",
+              "phase": "unfreeze",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 32768,
+              "validationGpuCopySubmissions": 1,
+              "width": 128
+            },
+            {
+              "black": false,
+              "height": 64,
+              "heldSoftwareFrame": 6,
+              "maxChannelError": 1,
+              "output": "one",
+              "phase": "held",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 32768,
+              "validationGpuCopySubmissions": 1,
+              "width": 128
+            },
+            {
+              "black": true,
+              "height": 53,
+              "heldSoftwareFrame": 11,
+              "maxChannelError": 0,
+              "output": "two",
+              "phase": "blackout",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 20564,
+              "validationGpuCopySubmissions": 1,
+              "width": 97
+            },
+            {
+              "black": false,
+              "height": 32,
+              "heldSoftwareFrame": 11,
+              "maxChannelError": 1,
+              "output": "three",
+              "phase": "independent",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 8192,
+              "validationGpuCopySubmissions": 1,
+              "width": 64
+            },
+            {
+              "black": true,
+              "height": 64,
+              "heldSoftwareFrame": 6,
+              "maxChannelError": 0,
+              "output": "one",
+              "phase": "blackout-frozen",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 32768,
+              "validationGpuCopySubmissions": 1,
+              "width": 128
+            },
+            {
+              "black": false,
+              "height": 53,
+              "heldSoftwareFrame": 12,
+              "maxChannelError": 2,
+              "output": "two",
+              "phase": "blackout-release",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 20564,
+              "validationGpuCopySubmissions": 1,
+              "width": 97
+            },
+            {
+              "black": true,
+              "height": 32,
+              "heldSoftwareFrame": 11,
+              "maxChannelError": 0,
+              "output": "three",
+              "phase": "disabled",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 8192,
+              "validationGpuCopySubmissions": 1,
+              "width": 64
+            },
+            {
+              "black": false,
+              "height": 64,
+              "heldSoftwareFrame": 6,
+              "maxChannelError": 1,
+              "output": "one",
+              "phase": "restore-held",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 32768,
+              "validationGpuCopySubmissions": 1,
+              "width": 128
+            }
+          ],
+          "configuration": "Debug",
+          "detectedDisplays": [
+            {
+              "endpoint": "\\\\?\\DISPLAY#SDC420B#4&1e95aa41&0&UID8388688#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}",
+              "height": 1600,
+              "name": "",
+              "reason": "",
+              "refreshDenominator": 485280,
+              "refreshNumerator": 116467300,
+              "width": 2560,
+              "x": 0,
+              "y": 0
+            }
+          ],
+          "deviceId": 11353,
+          "drawSubmissions": 116,
+          "evidenceClass": "native-hardware-GPU-hidden-output-window-API",
+          "foreignOwnerRejected": true,
+          "framesSubmitted": 13,
+          "luidHigh": 0,
+          "luidLow": 89087,
+          "schemaVersion": 1,
+          "scope": "Three hidden SDL native windows with independent bgfx/D3D11 swapchains. Captures validate the exact intermediate textures submitted to those windows, not physical scanout/backbuffer receipt. Static prepared content; no browser, production engine or display-topology/hotplug qualification. Software frame metadata does not establish synchronized physical scanout.",
+          "sourceDirty": false,
+          "sourceRevision": "e83b8947a8848ebb2f13dbe5f6edd7664733ebd9",
+          "vendorId": 4318,
+          "windows": 3,
+          "command": [
+            "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\Debug\\mapgyver-output-probe.exe",
+            "--json"
+          ],
+          "probeSha256": "e8192714cd244c2960cedba42b6c2607d3d2bfecd504ef1159942b11b1f30cc2"
+        },
+        "native-program": {
+          "evidenceClass": "native-hardware-engine-control-Chromium-process-death",
+          "command": [
+            "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\Debug\\mapgyver-engine.exe",
+            "--serve",
+            "--pipe-name",
+            "native-9c86d73813334a9ba99c7f418286b55f",
+            "--oscquery",
+            "--render",
+            "--render-hidden",
+            "--initial-state",
+            "D:\\Projects\\Dev\\MapGyver2\\out\\reports\\preparation-device\\Debug\\native-program.project.json",
+            "--native-frames",
+            "900",
+            "--native-report",
+            "D:\\Projects\\Dev\\MapGyver2\\out\\reports\\preparation-device\\Debug\\native-program.native.json"
+          ],
+          "sourceRevision": "e83b8947a8848ebb2f13dbe5f6edd7664733ebd9",
+          "sourceDirty": false,
+          "phases": [
+            {
+              "name": "native_without_browser",
+              "renderer": {
+                "appliedRevision": "0",
+                "available": true,
+                "frame": "1",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "534800",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              }
+            },
+            {
+              "name": "Svelte_checkbox_shared_validator_native_application",
+              "renderer": {
+                "appliedRevision": "1",
+                "available": true,
+                "frame": "43",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "702461700",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              }
+            },
+            {
+              "name": "browser_reload",
+              "before": {
+                "appliedRevision": "1",
+                "available": true,
+                "frame": "53",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "868234000",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              },
+              "after": {
+                "appliedRevision": "1",
+                "available": true,
+                "frame": "57",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "935996900",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              }
+            },
+            {
+              "name": "atomic_native_output_controls",
+              "renderer": {
+                "appliedRevision": "2",
+                "available": true,
+                "frame": "65",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "1068537300",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              }
+            },
+            {
+              "name": "all_clients_absent_after_browser_process_death",
+              "browser": {
+                "event": "crashed",
+                "ownedBrowserPid": 23388,
+                "termination": {
+                  "code": null,
+                  "signal": "SIGTERM"
+                }
+              },
+              "before": {
+                "appliedRevision": "2",
+                "available": true,
+                "frame": "65",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "1068537300",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              },
+              "after": {
+                "appliedRevision": "2",
+                "available": true,
+                "frame": "189",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "3134531400",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              }
+            },
+            {
+              "name": "resource_change_retains_last_applied_then_undo",
+              "pending": {
+                "appliedRevision": "3",
+                "available": true,
+                "frame": "202",
+                "generation": "1",
+                "reason": "render_state_requires_preparation",
+                "showTime": {
+                  "ticks": "3352048300",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              },
+              "restored": {
+                "appliedRevision": "5",
+                "available": true,
+                "frame": "209",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "3468492000",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              }
+            },
+            {
+              "name": "operator_granted_OSC_bundle_same_native_validator",
+              "renderer": {
+                "appliedRevision": "6",
+                "available": true,
+                "frame": "220",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "3650697600",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              }
+            },
+            {
+              "name": "normal_native_shutdown_and_offline_gpu_goldens",
+              "finalObserved": {
+                "appliedRevision": "6",
+                "available": true,
+                "frame": "220",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "3650697600",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              },
+              "native": {
+                "appliedRevision": 6,
+                "captures": [
+                  {
+                    "actualPixelChecksum": "4093495296376631129",
+                    "height": 64,
+                    "heldSoftwareFrame": 217,
+                    "maxChannelError": 1,
+                    "output": "7f8b396c-527a-4c7e-b5a8-b21ad74b4ca5",
+                    "tolerance": 2,
+                    "validationCpuReadbackBytes": 32768,
+                    "validationGpuCopySubmissions": 1,
+                    "width": 128
+                  },
+                  {
+                    "actualPixelChecksum": "14918372856747041146",
+                    "height": 53,
+                    "heldSoftwareFrame": 900,
+                    "maxChannelError": 0,
+                    "output": "native-output-2",
+                    "tolerance": 2,
+                    "validationCpuReadbackBytes": 20564,
+                    "validationGpuCopySubmissions": 1,
+                    "width": 97
+                  },
+                  {
+                    "actualPixelChecksum": "5103229672427504515",
+                    "height": 32,
+                    "heldSoftwareFrame": 217,
+                    "maxChannelError": 0,
+                    "output": "native-output-3",
+                    "tolerance": 2,
+                    "validationCpuReadbackBytes": 8192,
+                    "validationGpuCopySubmissions": 1,
+                    "width": 64
+                  }
+                ],
+                "configuredOutputs": [
+                  {
+                    "configuredAdapter": "windows.window",
+                    "configuredEndpoint": "",
+                    "id": "7f8b396c-527a-4c7e-b5a8-b21ad74b4ca5",
+                    "reason": ""
+                  },
+                  {
+                    "configuredAdapter": "windows.window",
+                    "configuredEndpoint": "",
+                    "id": "native-output-2",
+                    "reason": ""
+                  },
+                  {
+                    "configuredAdapter": "windows.window",
+                    "configuredEndpoint": "",
+                    "id": "native-output-3",
+                    "reason": ""
+                  }
+                ],
+                "deviceId": 11353,
+                "evidenceClass": "native-engine-program-static-pattern-hidden-window-API",
+                "framesSubmitted": 900,
+                "luidHigh": 0,
+                "luidLow": 89087,
+                "scope": "Actual engine native render owner. Offline final intermediate texture captures after the bounded program loop, not physical scanout or encoded preview. Graph/resource handoff and nontrivial patch mapping remain open.",
+                "showTimeTicks": "14984596200",
+                "sourceCpuUploadBytes": 131072,
+                "sourceIssues": [],
+                "vendorId": 4318
+              }
+            }
+          ],
+          "engineSha256": "2253175cdd15f2a5c72a3d5744485256a01815d6cc638e590514408ec250ada1",
+          "fixtureSha256": "314c4d67296283a000139c7080652525ecb4483d1726b1fc5cec4291c7ce7dac",
+          "screenshotSha256": "48ea041484887fe239f6ffd548e6a0bd8752fd52f798d96bad07d1e337ae75af",
+          "scope": "Static test patterns on three hidden native windows. Real browser reload/process death and no-client interval; fixed-tolerance offline final intermediate captures. Not physical scanout, animated media playback, hot GPU-resource preparation or encoded preview qualification."
+        }
+      }
+    },
+    {
+      "configuration": "Release",
+      "environment": {
+        "schemaVersion": 1,
+        "evidenceClass": "native-build-and-non-hardware-tests",
+        "startedUtc": "2026-10-16T06:08:43.830552+00:00",
+        "sourceRevision": "e83b8947a8848ebb2f13dbe5f6edd7664733ebd9",
+        "sourceDirty": false,
+        "hosted": false,
+        "ciRunUrl": null,
+        "host": {
+          "system": "Windows",
+          "release": "11",
+          "version": "10.0.26300",
+          "machine": "AMD64",
+          "python": "3.14.6"
+        },
+        "runner": {
+          "ImageOS": null,
+          "ImageVersion": null,
+          "RUNNER_OS": null,
+          "RUNNER_ARCH": null
+        },
+        "preset": "windows-render",
+        "configuration": "Release",
+        "dependencyBaseline": "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+        "commands": [
+          {
+            "name": "cmake-version",
+            "command": [
+              "cmake",
+              "--version"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "cmake-version.log"
+          },
+          {
+            "name": "git-version",
+            "command": [
+              "git",
+              "--version"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "git-version.log"
+          },
+          {
+            "name": "dependency-identity",
+            "command": [
+              "git",
+              "-C",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\deps\\vcpkg",
+              "rev-parse",
+              "HEAD"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "dependency-identity.log"
+          },
+          {
+            "name": "configure",
+            "command": [
+              "cmake",
+              "--preset",
+              "windows-render"
+            ],
+            "timeoutSeconds": 1800,
+            "exitCode": 0,
+            "log": "configure.log"
+          },
+          {
+            "name": "build",
+            "command": [
+              "cmake",
+              "--build",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render",
+              "--config",
+              "Release",
+              "--parallel",
+              "2"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "build.log"
+          },
+          {
+            "name": "composition-probe-version",
+            "command": [
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\Release\\mapgyver-composition-probe.exe",
+              "--version"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "composition-probe-version.log"
+          },
+          {
+            "name": "output-probe-version",
+            "command": [
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\Release\\mapgyver-output-probe.exe",
+              "--version"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "output-probe-version.log"
+          },
+          {
+            "name": "preparation-probe-version",
+            "command": [
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\Release\\mapgyver-preparation-probe.exe",
+              "--version"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "preparation-probe-version.log"
+          },
+          {
+            "name": "node-version",
+            "command": [
+              "node",
+              "--version"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "node-version.log"
+          },
+          {
+            "name": "npm-version",
+            "command": [
+              "C:\\Program Files\\nodejs\\node.EXE",
+              "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+              "--version"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "npm-version.log"
+          },
+          {
+            "name": "browser-test-inputs",
+            "command": [
+              "C:\\Program Files\\nodejs\\node.EXE",
+              "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+              "--prefix",
+              "D:\\Projects\\Dev\\MapGyver2\\ui",
+              "exec",
+              "--",
+              "playwright",
+              "install",
+              "chromium"
+            ],
+            "timeoutSeconds": 600,
+            "exitCode": 0,
+            "log": "browser-test-inputs.log"
+          },
+          {
+            "name": "test",
+            "command": [
+              "ctest",
+              "--test-dir",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render",
+              "-C",
+              "Release",
+              "--output-on-failure",
+              "--no-tests=error",
+              "-LE",
+              "hardware",
+              "--output-junit",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\reports\\windows-render\\Release\\test-results.xml"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "test.log"
+          },
+          {
+            "name": "diagnostics",
+            "command": [
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\Release\\mapgyver-engine.exe",
+              "--diagnose",
+              "--json",
+              "--no-gpu"
+            ],
+            "timeoutSeconds": 900,
+            "exitCode": 0,
+            "log": "diagnostics.log"
+          }
+        ],
+        "result": "passed",
+        "diagnostics": {
+          "build": {
+            "cmakeVersion": "4.4.1",
+            "compiler": {
+              "id": "MSVC",
+              "version": "19.50.35730.0"
+            },
+            "configuration": "Release",
+            "dirty": false,
+            "revision": "e83b8947a8848ebb2f13dbe5f6edd7664733ebd9"
+          },
+          "features": {
+            "hardwareTests": {
+              "available": false,
+              "configured": false,
+              "reason": "no_hardware_suite"
+            },
+            "media": {
+              "available": false,
+              "configured": false,
+              "reason": "not_implemented"
+            },
+            "ndi": {
+              "available": false,
+              "configured": false,
+              "reason": "owner_approval_required"
+            },
+            "platform": {
+              "available": false,
+              "configured": false,
+              "reason": "not_implemented"
+            },
+            "renderer": {
+              "available": true,
+              "configured": true,
+              "reason": "provisional_native_compositor_built"
+            },
+            "ui": {
+              "available": true,
+              "configured": true,
+              "reason": "static_editor_built"
+            }
+          },
+          "gpu": {
+            "reason": "disabled_by_request",
+            "status": "not_probed"
+          },
+          "platform": {
+            "architecture": "x64",
+            "byteOrder": "little",
+            "os": "Windows",
+            "pointerBits": 64
+          },
+          "product": {
+            "name": "MapGyver",
+            "version": "0.1.0-dev"
+          },
+          "schemaVersion": 1
+        },
+        "windowsSdk": "10.0.26100.0",
+        "resolvedPackages": [
+          {
+            "Package": "vcpkg-cmake-config",
+            "Version": "2026-07-21",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "vcpkg-cmake",
+            "Version": "2025-08-07",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "vcpkg-boost",
+            "Version": "2026-08-21",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-uninstall",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-cmake",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-headers",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-config",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-predef",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-winapi",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-type-traits",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-assert",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-throw-exception",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-mp11",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-describe",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-container-hash",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-type-index",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-variant2",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-compat",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-system",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-preprocessor",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-io",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-core",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-utility",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-static-string",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-smart-ptr",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-optional",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-logic",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-move",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-intrusive",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-endian",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-container",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-bind",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-integer",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-pool",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-context",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-mpl",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-typeof",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-tuple",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-detail",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-function-types",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-fusion",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-concept-check",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-iterator",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-tokenizer",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-static-assert",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-regex",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-conversion",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-array",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-range",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-numeric-conversion",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-lexical-cast",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-unordered",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-function",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-exception",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-algorithm",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-date-time",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-align",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-asio",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-asio",
+            "Version": null,
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-asio",
+            "Version": null,
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-beast",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "nlohmann-json",
+            "Version": "3.12.0",
+            "Port-Version": "2",
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "spirv-headers",
+            "Version": "1.4.357.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "spirv-tools",
+            "Version": "1.4.357.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "spirv-cross",
+            "Version": "1.4.363.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "meshoptimizer",
+            "Version": "1.3",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "glslang",
+            "Version": "16.4.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "glslang",
+            "Version": null,
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "cgltf",
+            "Version": "1.15",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "miniz",
+            "Version": "3.1.2",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "tinyexr",
+            "Version": "3.2.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "stb",
+            "Version": "2026-08-02",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "mgnlibs",
+            "Version": "2019-09-29",
+            "Port-Version": "2",
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "lodepng",
+            "Version": "2021-12-04",
+            "Port-Version": "1",
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "libsquish",
+            "Version": "1.15",
+            "Port-Version": "15",
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "bgfx",
+            "Version": "1.129.8940-496",
+            "Port-Version": "1",
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "bgfx",
+            "Version": null,
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "sdl3",
+            "Version": "3.4.18",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          }
+        ],
+        "finishedUtc": "2026-10-16T06:09:41.251934+00:00"
+      },
+      "junit": {
+        "sha256": "a6096fadafdb670536e213019ec3074375b62fa92582e8ee04612947f1c608a6",
+        "summary": {
+          "name": "Win32-MSBuild",
+          "tests": "23",
+          "failures": "0",
+          "disabled": "0",
+          "skipped": "0",
+          "hostname": "BenPortable",
+          "time": "45",
+          "timestamp": "2026-10-16T08:08:55"
+        }
+      },
+      "commandLogs": [
+        {
+          "name": "cmake-version",
+          "sha256": "9b43434d276203740883de08da29b9589f8763cc898dfb90aff8af429cbbad65"
+        },
+        {
+          "name": "git-version",
+          "sha256": "a0bef3335cdbc9a4a7733503ecdb281e91319f5a15e22026bfbef750ce76aaba"
+        },
+        {
+          "name": "dependency-identity",
+          "sha256": "21bdcc8bf88da15341a61f154179253e490aa0c4ebb55093e93846d0cb8504e3"
+        },
+        {
+          "name": "configure",
+          "sha256": "003b5791faa3f675e7b3d0a919873f44c97d821a93951908870b95a5903bb2aa"
+        },
+        {
+          "name": "build",
+          "sha256": "bbe75e7921df449e966ed653dcb7f3923fe2adc8b8410ef7fdb4ef19e66834e1"
+        },
+        {
+          "name": "composition-probe-version",
+          "sha256": "8b10186fdcf70727862cf46dc1f1ee4d2b07a1aa336141fbf05d76ee78d0f51a"
+        },
+        {
+          "name": "output-probe-version",
+          "sha256": "0a53d1f992ae57d0e4d37ea8f48d2abda40b1470192ed3c7fb7fb31e07e5670d"
+        },
+        {
+          "name": "preparation-probe-version",
+          "sha256": "56b6de8d055fb2815ca715d08d3e11f3c18603bafce191021b5a7b5905d7c389"
+        },
+        {
+          "name": "node-version",
+          "sha256": "70d4ab241afc5dfdc2bdbd7969d78a32b02eefb736735861133c71c313cdb189"
+        },
+        {
+          "name": "npm-version",
+          "sha256": "a38e383f1e9080b0dd9001481f6e56b341000de90a05061b66734350ad3adc41"
+        },
+        {
+          "name": "browser-test-inputs",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "test",
+          "sha256": "7b011c5c87768c7bb4833200eb3ffaa573be2dde3ea74d2bdaeea1a58c680cf5"
+        },
+        {
+          "name": "diagnostics",
+          "sha256": "bbabf331c195c1a21377dc7b8a5c646df9b6eceade56dd6afdd1899627983a0d"
+        }
+      ],
+      "qualification": {
+        "preparation": {
+          "activeOutputMaxChannelError": 0,
+          "activeOutputTolerance": 2,
+          "backgroundCpuUploadBytes": 16777216,
+          "backgroundGpuCopySubmissions": 0,
+          "backgroundImageBitwiseFloatReadback": true,
+          "backgroundImageGenerations": 128,
+          "configuration": "Release",
+          "deviceCreationFlags": 32,
+          "deviceId": 11353,
+          "driverCommandLists": true,
+          "driverConcurrentCreates": true,
+          "evidenceClass": "native-hardware-owned-D3D11-device-concurrent-image-preparation",
+          "framesSubmitted": 120,
+          "invalidRequestsRejected": 5,
+          "luidHigh": 0,
+          "luidLow": 89087,
+          "postCompositorShutdownPreparation": true,
+          "preparedAtFirstFrame": 0,
+          "preparedAtLastFrame": 128,
+          "retainedGenerationCapacity": 8,
+          "retainedImagePayloadCapacityBytes": 1048576,
+          "schemaVersion": 1,
+          "scope": "Actual owned hardware device and immutable image CPU uploads concurrent with native composition frames. Immediate context/bgfx remain on their render owner. Final offline GPU completion/readbacks only. No runtime image-generation adoption, graph/window handoff, deadline budget, physical scanout or device-loss qualification.",
+          "sourceDirty": false,
+          "sourceRevision": "e83b8947a8848ebb2f13dbe5f6edd7664733ebd9",
+          "validationCpuReadbackBytes": 163840,
+          "validationGpuCopySubmissions": 2,
+          "vendorId": 4318,
+          "command": [
+            "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\Release\\mapgyver-preparation-probe.exe",
+            "--json"
+          ],
+          "probeSha256": "d16572d9f73d2922624a287ccd898e4dc08ebeb02b60af2cd903ab543af64155"
+        },
+        "composition": {
+          "cases": [
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "14367886471282303875",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 64,
+                  "maxChannelError": 0,
+                  "node": 2,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "417156089417555810",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 0,
+                  "node": 3,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 100,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 0,
+              "lastMonotonicTicks": "2892500",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 0,
+              "planNodes": 4,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 83416,
+              "sourceCpuUploadBytes": 32768,
+              "targetSlots": 3,
+              "unavailableSources": 0,
+              "vendorId": 4318
+            },
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "14367886471282303875",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 64,
+                  "maxChannelError": 0,
+                  "node": 3,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "417156089417555810",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 0,
+                  "node": 4,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 140,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 0,
+              "lastMonotonicTicks": "3199900",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 1,
+              "planNodes": 5,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 83416,
+              "sourceCpuUploadBytes": 65536,
+              "targetSlots": 3,
+              "unavailableSources": 0,
+              "vendorId": 4318
+            },
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "6355575903811549555",
+                  "alpha": "straight",
+                  "colourSpace": "linear-srgb",
+                  "height": 64,
+                  "maxChannelError": 1,
+                  "node": 3,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "15306258156899033581",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 1,
+                  "node": 4,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 140,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 0,
+              "lastMonotonicTicks": "2865500",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 2,
+              "planNodes": 5,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 83416,
+              "sourceCpuUploadBytes": 65536,
+              "targetSlots": 3,
+              "unavailableSources": 0,
+              "vendorId": 4318
+            },
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "14251358008418771403",
+                  "alpha": "premultiplied",
+                  "colourSpace": "srgb",
+                  "height": 64,
+                  "maxChannelError": 1,
+                  "node": 3,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "15306258156899033581",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 1,
+                  "node": 4,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 140,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 0,
+              "lastMonotonicTicks": "2683800",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 3,
+              "planNodes": 5,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 83416,
+              "sourceCpuUploadBytes": 65536,
+              "targetSlots": 3,
+              "unavailableSources": 0,
+              "vendorId": 4318
+            },
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "3585945034534470579",
+                  "alpha": "premultiplied",
+                  "colourSpace": "linear-srgb",
+                  "height": 64,
+                  "maxChannelError": 1,
+                  "node": 3,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "15306258156899033581",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 1,
+                  "node": 4,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 140,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 0,
+              "lastMonotonicTicks": "2455600",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 4,
+              "planNodes": 5,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 83416,
+              "sourceCpuUploadBytes": 65536,
+              "targetSlots": 3,
+              "unavailableSources": 0,
+              "vendorId": 4318
+            },
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "11885972555386188811",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 64,
+                  "maxChannelError": 1,
+                  "node": 10,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "15306258156899033581",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 1,
+                  "node": 11,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 260,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 0,
+              "lastMonotonicTicks": "3336300",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 5,
+              "planNodes": 12,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 99800,
+              "sourceCpuUploadBytes": 65536,
+              "targetSlots": 4,
+              "unavailableSources": 0,
+              "vendorId": 4318
+            },
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "14367886471282303875",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 64,
+                  "maxChannelError": 0,
+                  "node": 303,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "417156089417555810",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 0,
+                  "node": 304,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 12140,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 0,
+              "lastMonotonicTicks": "3441400",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 6,
+              "planNodes": 305,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 83416,
+              "sourceCpuUploadBytes": 98304,
+              "targetSlots": 3,
+              "unavailableSources": 0,
+              "vendorId": 4318
+            },
+            {
+              "authoredRevisionSubmitted": 1,
+              "captures": [
+                {
+                  "actualPixelChecksum": "2092149027815752579",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 64,
+                  "maxChannelError": 0,
+                  "node": 3,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 32768,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 128
+                },
+                {
+                  "actualPixelChecksum": "6034152062451920915",
+                  "alpha": "straight",
+                  "colourSpace": "srgb",
+                  "height": 11,
+                  "maxChannelError": 0,
+                  "node": 4,
+                  "pixelFormat": "rgba8-unorm",
+                  "tolerance": 2,
+                  "validationCpuReadbackBytes": 748,
+                  "validationGpuCopySubmissions": 1,
+                  "width": 17
+                }
+              ],
+              "clockTimeBase": {
+                "denominator": "1000000000",
+                "numerator": "1"
+              },
+              "deviceId": 11353,
+              "drawSubmissions": 40,
+              "framesSubmitted": 20,
+              "internalConstantUploadBytes": 16,
+              "lastMonotonicTicks": "2200500",
+              "luidHigh": 0,
+              "luidLow": 89087,
+              "mode": 7,
+              "planNodes": 5,
+              "plannedExportPayloadBytes": 33516,
+              "plannedInternalTargetPayloadBytes": 0,
+              "sourceCpuUploadBytes": 0,
+              "targetSlots": 0,
+              "unavailableSources": 2,
+              "vendorId": 4318
+            }
+          ],
+          "configuration": "Release",
+          "evidenceClass": "native-hardware-GPU-offscreen-bgfx-D3D11-composition-goldens",
+          "schemaVersion": 1,
+          "scope": "Actual GPU rasterization and offline CPU readback. Static prepared render plans, no browser/native output windows or physical scanout. Resource preparation and synchronous validation are outside frame(). Runtime graph handoff, encoded preview, deadline/performance and hardware recovery qualification remain open.",
+          "sourceDirty": false,
+          "sourceRevision": "e83b8947a8848ebb2f13dbe5f6edd7664733ebd9",
+          "command": [
+            "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\Release\\mapgyver-composition-probe.exe",
+            "--json"
+          ],
+          "probeSha256": "7bb61b4f702305c4d390dd091c54c99ccae6397021df37212da4ca286b06e238",
+          "shaderBuild": {
+            "compilerVersion": "shaderc, bgfx shader compiler tool, version 1.18.129.",
+            "compilerSha256": "c463d912e2c720aaa9a8a9da39b823d49dc9202c24eefb523e4b0a21a658b156",
+            "varyingDefinitionSha256": "e255161739af3072ac22395eae118e7df091381b73a22ebf1338d51191de00ea",
+            "bgfxShaderHeaderSha256": "93441aea21714b45d370768261783dbdb908f6eb713edee8b3daf96d4ec53024",
+            "shaders": [
+              {
+                "name": "fullscreen",
+                "command": [
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\tools\\bgfx\\shaderc.exe",
+                  "-f",
+                  "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\fullscreen.sc",
+                  "-o",
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\generated\\fullscreen.bin",
+                  "--type",
+                  "vertex",
+                  "--platform",
+                  "windows",
+                  "-p",
+                  "s_5_0",
+                  "--varyingdef",
+                  "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\varying.def.sc",
+                  "-i",
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\include\\bgfx",
+                  "-O",
+                  "3",
+                  "--Werror"
+                ],
+                "sourceSha256": "6bb761a457774e0535ea7a93ed9bbe2b31529d45944855aebeeab1c7b143d30e",
+                "binarySha256": "70fcdbefafd6edded6ec9886f92642ff77949df8e7b14e00d1857858b5e662c1"
+              },
+              {
+                "name": "composite",
+                "command": [
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\tools\\bgfx\\shaderc.exe",
+                  "-f",
+                  "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\composite.sc",
+                  "-o",
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\generated\\composite.bin",
+                  "--type",
+                  "fragment",
+                  "--platform",
+                  "windows",
+                  "-p",
+                  "s_5_0",
+                  "--varyingdef",
+                  "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\varying.def.sc",
+                  "-i",
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\include\\bgfx",
+                  "-O",
+                  "3",
+                  "--Werror"
+                ],
+                "sourceSha256": "9a7110c132292d062d8bcb0c251de9fad48e0d51e23c946f6c85638059332b37",
+                "binarySha256": "d73365aaa55a0e06e2511be4c2c1bcaafb3f6c6c87a0c6f2d8346914911ea417"
+              },
+              {
+                "name": "encode",
+                "command": [
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\tools\\bgfx\\shaderc.exe",
+                  "-f",
+                  "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\encode.sc",
+                  "-o",
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\generated\\encode.bin",
+                  "--type",
+                  "fragment",
+                  "--platform",
+                  "windows",
+                  "-p",
+                  "s_5_0",
+                  "--varyingdef",
+                  "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\varying.def.sc",
+                  "-i",
+                  "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\include\\bgfx",
+                  "-O",
+                  "3",
+                  "--Werror"
+                ],
+                "sourceSha256": "5b5358404aa9411a95530d546c7bc1d9583812ed4153c79d0dcc5d9ec6c389b4",
+                "binarySha256": "e4b938b1df10e461da6b1fc53321391d150607e8778a662505d20af137abed33"
+              }
+            ]
+          }
+        },
+        "outputs": {
+          "captures": [
+            {
+              "black": true,
+              "height": 64,
+              "heldSoftwareFrame": 0,
+              "maxChannelError": 0,
+              "output": "one",
+              "phase": "initial-freeze",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 32768,
+              "validationGpuCopySubmissions": 1,
+              "width": 128
+            },
+            {
+              "black": false,
+              "height": 53,
+              "heldSoftwareFrame": 1,
+              "maxChannelError": 2,
+              "output": "two",
+              "phase": "active",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 20564,
+              "validationGpuCopySubmissions": 1,
+              "width": 97
+            },
+            {
+              "black": false,
+              "height": 32,
+              "heldSoftwareFrame": 1,
+              "maxChannelError": 1,
+              "output": "three",
+              "phase": "active",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 8192,
+              "validationGpuCopySubmissions": 1,
+              "width": 64
+            },
+            {
+              "black": false,
+              "height": 64,
+              "heldSoftwareFrame": 6,
+              "maxChannelError": 1,
+              "output": "one",
+              "phase": "unfreeze",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 32768,
+              "validationGpuCopySubmissions": 1,
+              "width": 128
+            },
+            {
+              "black": false,
+              "height": 64,
+              "heldSoftwareFrame": 6,
+              "maxChannelError": 1,
+              "output": "one",
+              "phase": "held",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 32768,
+              "validationGpuCopySubmissions": 1,
+              "width": 128
+            },
+            {
+              "black": true,
+              "height": 53,
+              "heldSoftwareFrame": 11,
+              "maxChannelError": 0,
+              "output": "two",
+              "phase": "blackout",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 20564,
+              "validationGpuCopySubmissions": 1,
+              "width": 97
+            },
+            {
+              "black": false,
+              "height": 32,
+              "heldSoftwareFrame": 11,
+              "maxChannelError": 1,
+              "output": "three",
+              "phase": "independent",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 8192,
+              "validationGpuCopySubmissions": 1,
+              "width": 64
+            },
+            {
+              "black": true,
+              "height": 64,
+              "heldSoftwareFrame": 6,
+              "maxChannelError": 0,
+              "output": "one",
+              "phase": "blackout-frozen",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 32768,
+              "validationGpuCopySubmissions": 1,
+              "width": 128
+            },
+            {
+              "black": false,
+              "height": 53,
+              "heldSoftwareFrame": 12,
+              "maxChannelError": 2,
+              "output": "two",
+              "phase": "blackout-release",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 20564,
+              "validationGpuCopySubmissions": 1,
+              "width": 97
+            },
+            {
+              "black": true,
+              "height": 32,
+              "heldSoftwareFrame": 11,
+              "maxChannelError": 0,
+              "output": "three",
+              "phase": "disabled",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 8192,
+              "validationGpuCopySubmissions": 1,
+              "width": 64
+            },
+            {
+              "black": false,
+              "height": 64,
+              "heldSoftwareFrame": 6,
+              "maxChannelError": 1,
+              "output": "one",
+              "phase": "restore-held",
+              "tolerance": 2,
+              "validationCpuReadbackBytes": 32768,
+              "validationGpuCopySubmissions": 1,
+              "width": 128
+            }
+          ],
+          "configuration": "Release",
+          "detectedDisplays": [
+            {
+              "endpoint": "\\\\?\\DISPLAY#SDC420B#4&1e95aa41&0&UID8388688#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}",
+              "height": 1600,
+              "name": "",
+              "reason": "",
+              "refreshDenominator": 485280,
+              "refreshNumerator": 116467300,
+              "width": 2560,
+              "x": 0,
+              "y": 0
+            }
+          ],
+          "deviceId": 11353,
+          "drawSubmissions": 116,
+          "evidenceClass": "native-hardware-GPU-hidden-output-window-API",
+          "foreignOwnerRejected": true,
+          "framesSubmitted": 13,
+          "luidHigh": 0,
+          "luidLow": 89087,
+          "schemaVersion": 1,
+          "scope": "Three hidden SDL native windows with independent bgfx/D3D11 swapchains. Captures validate the exact intermediate textures submitted to those windows, not physical scanout/backbuffer receipt. Static prepared content; no browser, production engine or display-topology/hotplug qualification. Software frame metadata does not establish synchronized physical scanout.",
+          "sourceDirty": false,
+          "sourceRevision": "e83b8947a8848ebb2f13dbe5f6edd7664733ebd9",
+          "vendorId": 4318,
+          "windows": 3,
+          "command": [
+            "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\Release\\mapgyver-output-probe.exe",
+            "--json"
+          ],
+          "probeSha256": "0ef36d3d87016a6f1a4bccd24424cd8091b0013bbe87fb3c5c2482d144b439fd"
+        },
+        "native-program": {
+          "evidenceClass": "native-hardware-engine-control-Chromium-process-death",
+          "command": [
+            "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\Release\\mapgyver-engine.exe",
+            "--serve",
+            "--pipe-name",
+            "native-4a3fd4b193e34b53a87d8e41a3000a08",
+            "--oscquery",
+            "--render",
+            "--render-hidden",
+            "--initial-state",
+            "D:\\Projects\\Dev\\MapGyver2\\out\\reports\\preparation-device\\Release\\native-program.project.json",
+            "--native-frames",
+            "900",
+            "--native-report",
+            "D:\\Projects\\Dev\\MapGyver2\\out\\reports\\preparation-device\\Release\\native-program.native.json"
+          ],
+          "sourceRevision": "e83b8947a8848ebb2f13dbe5f6edd7664733ebd9",
+          "sourceDirty": false,
+          "phases": [
+            {
+              "name": "native_without_browser",
+              "renderer": {
+                "appliedRevision": "0",
+                "available": true,
+                "frame": "1",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "348500",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              }
+            },
+            {
+              "name": "Svelte_checkbox_shared_validator_native_application",
+              "renderer": {
+                "appliedRevision": "1",
+                "available": true,
+                "frame": "38",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "618125700",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              }
+            },
+            {
+              "name": "browser_reload",
+              "before": {
+                "appliedRevision": "1",
+                "available": true,
+                "frame": "44",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "718629800",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              },
+              "after": {
+                "appliedRevision": "1",
+                "available": true,
+                "frame": "46",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "751910600",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              }
+            },
+            {
+              "name": "atomic_native_output_controls",
+              "renderer": {
+                "appliedRevision": "2",
+                "available": true,
+                "frame": "50",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "817845700",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              }
+            },
+            {
+              "name": "all_clients_absent_after_browser_process_death",
+              "browser": {
+                "event": "crashed",
+                "ownedBrowserPid": 50812,
+                "termination": {
+                  "code": null,
+                  "signal": "SIGTERM"
+                }
+              },
+              "before": {
+                "appliedRevision": "2",
+                "available": true,
+                "frame": "50",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "817845700",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              },
+              "after": {
+                "appliedRevision": "2",
+                "available": true,
+                "frame": "174",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "2884501200",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              }
+            },
+            {
+              "name": "resource_change_retains_last_applied_then_undo",
+              "pending": {
+                "appliedRevision": "3",
+                "available": true,
+                "frame": "177",
+                "generation": "1",
+                "reason": "render_state_requires_preparation",
+                "showTime": {
+                  "ticks": "2934628900",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              },
+              "restored": {
+                "appliedRevision": "5",
+                "available": true,
+                "frame": "181",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "3001956000",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              }
+            },
+            {
+              "name": "operator_granted_OSC_bundle_same_native_validator",
+              "renderer": {
+                "appliedRevision": "6",
+                "available": true,
+                "frame": "185",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "3067553800",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              }
+            },
+            {
+              "name": "normal_native_shutdown_and_offline_gpu_goldens",
+              "finalObserved": {
+                "appliedRevision": "6",
+                "available": true,
+                "frame": "185",
+                "generation": "1",
+                "reason": "",
+                "showTime": {
+                  "ticks": "3067553800",
+                  "timeBase": {
+                    "denominator": "1000000000",
+                    "numerator": "1"
+                  }
+                }
+              },
+              "native": {
+                "appliedRevision": 6,
+                "captures": [
+                  {
+                    "actualPixelChecksum": "4093495296376631129",
+                    "height": 64,
+                    "heldSoftwareFrame": 183,
+                    "maxChannelError": 1,
+                    "output": "6b3eeb05-f56c-405c-b6cf-41ca670a7667",
+                    "tolerance": 2,
+                    "validationCpuReadbackBytes": 32768,
+                    "validationGpuCopySubmissions": 1,
+                    "width": 128
+                  },
+                  {
+                    "actualPixelChecksum": "14918372856747041146",
+                    "height": 53,
+                    "heldSoftwareFrame": 900,
+                    "maxChannelError": 0,
+                    "output": "native-output-2",
+                    "tolerance": 2,
+                    "validationCpuReadbackBytes": 20564,
+                    "validationGpuCopySubmissions": 1,
+                    "width": 97
+                  },
+                  {
+                    "actualPixelChecksum": "5103229672427504515",
+                    "height": 32,
+                    "heldSoftwareFrame": 183,
+                    "maxChannelError": 0,
+                    "output": "native-output-3",
+                    "tolerance": 2,
+                    "validationCpuReadbackBytes": 8192,
+                    "validationGpuCopySubmissions": 1,
+                    "width": 64
+                  }
+                ],
+                "configuredOutputs": [
+                  {
+                    "configuredAdapter": "windows.window",
+                    "configuredEndpoint": "",
+                    "id": "6b3eeb05-f56c-405c-b6cf-41ca670a7667",
+                    "reason": ""
+                  },
+                  {
+                    "configuredAdapter": "windows.window",
+                    "configuredEndpoint": "",
+                    "id": "native-output-2",
+                    "reason": ""
+                  },
+                  {
+                    "configuredAdapter": "windows.window",
+                    "configuredEndpoint": "",
+                    "id": "native-output-3",
+                    "reason": ""
+                  }
+                ],
+                "deviceId": 11353,
+                "evidenceClass": "native-engine-program-static-pattern-hidden-window-API",
+                "framesSubmitted": 900,
+                "luidHigh": 0,
+                "luidLow": 89087,
+                "scope": "Actual engine native render owner. Offline final intermediate texture captures after the bounded program loop, not physical scanout or encoded preview. Graph/resource handoff and nontrivial patch mapping remain open.",
+                "showTimeTicks": "14984455100",
+                "sourceCpuUploadBytes": 131072,
+                "sourceIssues": [],
+                "vendorId": 4318
+              }
+            }
+          ],
+          "engineSha256": "d40526f1bebf12a3ed5ccb01e5ddc240570b965ac3404c433c03e5eed82e72d8",
+          "fixtureSha256": "fe2350fae1bdaef6fd49077c572dd7402edc85d7195cf27132d0a52fc2719a12",
+          "screenshotSha256": "e9495764dcae1757692cb75bed5c6ae131caa45bdac4afbca7d72ca55caa8bbf",
+          "scope": "Static test patterns on three hidden native windows. Real browser reload/process death and no-client interval; fixed-tolerance offline final intermediate captures. Not physical scanout, animated media playback, hot GPU-resource preparation or encoded preview qualification."
+        }
+      }
+    }
+  ],
+  "shaderBuild": {
+    "compilerVersion": "shaderc, bgfx shader compiler tool, version 1.18.129.",
+    "compilerSha256": "c463d912e2c720aaa9a8a9da39b823d49dc9202c24eefb523e4b0a21a658b156",
+    "varyingDefinitionSha256": "e255161739af3072ac22395eae118e7df091381b73a22ebf1338d51191de00ea",
+    "bgfxShaderHeaderSha256": "93441aea21714b45d370768261783dbdb908f6eb713edee8b3daf96d4ec53024",
+    "shaders": [
+      {
+        "name": "fullscreen",
+        "command": [
+          "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\tools\\bgfx\\shaderc.exe",
+          "-f",
+          "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\fullscreen.sc",
+          "-o",
+          "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\generated\\fullscreen.bin",
+          "--type",
+          "vertex",
+          "--platform",
+          "windows",
+          "-p",
+          "s_5_0",
+          "--varyingdef",
+          "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\varying.def.sc",
+          "-i",
+          "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\include\\bgfx",
+          "-O",
+          "3",
+          "--Werror"
+        ],
+        "sourceSha256": "6bb761a457774e0535ea7a93ed9bbe2b31529d45944855aebeeab1c7b143d30e",
+        "binarySha256": "70fcdbefafd6edded6ec9886f92642ff77949df8e7b14e00d1857858b5e662c1"
+      },
+      {
+        "name": "composite",
+        "command": [
+          "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\tools\\bgfx\\shaderc.exe",
+          "-f",
+          "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\composite.sc",
+          "-o",
+          "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\generated\\composite.bin",
+          "--type",
+          "fragment",
+          "--platform",
+          "windows",
+          "-p",
+          "s_5_0",
+          "--varyingdef",
+          "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\varying.def.sc",
+          "-i",
+          "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\include\\bgfx",
+          "-O",
+          "3",
+          "--Werror"
+        ],
+        "sourceSha256": "9a7110c132292d062d8bcb0c251de9fad48e0d51e23c946f6c85638059332b37",
+        "binarySha256": "d73365aaa55a0e06e2511be4c2c1bcaafb3f6c6c87a0c6f2d8346914911ea417"
+      },
+      {
+        "name": "encode",
+        "command": [
+          "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\tools\\bgfx\\shaderc.exe",
+          "-f",
+          "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\encode.sc",
+          "-o",
+          "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\adapters\\windows\\render\\generated\\encode.bin",
+          "--type",
+          "fragment",
+          "--platform",
+          "windows",
+          "-p",
+          "s_5_0",
+          "--varyingdef",
+          "D:\\Projects\\Dev\\MapGyver2\\adapters\\windows\\render\\..\\shaders\\varying.def.sc",
+          "-i",
+          "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-render\\vcpkg_installed\\x64-windows\\include\\bgfx",
+          "-O",
+          "3",
+          "--Werror"
+        ],
+        "sourceSha256": "5b5358404aa9411a95530d546c7bc1d9583812ed4153c79d0dcc5d9ec6c389b4",
+        "binarySha256": "e4b938b1df10e461da6b1fc53321391d150607e8778a662505d20af137abed33"
+      }
+    ]
+  }
+}
