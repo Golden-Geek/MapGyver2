@@ -114,6 +114,7 @@ def main():
             run("window-probe-version", [build / "experiments/graphics" / args.configuration / "mapgyver-window-probe.exe", "--version"])
         if cached("PM_BUILD_RENDERER") == "ON":
             run("composition-probe-version", [build / "adapters/windows/render" / args.configuration / "mapgyver-composition-probe.exe", "--version"])
+            run("output-probe-version", [build / "adapters/windows/render" / args.configuration / "mapgyver-output-probe.exe", "--version"])
         if cached("PM_BUILD_UI") == "ON":
             run("node-version", ["node", "--version"])
             run("npm-version", npm_command("--version"))

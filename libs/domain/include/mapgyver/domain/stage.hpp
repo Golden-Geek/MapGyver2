@@ -79,6 +79,7 @@ struct OutputTarget {
     std::string adapter; // Configured name, including unavailable/unknown adapters.
     std::string endpoint; // Persistent desired binding; never an OS pointer/index.
     DesiredOutputMode desired;
+    bool enabled = true, blackout = false, freeze = false;
     bool operator==(const OutputTarget&) const = default;
 };
 enum class WarpMode { homography, mesh };

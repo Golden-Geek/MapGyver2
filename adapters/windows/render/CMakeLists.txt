@@ -25,3 +25,7 @@ add_executable(mapgyver_composition_probe "${PROJECT_SOURCE_DIR}/tests/hardware/
 set_target_properties(mapgyver_composition_probe PROPERTIES OUTPUT_NAME mapgyver-composition-probe)
 target_link_libraries(mapgyver_composition_probe PRIVATE mapgyver_windows_renderer mapgyver_core nlohmann_json::nlohmann_json)
 target_compile_options(mapgyver_composition_probe PRIVATE /W4 /WX /permissive- /utf-8)
+add_executable(mapgyver_output_probe "${PROJECT_SOURCE_DIR}/tests/hardware/output_probe.cpp")
+set_target_properties(mapgyver_output_probe PROPERTIES OUTPUT_NAME mapgyver-output-probe)
+target_link_libraries(mapgyver_output_probe PRIVATE mapgyver_windows_renderer mapgyver_core nlohmann_json::nlohmann_json)
+target_compile_options(mapgyver_output_probe PRIVATE /W4 /WX /permissive- /utf-8)

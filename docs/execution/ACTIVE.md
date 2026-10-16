@@ -83,11 +83,24 @@ M04.C01 current working slice:
    COM references before bgfx unloads D3D11; bgfx retains actual resource ownership.
 4. Six additional offline bgfx tool dependencies/notices inspected and inventoried.
    No application exception/proprietary runtime. Source inventory is not M13 SBOM.
-5. Next: push tested C01/evidence and inspect source CI; then C02 persistent native targets and actual engine output/runtime handoff.
-   C03 quad mapping/masks/color rules and C04 UI-loss/multi-output remain open.
+5. C01 code/evidence pushed at 0aa62c5547de512565a83f0aaa20c2c1f0da26bd.
+   CI 38843868195: Linux/macOS/plan passed; Windows jobs still running at last check.
+6. Current C02 working slice: output enable/blackout/freeze intent in the shared
+   registry/wire, exact stable endpoint/mode binding with retained unavailable
+   reasons, bounded runtime inventory and tests. Native compositor has independent
+   windows/swapchains and per-output held/presented textures with owner checks.
+   Initial Debug 3-window/13-frame/11-capture GPU run passed, fixed tolerance 2/255.
+   Expanded fixture at three sizes passes in Debug/Release, with 23/23 full
+   wrapper checks and composition/output GPU regressions. A known blue/half-alpha
+   display reference and foreign GPU-owner rejection also pass focused Debug.
+   Commit tested slice, retain clean-source Debug/Release evidence and push after
+   the current CI is terminal.
+7. Next C02 work: actual monitor enumeration and logical binding/window orchestration,
+   render/control worker handoff, engine applied-frame/status and production native
+   output/browser-loss. C03 quad mapping/masks/color rules and C04 remain open.
 
-This is static offscreen real-GPU evidence, not the engine's program path. No
-native output-window/browser independence, encoded preview, physical scanout,
+These are static offscreen/window-API real-GPU paths, not the engine's program
+path. No production browser independence, encoded preview, physical scanout,
 sustained budgets or recovery claim. M01/M03 prerequisites still prevent milestone
 qualification. No M01/M02/M03/M04 tag.
 

@@ -201,7 +201,7 @@ std::shared_ptr<const Image> pattern(Id id,std::uint64_t generation,std::uint32_
     return rgba8(std::move(id),generation,width,height,data,{},limit);
 }
 Pixel over(Pixel a,Pixel b) noexcept {return {a.r+b.r*(1-a.a),a.g+b.g*(1-a.a),a.b+b.b*(1-a.a),a.a+b.a*(1-a.a)};}
-std::vector<std::uint8_t> reference(const Plan& plan,std::uint32_t result) {
+std::vector<std::uint8_t> reference(const Plan& plan,std::uint32_t result,bool display) {
     require(result < plan.nodes.size(),"Reference output node is missing");
     std::vector<std::vector<Pixel>> targets;
     for (const auto& target : plan.targets) targets.emplace_back(static_cast<std::size_t>(target.width)*target.height);
@@ -227,12 +227,12 @@ std::vector<std::uint8_t> reference(const Plan& plan,std::uint32_t result) {
         const auto p = pixel(result,x,y); std::array<float,3> colour{p.r,p.g,p.b};
         const auto offset = (static_cast<std::size_t>(y)*node.width+x)*4;
         for (std::size_t c = 0; c < 3; ++c) {
-            auto value = p.a > 0 ? colour[c]/p.a : 0.F;
-            if (node.encoding.transfer == Transfer::srgb) value = srgb(value);
-            if (node.encoding.alpha == Alpha::premultiplied) value *= p.a;
+            auto value = display ? colour[c] : (p.a > 0 ? colour[c]/p.a : 0.F);
+            if (display || node.encoding.transfer == Transfer::srgb) value = srgb(value);
+            if (!display && node.encoding.alpha == Alpha::premultiplied) value *= p.a;
             output[offset+c] = static_cast<std::uint8_t>(std::lround(std::clamp(value,0.F,1.F)*255));
         }
-        output[offset+3] = static_cast<std::uint8_t>(std::lround(std::clamp(p.a,0.F,1.F)*255));
+        output[offset+3] = display ? 255 : static_cast<std::uint8_t>(std::lround(std::clamp(p.a,0.F,1.F)*255));
     }
     return output;
 }

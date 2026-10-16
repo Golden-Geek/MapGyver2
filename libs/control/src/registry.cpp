@@ -224,6 +224,9 @@ ParameterRegistry::ParameterRegistry(const ProjectController& controller, Regist
         const auto select = [id](Edit& edit)->auto& {edit.stage_dirty = true; return edit.stage.outputs.at(id);};
         field(id,"adapter",base,output.adapter,std::nullopt,"","Configured output adapter; not a runtime capability claim",[select](Edit& edit,const auto& value){select(edit).adapter = value;});
         field(id,"endpoint",base,output.endpoint,ParameterValue{std::string{}},"","Persistent desired output binding",[select](Edit& edit,const auto& value){select(edit).endpoint = value;});
+        field(id,"enabled",base,output.enabled,ParameterValue{true},"","Desired native output enable",[select](Edit& edit,auto value){select(edit).enabled = value;});
+        field(id,"blackout",base,output.blackout,ParameterValue{false},"","Black output without changing content or calibration",[select](Edit& edit,auto value){select(edit).blackout = value;});
+        field(id,"freeze",base,output.freeze,ParameterValue{false},"","Hold this output's last complete frame",[select](Edit& edit,auto value){select(edit).freeze = value;});
         field(id,"width",base+"/desired",static_cast<std::uint64_t>(output.desired.width),ParameterValue{std::uint64_t{1920}},"pixels","Desired output width",[select](Edit& edit,auto value){select(edit).desired.width = static_cast<std::uint32_t>(value);},Persistence::authored,uint_range);
         field(id,"height",base+"/desired",static_cast<std::uint64_t>(output.desired.height),ParameterValue{std::uint64_t{1080}},"pixels","Desired output height",[select](Edit& edit,auto value){select(edit).desired.height = static_cast<std::uint32_t>(value);},Persistence::authored,uint_range);
         field(id,"refreshHz",base+"/desired",output.desired.refresh_hz,ParameterValue{Rational{60,1}},"Hz","Desired rational refresh; not measured scanout",[select](Edit& edit,auto value){select(edit).desired.refresh_hz = value;});

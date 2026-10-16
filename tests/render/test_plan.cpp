@@ -130,8 +130,17 @@ void prepared_resource_contracts() {
     rejects([&]{static_cast<void>(render::compile(*state,0,images));});
     check(controller.revision() == 0 && state->instances.definitions().data().assets.contains(Id{"unused"}),"Preparation failure deleted/modified authored assets");
 }
+void opaque_display_colour() {
+    auto controller = fixture();auto definitions = controller.snapshot()->instances.definitions().data();
+    definitions.compositions.at(Id{"nested"}).layers.erase(definitions.compositions.at(Id{"nested"}).layers.begin());
+    static_cast<void>(controller.transact(0,{control::ReplaceDefinitions{std::move(definitions)}}));
+    const auto plan = render::compile(*controller.snapshot(),1,prepare(*controller.snapshot()));
+    const auto canvas = render::reference(*plan,plan->preview), display = render::reference(*plan,plan->preview,true);
+    check(canvas[2] == 255 && canvas[3] == 128 && display[2] == 188 && display[3] == 255,
+        "Display encoded straight alpha RGB instead of compositing over linear black first");
+}
 }
 int main() {
-    try {colour_and_generations();active_graph_and_linear_blend();unsupported_and_independent();deep_graph_and_pool_reuse();prepared_resource_contracts();std::cout << "Render graph, colour, culling and lifetime contracts passed\n";return 0;}
+    try {colour_and_generations();active_graph_and_linear_blend();unsupported_and_independent();deep_graph_and_pool_reuse();prepared_resource_contracts();opaque_display_colour();std::cout << "Render graph, colour, culling and lifetime contracts passed\n";return 0;}
     catch (const std::exception& error) {std::cerr << error.what() << '\n';return 1;}
 }

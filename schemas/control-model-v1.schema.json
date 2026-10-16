@@ -823,11 +823,20 @@
         "adapter": {
           "type": "string"
         },
+        "blackout": {
+          "type": "boolean"
+        },
         "desired": {
           "$ref": "#/$defs/DesiredOutputMode"
         },
+        "enabled": {
+          "type": "boolean"
+        },
         "endpoint": {
           "type": "string"
+        },
+        "freeze": {
+          "type": "boolean"
         },
         "id": {
           "pattern": "^[a-zA-Z0-9_-]{1,64}$",
@@ -842,7 +851,10 @@
         "name",
         "adapter",
         "endpoint",
-        "desired"
+        "desired",
+        "enabled",
+        "blackout",
+        "freeze"
       ],
       "type": "object"
     },

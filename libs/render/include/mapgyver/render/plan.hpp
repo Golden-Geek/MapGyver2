@@ -53,5 +53,7 @@ class Error : public std::runtime_error {public: using std::runtime_error::runti
 [[nodiscard]] std::shared_ptr<const Image> pattern(Id resource,std::uint64_t generation,std::uint32_t width,
     std::uint32_t height,std::string_view name,std::uint64_t byte_limit = 268435456);
 [[nodiscard]] Pixel over(Pixel foreground,Pixel background) noexcept;
-[[nodiscard]] std::vector<std::uint8_t> reference(const Plan& plan,std::uint32_t node);
+// Display reference composites linear premultiplied content over black, then
+// encodes opaque sRGB. Named canvas exports retain their declared alpha/transfer.
+[[nodiscard]] std::vector<std::uint8_t> reference(const Plan& plan,std::uint32_t node,bool display = false);
 } // namespace mapgyver::render

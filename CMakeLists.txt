@@ -79,6 +79,7 @@ target_compile_definitions(mapgyver_core PRIVATE MAPGYVER_BUILD_CONFIGURATION="$
 add_subdirectory(libs/domain)
 add_subdirectory(libs/control)
 add_subdirectory(libs/render)
+add_subdirectory(libs/runtime)
 if(PM_BUILD_RENDERER)
   add_subdirectory(adapters/windows/render)
 endif()

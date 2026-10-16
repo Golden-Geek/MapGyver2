@@ -28,8 +28,10 @@ preparation. Dense view IDs count composition passes rather than source leaves.
 SDK objects remain private to the adapter. `frame()` submits an already prepared
 plan; resource creation, shader compilation and synchronous readback are outside
 that function. The adapter is currently an offscreen library/qualification path,
-not the engine's output service. Graph handoff, output windows and preview remain
-open. This implementation does not accept the renderer or complete M04.
+not the engine's output service. [Native window API controls](../runtime/README.md)
+now prepare independent swapchains and bounded held/presented textures. Engine
+handoff, physical-target orchestration and preview remain open. This implementation
+does not accept the renderer or complete M04.
 
 Build/check on the Windows laptop:
 
