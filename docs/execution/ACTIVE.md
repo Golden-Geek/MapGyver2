@@ -1,5 +1,13 @@
 # Active execution plan - MapGyver Windows beta
 
+Current continuation: M03.C02 portable adapter code is
+0680d44dbb62e6e03e5f2416d1afe445d9b14ff4, with clean Debug/Release 15/15
+wrapper results retained in M03-C02-adapter-local.json. Next implementation:
+Boost.Beast/Asio HTTP/UDP/WebSocket adapter polled by the existing control owner,
+actual bound endpoints and independent socket clients, bounded peers/traffic/
+deadlines. Default loopback and explicit external OSC editing-owner transfer;
+do not advertise remote authorization, discovery or native applied/save outcomes.
+
 ## Scope and prerequisite evidence
 
 - Authorized: implement M00-M13; product MapGyver; public Golden-Geek/MapGyver2;
