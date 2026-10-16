@@ -8,6 +8,7 @@
   let selected = $state('');
   let name = $state('');
   const project = $derived(view.snapshot?.data.project);
+  const outputs = $derived(Object.values(project?.stage.outputs || {}));
   const surfaces = $derived(Object.values(project?.stage.surfaces || {}));
   const surface = $derived(surfaces.find(item => item.id === selected) || surfaces[0]);
   const compositions = $derived(Object.values(project?.definitions.compositions || {}));
@@ -54,6 +55,9 @@
   }
   async function rename() {
     if (client && surface) await action(() => client!.write({address: `/stage/surfaces/${surface.id}/name`, value: {type: 'text', value: name}}));
+  }
+  async function setOutput(id: string, parameter: 'enabled' | 'blackout' | 'freeze', value: boolean) {
+    if (client) await action(() => client!.write({address: `/outputs/${id}/${parameter}`, value: {type: 'boolean', value}}));
   }
   async function historyAction(operation: 'undo' | 'redo') {
     if (!client || !view.snapshot) return;
@@ -118,7 +122,7 @@
       <div class="surface-strip"><h3>SURFACES <span class="count">{surfaces.length}</span></h3><div class="surface-cards">
         {#each surfaces as item (item.id)}<button class:selected={surface?.id === item.id} onclick={() => {selected = item.id;}}><span class="surface-thumbnail">▱</span><span>{item.name}</span><small>{item.contentPlacement ? 'Content assigned' : 'No content'}</small></button>{/each}
       </div></div>
-      <div class="preview-status"><span class="preview-icon">▣</span><div><strong>Engine preview</strong><p>{view.snapshot?.renderer.available ? 'Preview transport is waiting for an encoded frame.' : 'Preview will appear when the native renderer is connected.'}</p></div><span class="badge">UNAVAILABLE</span></div>
+      <div class="preview-status"><span class="preview-icon">▣</span><div><strong>Engine preview</strong><p>{view.snapshot?.renderer.available ? 'Native rendering is active. Preview is unavailable in this build.' : 'Preview will appear when the native renderer is connected.'}</p></div><span class="badge">UNAVAILABLE</span></div>
     </section>
     <aside class="inspector">
       <div class="panel-heading"><h2>Inspector</h2><span class="inspector-symbol">☷</span></div>
@@ -132,9 +136,20 @@
         <div class="property-group"><h3>PROJECTION</h3><dl><dt>Patches</dt><dd>{Object.values(project?.stage.patches || {}).filter(p => p.surface === surface.id).length}</dd><dt>Output targets</dt><dd>{Object.keys(project?.stage.outputs || {}).length}</dd></dl><p class="hint">Physical calibration belongs to projection patches and stays independent of content changes.</p></div>
         <div class="property-group"><h3>CONTROL</h3><dl><dt>Access</dt><dd>{view.snapshot?.isEditor ? 'Editing owner' : 'Read only'}</dd><dt>Revision</dt><dd data-testid="revision">{view.snapshot?.authoredRevision || '—'}</dd><dt>Saved revision</dt><dd>{view.snapshot?.persistence.savedRevision || 'Unavailable'}</dd></dl>
           {#if view.snapshot && !view.snapshot.isEditor && !view.snapshot.editOwner}<button onclick={() => action(async () => {await client!.call('claimEdit', {expectedOwnershipGeneration: view.snapshot!.ownershipGeneration}); await client!.call('snapshot', {});})}>Claim editing</button>{/if}
+          {#if view.snapshot?.isEditor}<button disabled={!editable} onclick={() => action(async () => {await client!.call('releaseEdit', {expectedOwnershipGeneration: view.snapshot!.ownershipGeneration}); await client!.call('snapshot', {});})}>Release editing</button>{/if}
+        </div>
+        <div class="property-group"><h3>OUTPUT CONTROLS</h3>
+          {#each outputs as output (output.id)}<div class="output-controls"><strong>{output.name}</strong>
+            {#each ['enabled', 'blackout', 'freeze'] as parameter}<label>
+              <input type="checkbox" data-testid={`output-${output.id}-${parameter}`} checked={output[parameter as 'enabled' | 'blackout' | 'freeze']} disabled={!editable}
+                onchange={event => setOutput(output.id, parameter as 'enabled' | 'blackout' | 'freeze', event.currentTarget.checked)}/>{parameter === 'enabled' ? 'Enabled' : parameter === 'blackout' ? 'Blackout' : 'Freeze'}
+            </label>{/each}
+          </div>{/each}
         </div>
       </div>{:else}<p class="inspector-empty">Select a surface to inspect its authored state.</p>{/if}
-      <div class="inspector-footer"><span class="status-dot"></span> Native output not connected</div>
+      <div class="inspector-footer"><span class:online={view.snapshot?.renderer.available} class="status-dot"></span>
+        {view.snapshot?.renderer.reason === 'render_state_requires_preparation' ? 'Output update unavailable' : view.snapshot?.renderer.reason === 'source_frames_unavailable' ? 'Source frames unavailable' : view.snapshot?.renderer.reason === 'output_targets_unavailable' ? 'No output target is bound' : view.snapshot?.renderer.available ? 'Native compositor active' : view.snapshot?.renderer.reason === 'native_render_owner_failed' ? 'Native compositor failed' : 'Native output not connected'}
+      </div>
     </aside>
   </main>
   <footer class="statusbar"><span>MapGyver <span class="muted">0.1 · Development</span></span><span>{surfaces.length} surfaces <span class="muted">·</span> {Object.keys(project?.stage.outputs || {}).length} outputs</span><span>Authored r{view.snapshot?.authoredRevision || '—'} <span class="muted">·</span> Applied {view.snapshot?.renderer.appliedRevision || 'unavailable'} <span class="muted">·</span> Reconnects {view.reconnects}</span></footer>

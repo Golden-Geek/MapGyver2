@@ -299,4 +299,5 @@ protocol::Json pipe_capabilities() {
         {"writeTimeoutMs",std::chrono::duration_cast<std::chrono::milliseconds>(write_timeout).count()},
         {"remoteClients","rejected_by_pipe_flag"},{"access","current_user_acl"}};
 }
+void request_pipe_stop() noexcept {stopping.store(true);}
 } // namespace mapgyver::windows

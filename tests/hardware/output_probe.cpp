@@ -2,16 +2,18 @@
 #include "adapters/windows/composition_renderer.hpp"
 #include "adapters/windows/display_inventory.hpp"
 #include <mapgyver/build_info.hpp>
+#include <mapgyver/control/wire.hpp>
 #include <nlohmann/json.hpp>
 #include <algorithm>
 #include <iostream>
 #include <thread>
+#include <fstream>
 
 using namespace mapgyver;
 using namespace domain;
 namespace {
 void check(bool value,const char* message) {if (!value) throw std::runtime_error(message);}
-std::shared_ptr<const render::Plan> fixture() {
+control::ProjectState project_fixture() {
     Definitions definitions;
     definitions.assets.emplace(Id{"alpha"},Asset{Id{"alpha"},"Gradient",ExternalSource{"mapgyver.pattern","gradient",{{Id{"picture"},"Picture",StreamKind::video}}}});
     auto project = make_default_project(std::move(definitions));
@@ -21,11 +23,25 @@ std::shared_ptr<const render::Plan> fixture() {
     }
     static_cast<void>(project.instances.reconcile_definitions(DefinitionSnapshot{std::move(library)}));
     static_cast<void>(project.instances.bind_input(project.root_instance,project.content_input,{Id{"alpha"},Id{"picture"}},false));
+    auto stage = project.stage.data();
+    stage.outputs.at(project.output).adapter = "windows.window";
+    stage.outputs.at(project.output).desired = {128,64,{60,1}};
+    for (unsigned i = 0; i < 2; ++i) {
+        const Id id{"native-output-"+std::to_string(i+2)};
+        stage.outputs.emplace(id,OutputTarget{id,"Native "+std::to_string(i+2),"windows.window","",{i == 0 ? 97U : 64U,i == 0 ? 53U : 32U,{60,1}}});
+        const Id patch{"native-patch-"+std::to_string(i+2)};
+        stage.patches.emplace(patch,ProjectionPatch{patch,"Full frame",project.surface,id,quad_calibration(128,64)});
+    }
+    project.stage = StageSnapshot{std::move(stage),project.instances};
     control::ProjectController controller{std::move(project)};
+    return *controller.snapshot();
+}
+std::shared_ptr<const render::Plan> fixture() {
+    const auto state = project_fixture();
     render::Images images;
-    for (const auto& [id,source] : controller.snapshot()->instances.instances()) if (source.asset == Id{"alpha"})
+    for (const auto& [id,source] : state.instances.instances()) if (source.asset == Id{"alpha"})
         images.emplace(render::PortKey{id,Id{"picture"}},render::pattern(Id{"gradient"},1,128,64,"gradient"));
-    return render::compile(*controller.snapshot(),controller.revision(),images);
+    return render::compile(state,0,images);
 }
 nlohmann::json run() {
     nlohmann::json displays = nlohmann::json::array();
@@ -87,6 +103,10 @@ nlohmann::json run() {
 }
 }
 int main(int argc,char** argv) {
+    if (argc == 3 && std::string_view{argv[1]} == "--write-project") {
+        try {std::ofstream output{argv[2],std::ios::binary};output << control::wire::encode_project(project_fixture()).dump(2) << '\n';check(output.good(),"Could not write native engine fixture");return 0;}
+        catch (const std::exception& error) {std::cerr << error.what() << '\n';return 1;}
+    }
     if (argc == 2 && std::string_view{argv[1]} == "--version") {std::cout << "MapGyver native output window qualification\n";return 0;}
     if (argc != 2 || std::string_view{argv[1]} != "--json") {std::cerr << "Usage: mapgyver-output-probe --json\n";return 2;}
     try {

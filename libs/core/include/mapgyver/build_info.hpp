@@ -23,5 +23,5 @@ struct FeatureInfo {
     bool available;
     std::string_view reason;
 };
-[[nodiscard]] std::array<FeatureInfo, 5> feature_info() noexcept;
+[[nodiscard]] std::array<FeatureInfo, 6> feature_info() noexcept;
 } // namespace mapgyver

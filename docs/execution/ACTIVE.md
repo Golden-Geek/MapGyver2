@@ -84,32 +84,36 @@ M04.C01 current working slice:
 4. Six additional offline bgfx tool dependencies/notices inspected and inventoried.
    No application exception/proprietary runtime. Source inventory is not M13 SBOM.
 5. C01 code/evidence pushed at 0aa62c5547de512565a83f0aaa20c2c1f0da26bd.
-   CI 38843868195: Linux/macOS/plan passed; Windows jobs still running at last check.
-6. C02 binding/window-API code `0c98675065db977864b25eb991bba9f644f1192c` is committed locally.
-   Clean windows-render Debug/Release wrappers each pass 23/23, dirty=false.
-   Both GPU runs pass composition regressions and three different-size native
-   windows, 13 frames/11 captures, fixed tolerance 2/255, normal exit. Foreign
-   owner mutation is rejected; known half-alpha display reference passes.
-   M04-C02-local.json retains exact source, commands/JUnit, drivers, binaries,
-   shader/compiler and GPU reports. Commit evidence and publish C02; inspect its
-   source CI. C01 hosted Windows jobs were still running at last check.
-7. Native inventory code `4d4bcc3325c28aa348c113f797878eb719304151` is committed locally.
-   Clean windows-render Debug/Release 23/23, dirty=false, and both actual native
-   output probes pass (three windows/13 frames/11 captures/foreign-owner refusal).
-   M04-C02-inventory-local.json retains actual one-panel device path/OS-reported
-   mode, commands/JUnit and binary/shader/GPU evidence. Bounded topology retry,
-   identity conversion and clone constraints implemented; no hotplug qualification.
-   Local C02 commits: 0c98675, 90b3c41, 4d4bcc3 plus this evidence commit. Origin
-   remains at C01 evidence 0aa62c5547de512565a83f0aaa20c2c1f0da26bd. Publish pending
-   tested commits after CI 38843868195 becomes terminal, then inspect the new CI.
-   Windows jobs 116789825642/116789825931 still running at last check; Linux/macOS
-   and plan already passed. Do not cancel that build for an evidence-only push.
-8. Continue independent C02 work while CI runs: logical monitor binding/window orchestration,
-   render/control worker handoff, engine applied-frame/status and production native
-   output/browser-loss. C03 quad mapping/masks/color rules and C04 remain open.
+   CI 38843868195 is terminal: Windows Debug/Linux/macOS/plan passed; Release
+   expired the 30m cold dependency-configure guard before app compilation/tests.
+   Retained configure log showed FFmpeg 16m + SPIR-V 11m then SPIRV-Cross active.
+   Scoped windows-ci configure guard is now 40m; outer job/app/test guards unchanged.
+6. C02 controls/window code 0c98675065db977864b25eb991bba9f644f1192c and inventory
+   code 4d4bcc3325c28aa348c113f797878eb719304151 have clean Debug/Release 23/23
+   and actual GPU/window evidence in M04-C02-local.json / M04-C02-inventory-local.json.
+   They were published with evidence/CI fix at 256e2cb4426389ec444ebf6d3af72378e75a04fe.
+   CI 38847721626 is fully green on Windows Debug/Release, Linux/macOS, plan and
+   quality-gate. Hosted compilation is separate from GPU/physical qualification.
+7. Current uncommitted C02 engine-owner slice: --render creates a native GPU/window
+   owner; control/status mailboxes carry bounded values. Core validates native
+   generation/revision/frame/clock and preserves original cached outcome metadata.
+   Svelte output flags and edit release share pipe/OSC validation. Actual 900-frame
+   tests cover UI checkbox, reload, owned browser process death, no clients for
+   2s, native controls, pending resource shape/undo and granted OSC bundle. Final
+   offline three-window captures use fixed tolerance 2/255. Initial Node stdin
+   teardown bug fixed without widening deadlines; owned browser job cleanup passes.
+   Dirty-source Debug/Release wrappers pass 23/23 and native engine tests pass.
+   Latest owner initial-revision fix compiles/passes focused Debug. Commit tested
+   slice, collect clean Debug/Release wrappers/native evidence and publish.
+8. Next: implement actual GPU resource preparation/handoff for new graphs/images,
+   sizes, bindings and mapping while the old native scene keeps running. Current
+   compatible flags/metadata apply; other edits remain explicitly unapplied.
+   Pinned bgfx source creates a SINGLETHREADED D3D11 device; keep native calls on
+   the owner until a measured owned-device/staged handoff path is qualified.
+   C03 homography/masks/color rules, encoded preview and C04 full scenarios remain.
 
-These are static offscreen/window-API real-GPU paths, not the engine's program
-path. No production browser independence, encoded preview, physical scanout,
+The engine now has a static-pattern native program path and actual browser-loss
+evidence. No animated-media/resource-handoff, encoded preview, physical scanout,
 sustained budgets or recovery claim. M01/M03 prerequisites still prevent milestone
 qualification. No M01/M02/M03/M04 tag.
 

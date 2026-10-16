@@ -105,6 +105,10 @@ if(PM_BUILD_UI)
   install(DIRECTORY "$<TARGET_FILE_DIR:mapgyver_engine>/ui/" DESTINATION bin/ui)
 endif()
 target_link_libraries(mapgyver_engine PRIVATE mapgyver_core mapgyver_protocol mapgyver_network nlohmann_json::nlohmann_json)
+target_compile_definitions(mapgyver_engine PRIVATE MAPGYVER_NATIVE_RENDERER=$<BOOL:${PM_BUILD_RENDERER}>)
+if(PM_BUILD_RENDERER)
+  target_link_libraries(mapgyver_engine PRIVATE mapgyver_windows_renderer)
+endif()
 if(WIN32)
   target_sources(mapgyver_engine PRIVATE adapters/windows/pipe_service.cpp adapters/windows/entry.cpp)
   target_include_directories(mapgyver_engine PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -173,7 +177,7 @@ if(BUILD_TESTING)
   add_test(NAME diagnostics.contract
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_diagnostics.py"
       --engine "$<TARGET_FILE:mapgyver_engine>" --source "${CMAKE_CURRENT_SOURCE_DIR}"
-      --configuration "$<CONFIG>" --ui-built "$<BOOL:${PM_BUILD_UI}>")
+      --configuration "$<CONFIG>" --ui-built "$<BOOL:${PM_BUILD_UI}>" --renderer-built "$<BOOL:${PM_BUILD_RENDERER}>")
   add_test(NAME build.source-identity
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_build_metadata.py"
       --script "${CMAKE_CURRENT_SOURCE_DIR}/tools/build_metadata.py")

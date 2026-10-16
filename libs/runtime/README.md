@@ -25,14 +25,22 @@ software clock continue. Display encoding composites canonical linear content
 over black, then encodes opaque sRGB. A shared software frame never proves
 synchronized physical scanout.
 
-This is a preparation library and native-window API path. Windows native monitor
+The Windows engine can now run the prepared scene on a native render owner with
+`--render`; its monotonic show clock runs independently of UI/control requests.
+Output controls and metadata changes use bounded value batches consumed between
+frames. Actual frame observations update reliable control replies/snapshots;
+they never imply physical scanout or durable saving. Resource-changing edits
+currently keep the last applied scene and report `render_state_requires_preparation`.
+Hot resource preparation/handoff remains required work, not a completed feature.
+
+Windows native monitor
 inventory now queries active device paths, source desktop rectangles and rational
 mode rates, with three bounded retries for a topology race. Cloned sources retain
 their descriptors with an independent-output constraint; empty/ambiguous bindings
 never fall back to a primary display. These are OS-reported modes, not measured
-scanout. Binding-to-window orchestration, render/control worker handoff,
-production engine integration, hot topology recovery and patch mapping are still
-pending. The adapter currently presents a selected exported composition node
+scanout. Exact startup bindings now create windowed or explicitly positioned
+borderless targets. Hot topology/resource recovery and nontrivial patch mapping
+remain pending. The adapter currently presents a selected exported composition node
 over a whole window; callers must not treat it as implemented physical calibration.
 Only already-exported roots are allowed, preserving target lifetimes.
 
@@ -53,3 +61,30 @@ It preserves native error codes, bounds path/mode allocation and converts bounde
 UTF-16 identity fields explicitly. It does not change display modes or substitute
 monitor names/enumeration indices for a requested device path. M12 owns hotplug,
 EDID/connector confidence and recovery when those desired paths change.
+
+Native engine qualification:
+
+```powershell
+python tools/qualification/check_native_program.py --engine out/build/windows-render/Debug/mapgyver-engine.exe --probe out/build/windows-render/adapters/windows/render/Debug/mapgyver-output-probe.exe --report out/reports/native-program-Debug.json
+```
+
+Use Release paths for Release. The fixture exports a validated logical project
+with a default composition, one static gradient source and three output windows.
+`--initial-state` reads that bounded versioned control document; it is not SQLite
+persistence or a durable save implementation. `--render-hidden`, `--native-frames`
+and `--native-report` support explicit bounded qualification. Final synchronous
+captures/JSON/file IO occur after the bounded program loop ends. Normal output
+runs continuously without those options. Built-in `mapgyver.pattern` locators
+`bars`, `checker`, `alpha` and `gradient` prepare immutable 128x64 source images;
+arbitrary composition/output dimensions remain editable. Other sources retain
+unavailable reasons until their adapters are implemented.
+
+The explicit native test uses actual Svelte controls, named-pipe commands and an
+operator-granted OSC bundle through the same validator; reloads and terminates
+its owned Chromium process; then disconnects all control clients while native
+frames continue. An anonymous Windows job contains only that helper/browser tree
+for failure cleanup. Offline final textures check freeze/blackout/disable against
+fixed color tolerance. This remains static-pattern/hidden-window evidence;
+animated media, new GPU resources during playback, physical scanout and encoded
+preview are unqualified. Native resources stay on their owner thread, and shutdown
+waits for actual thread/resource completion with a five-second fatal boundary.

@@ -28,17 +28,20 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
   native client/fault tests pass locally. OSCQuery HTTP/UDP/WebSocket loopback
   transport and registry parity now have independent native socket tests; remote
   authorization/discovery remain open. A capability-bound local browser channel
-  and packaged Svelte shell now have native socket/Chromium tests. Actual encoded
-  preview/native applied frames, complete editor workflows and durable saving
-  remain open. CI 38838422770 is green on Windows/Linux/macOS, including the
+  and packaged Svelte shell now have native socket/Chromium tests. A native owner
+  now supplies applied revision/frame/show time for prepared static scenes and
+  live output controls. Encoded preview, hot resource handoff, complete editor
+  workflows and durable saving remain open. CI 38838422770 is green on Windows/Linux/macOS, including the
   bounded socket saturation fix and actual browser tests. Its one failed macOS
   dependency download passed on a terminal failed-job retry.
 - M04.C01 immutable active-video plans, compatible bounded target reuse, linear
   premultiplied compositing and authored offline shaders are implemented. Native
   offscreen GPU goldens pass locally. C02 adds exact persistent target binding,
   shared-registry enable/blackout/freeze intent and an independent native-window
-  API path. Engine integration, actual monitor orchestration, geometry/masks,
-  preview and hardware qualification remain open.
+  API path. The engine now runs that path on an independent native owner with
+  Svelte/pipe/OSC output controls and browser-loss tests. Resource-changing edits
+  retain the last applied scene with an explicit pending reason. Hot resource
+  handoff, nontrivial geometry/masks, preview and hardware qualification remain open.
 - Open product decisions: current NDI licensing/distribution path and exact reference hardware/workload budgets.
 - Later native targets: Windows ARM64, Linux x64/PipeWire, macOS ARM64/Syphon, Linux ARM64/Raspberry Pi.
 - Separate optional target: 32-bit Linux armhf.

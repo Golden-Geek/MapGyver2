@@ -37,10 +37,10 @@
     },
     "features": {
       "type": "object", "additionalProperties": false,
-      "required": ["platform", "media", "ui", "hardwareTests", "ndi"],
+      "required": ["platform", "media", "ui", "renderer", "hardwareTests", "ndi"],
       "properties": {
         "platform": { "$ref": "#/$defs/feature" }, "media": { "$ref": "#/$defs/feature" },
-        "ui": { "$ref": "#/$defs/feature" }, "hardwareTests": { "$ref": "#/$defs/feature" }, "ndi": { "$ref": "#/$defs/feature" }
+        "ui": { "$ref": "#/$defs/feature" }, "renderer": { "$ref": "#/$defs/feature" }, "hardwareTests": { "$ref": "#/$defs/feature" }, "ndi": { "$ref": "#/$defs/feature" }
       }
     }
   },

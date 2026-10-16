@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import type { CommandDocument, MediaTime, ParameterWrite, ProjectDocument, RegistryDocument, WriteDocument } from './generated/model';
 export type Revision = string;
-export interface Renderer {available: boolean; reason: string; appliedRevision: Revision | null; showTime: MediaTime | null; frame: Revision | null}
+export interface Renderer {available: boolean; reason: string; generation: Revision | null; appliedRevision: Revision | null; showTime: MediaTime | null; frame: Revision | null}
 export interface Persistence {available: boolean; reason: string; savedRevision: Revision | null}
 export interface Snapshot {
   type: 'snapshot'; serviceId: string; authoredRevision: Revision; eventSequence: Revision;

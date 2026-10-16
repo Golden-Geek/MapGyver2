@@ -9,5 +9,6 @@
 #cmakedefine01 PM_BUILD_PLATFORM
 #cmakedefine01 PM_BUILD_MEDIA
 #cmakedefine01 PM_BUILD_UI
+#cmakedefine01 PM_BUILD_RENDERER
 #cmakedefine01 PM_BUILD_HARDWARE_TESTS
 #cmakedefine01 PM_BUILD_NDI

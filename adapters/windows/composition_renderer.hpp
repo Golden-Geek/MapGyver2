@@ -12,6 +12,7 @@ struct OutputWindow {
     std::uint32_t width, height, node;
     bool hidden = false; // Explicit API-only qualification; never physical evidence.
     OutputControls controls;
+    std::optional<std::array<std::int32_t,2>> desktop_position{};
 };
 // Provisional measured Windows renderer. SDK objects remain adapter-private.
 // Construct/prewarm outside deadline operation; frame() allocates no app resources.
@@ -29,6 +30,7 @@ public:
     [[nodiscard]] std::uint64_t submitted_draws() const noexcept;
     // Same GPU owner thread, outside frame execution. No graph/calibration edits.
     void output_controls(const domain::Id& output,OutputControls controls);
+    void apply_output_controls(std::uint64_t revision,std::span<const OutputControls> controls);
     [[nodiscard]] std::uint64_t held_frame(const domain::Id& output) const;
     [[nodiscard]] std::vector<std::uint8_t> capture_output_for_test(const domain::Id& output);
 private:

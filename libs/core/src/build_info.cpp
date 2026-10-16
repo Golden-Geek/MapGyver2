@@ -17,10 +17,11 @@ BuildInfo build_info() noexcept {
             MAPGYVER_BUILD_CONFIGURATION, MAPGYVER_CMAKE_VERSION,
             MAPGYVER_TARGET_OS, architecture};
 }
-std::array<FeatureInfo, 5> feature_info() noexcept {
+std::array<FeatureInfo, 6> feature_info() noexcept {
     return {{{"platform", PM_BUILD_PLATFORM != 0, false, "not_implemented"},
              {"media", PM_BUILD_MEDIA != 0, false, "not_implemented"},
              {"ui", PM_BUILD_UI != 0, PM_BUILD_UI != 0, PM_BUILD_UI ? "static_editor_built" : "not_bundled"},
+             {"renderer", PM_BUILD_RENDERER != 0, PM_BUILD_RENDERER != 0, PM_BUILD_RENDERER ? "provisional_native_compositor_built" : "not_bundled"},
              {"hardwareTests", PM_BUILD_HARDWARE_TESTS != 0, false, "no_hardware_suite"},
              {"ndi", PM_BUILD_NDI != 0, false, "owner_approval_required"}}};
 }

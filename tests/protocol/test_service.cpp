@@ -177,12 +177,47 @@ void byte_cache_eviction_and_structural_batch_rollback() {
     rejected(execute(service,editor,invalid),"missing_reference",true);
     check(service.snapshot() == stable && service.revision() == 1,"A failed remote structural batch published an earlier input/source edit");
 }
+void native_observation_authority() {
+    ControlService service{fixture()};const auto owner = service.connect(hello("native-observer").dump());
+    service.begin_renderer(1);
+    service_rejects("renderer_generation",[&]{service.begin_renderer(1);});
+    service_rejects("renderer_observation",[&]{service.report_rendered({1,1,1,{10,{1,1000}}});});
+    service.report_rendered({1,0,1,{10,{1,1000}}});
+    const auto query = request(owner,0,"snapshot");const auto first = execute(service,owner,query);
+    check(first["renderer"]["available"] == true && first["renderer"]["appliedRevision"] == "0" && first["renderer"]["frame"] == "1" &&
+        first["renderer"]["showTime"]["ticks"] == "10","Observed native frame was not reported separately from authored acceptance");
+    const auto cursor = first["payload"]["eventSequence"];
+    service.report_rendered({1,0,2,{20,{1,1000}}});
+    const auto replay = execute(service,owner,query);
+    check(replay["replayed"] == true && replay["renderer"]["frame"] == "1","Native telemetry rewrote an already cached terminal outcome");
+    const auto next = execute(service,owner,request(owner,1,"snapshot"));
+    check(next["renderer"]["frame"] == "2" && next["payload"]["eventSequence"] == cursor,"Frame ticks flooded the bounded control journal");
+    service_rejects("renderer_observation",[&]{service.report_rendered({1,0,2,{30,{1,1000}}});});
+    service_rejects("renderer_observation",[&]{service.report_rendered({1,0,3,{19,{1,1000}}});});
+    const auto write = wire::encode_write({"/library/assets/media/name",std::string{"Changed"}});
+    const auto changed = execute(service,owner,request(owner,2,"parameters",{{"writes",Json::array({write})}},0));
+    check(changed["status"] == "accepted" && changed["authoredRevision"] == "1" && changed["renderer"]["appliedRevision"] == "0",
+        "Authored change claimed an unapplied native revision");
+    service.report_rendered({1,1,3,{30,{1,1000}}});service.renderer_failed(1,"device_lost");
+    const auto failed = execute(service,owner,request(owner,3,"snapshot"));
+    check(failed["renderer"]["available"] == false && failed["renderer"]["appliedRevision"] == "1" && failed["renderer"]["frame"] == "3",
+        "Worker failure discarded its last actual application evidence");
+    service.begin_renderer(2);
+    service_rejects("renderer_generation",[&]{service.report_rendered({1,1,4,{40,{1,1000}}});});
+    service_rejects("renderer_observation",[&]{service.report_rendered({2,0,1,{40,{1,1000}}});});
+    service_rejects("renderer_observation",[&]{service.report_rendered({2,1,1,{29,{1,1000}}});});
+    service.report_rendered({2,1,1,{40,{1,1000}}});
+    const auto restarted = execute(service,owner,request(owner,4,"snapshot"));
+    check(restarted["renderer"]["generation"] == "2" && restarted["renderer"]["frame"] == "1" && restarted["renderer"]["showTime"]["ticks"] == "40",
+        "New worker generation reset the monotonic show clock or reused stale frames");
+}
 }
 int main() {
     try {
         mutation_deduplication_and_revision(); editing_owner_and_session_binding(); reconnect_retention_and_cache_expiry();
         subscriptions_and_bounded_journal(); rollback_response_capacity_and_malformed_input();
         byte_cache_eviction_and_structural_batch_rollback();
+        native_observation_authority();
         std::cout << "Passed portable reliable control session contracts\n"; return 0;
     } catch (const std::exception& error) {
         std::cerr << "Control session contract failed: " << error.what() << '\n'; return 1;

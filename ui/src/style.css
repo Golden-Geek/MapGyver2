@@ -383,3 +383,7 @@ h1{font-size:17px;
 .workspace-heading{padding-left:20px}
 .preview-status .badge{display:none}
 }
+.output-controls{margin-top:14px;font-size:11px}
+.output-controls strong{display:block;margin-bottom:7px;color:#aab9c5}
+.inspector-content .output-controls label{display:inline-flex;align-items:center;gap:4px;margin-right:8px;font-size:10px}
+.inspector-content .output-controls input{width:auto;margin:0;accent-color:#57d4b0}

@@ -27,10 +27,10 @@ It verifies actual hardware identity and renderer capacities before resource
 preparation. Dense view IDs count composition passes rather than source leaves.
 SDK objects remain private to the adapter. `frame()` submits an already prepared
 plan; resource creation, shader compilation and synchronous readback are outside
-that function. The adapter is currently an offscreen library/qualification path,
-not the engine's output service. [Native window API controls](../runtime/README.md)
-now prepare independent swapchains and bounded held/presented textures. Engine
-handoff, physical-target orchestration and preview remain open. This implementation
+that function. The adapter provides offline qualification and the engine's
+independent native owner. [Native window controls](../runtime/README.md)
+prepare independent swapchains and bounded held/presented textures. Hot resource
+handoff, nontrivial patch mapping and preview remain open. This implementation
 does not accept the renderer or complete M04.
 
 Build/check on the Windows laptop:

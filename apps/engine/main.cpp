@@ -4,6 +4,9 @@
 #include "adapters/osc/network.hpp"
 #ifdef _WIN32
 #include "adapters/windows/pipe_service.hpp"
+#if MAPGYVER_NATIVE_RENDERER
+#include "adapters/windows/native_program.hpp"
+#endif
 #endif
 #include <nlohmann/json.hpp>
 #include <bit>
@@ -14,6 +17,8 @@
 #include <string>
 #include <string_view>
 #include <filesystem>
+#include <fstream>
+#include <charconv>
 
 namespace {
 constexpr std::string_view usage =
@@ -22,6 +27,8 @@ constexpr std::string_view usage =
     "       mapgyver-engine --diagnose [--json] [--no-gpu]\n"
     "       mapgyver-engine --serve --pipe-name <stable-id> [--oscquery]\n"
     "         [--editor-dir <static-assets>] [--dev-origin http://127.0.0.1:<port>] (Windows)\n"
+    "         [--render] [--initial-state <control-project.json>]\n"
+    "         [--render-hidden --native-frames <count> --native-report <offline-report.json>]\n"
     "       mapgyver-engine --help\n";
 
 nlohmann::json diagnose(bool no_gpu) {
@@ -52,11 +59,25 @@ nlohmann::json diagnose(bool no_gpu) {
 
 int engine_main(int argc, char** argv) {
     try {
-        bool version = false, diagnostic = false, json = false, no_gpu = false, help = false, serve = false, oscquery = false;
+        bool version = false, diagnostic = false, json = false, no_gpu = false, help = false, serve = false, oscquery = false, render = false, render_hidden = false;
+        std::string initial_state, native_report;
+        std::uint64_t native_frames = 0;
         std::optional<std::string> pipe_name;
         mapgyver::network::Options network_options;
         for (int index = 1; index < argc; ++index) {
             const std::string_view arg{argv[index]};
+            if (arg == "--initial-state" || arg == "--native-report") {
+                auto& value = arg == "--initial-state" ? initial_state : native_report;
+                if (!value.empty() || index+1 >= argc || std::string_view{argv[index+1]}.empty() || std::string_view{argv[index+1]}.starts_with("--")) {std::cerr << "Missing or repeated native option\n";return 2;}
+                value = argv[++index];continue;
+            }
+            if (arg == "--native-frames") {
+                if (native_frames || index+1 >= argc) {std::cerr << "Missing or repeated native frame budget\n";return 2;}
+                const std::string_view value{argv[++index]};
+                const auto result = std::from_chars(value.data(),value.data()+value.size(),native_frames);
+                if (result.ec != std::errc{} || result.ptr != value.data()+value.size() || !native_frames || native_frames > 1000000) {std::cerr << "Native frame budget must be 1..1000000\n";return 2;}
+                continue;
+            }
             if (arg == "--editor-dir" || arg == "--dev-origin") {
                 auto& value = arg == "--editor-dir" ? network_options.editor_directory : network_options.development_origin;
                 if (!value.empty() || index+1 >= argc || std::string_view{argv[index+1]}.empty() || std::string_view{argv[index+1]}.starts_with("--")) {std::cerr << "Missing or repeated network option\n" << usage; return 2;}
@@ -77,6 +98,8 @@ int engine_main(int argc, char** argv) {
             else if (arg == "--help") flag = &help;
             else if (arg == "--serve") flag = &serve;
             else if (arg == "--oscquery") flag = &oscquery;
+            else if (arg == "--render") flag = &render;
+            else if (arg == "--render-hidden") flag = &render_hidden;
             if (flag == nullptr || *flag) {
                 std::cerr << "Invalid or repeated argument: " << arg << '\n' << usage;
                 return 2;
@@ -85,7 +108,9 @@ int engine_main(int argc, char** argv) {
         }
         const auto modes = static_cast<int>(version) + static_cast<int>(diagnostic) + static_cast<int>(help) + static_cast<int>(serve);
         if ((argc > 1 && modes != 1) || ((json || no_gpu) && !diagnostic) || (pipe_name.has_value() != serve) || (oscquery && !serve) ||
-            ((!network_options.editor_directory.empty() || !network_options.development_origin.empty()) && (!serve || !oscquery))) {
+            ((!network_options.editor_directory.empty() || !network_options.development_origin.empty()) && (!serve || !oscquery)) ||
+            ((render || !initial_state.empty()) && !serve) || ((render_hidden || native_frames || !native_report.empty()) && !render) ||
+            (!native_report.empty() && !native_frames)) {
             std::cerr << "Choose one command; --json and --no-gpu require --diagnose.\n" << usage;
             return 2;
         }
@@ -96,7 +121,21 @@ int engine_main(int argc, char** argv) {
             std::cout << build.product << ' ' << build.version << '\n';
         } else if (serve) {
 #ifdef _WIN32
-            mapgyver::protocol::ControlService service{mapgyver::control::ProjectController{mapgyver::domain::make_default_project()}};
+            mapgyver::control::ProjectController controller{mapgyver::domain::make_default_project()};
+            if (!initial_state.empty()) {
+                std::ifstream input{std::filesystem::path{std::u8string{initial_state.begin(),initial_state.end()}},std::ios::binary|std::ios::ate};
+                if (!input.good() || input.tellg() < 0 || input.tellg() > 16777216) throw std::runtime_error("Initial authored state is missing or exceeds its byte capacity");
+                std::string bytes(static_cast<std::size_t>(input.tellg()),'\0');input.seekg(0);input.read(bytes.data(),static_cast<std::streamsize>(bytes.size()));
+                if (!input.good()) throw std::runtime_error("Could not read initial authored state");
+                controller = mapgyver::control::ProjectController{mapgyver::control::wire::decode_project(mapgyver::control::wire::parse(bytes))};
+            }
+            mapgyver::protocol::ControlService service{std::move(controller)};
+#if MAPGYVER_NATIVE_RENDERER
+            std::unique_ptr<mapgyver::windows::NativeProgram> program;
+            if (render) program = std::make_unique<mapgyver::windows::NativeProgram>(service,mapgyver::windows::ProgramOptions{render_hidden,native_frames,native_report});
+#else
+            if (render) {std::cerr << "Native compositor is not included in this build\n";return 3;}
+#endif
             std::unique_ptr<mapgyver::network::OscQueryServer> network;
             if (network_options.editor_directory.empty()) {
                 for (const auto& feature : mapgyver::feature_info()) if (feature.name == "ui" && feature.available) {
@@ -112,8 +151,17 @@ int engine_main(int argc, char** argv) {
                     {"sourceRevision",build.revision.empty() ? nlohmann::json(nullptr) : nlohmann::json(build.revision)},
                     {"sourceDirty",build.dirty.has_value() ? nlohmann::json(*build.dirty) : nlohmann::json(nullptr)}});
                 if (network) {ready["oscquery"] = network->endpoints(); ready["editor"] = network->editor_bootstrap();}
+                ready["nativeProgram"] = {{"configured",render},{"hidden",render_hidden},{"frameLimit",std::to_string(native_frames)}};
                 std::cout << ready.dump() << '\n' << std::flush;
-            },[&] {if (network) network->poll();});
+            },[&] {
+                if (network) network->poll();
+#if MAPGYVER_NATIVE_RENDERER
+                if (program && program->poll()) mapgyver::windows::request_pipe_stop();
+#endif
+            });
+#if MAPGYVER_NATIVE_RENDERER
+            if (program) program->finish();
+#endif
 #else
             std::cerr << "Windows named-pipe control transport is unavailable on this platform\n"; return 3;
 #endif

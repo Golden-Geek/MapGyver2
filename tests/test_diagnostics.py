@@ -16,6 +16,7 @@ parser.add_argument("--engine", required=True, type=Path)
 parser.add_argument("--source", required=True, type=Path)
 parser.add_argument("--configuration", required=True)
 parser.add_argument("--ui-built", choices=['0', '1'], default='0')
+parser.add_argument("--renderer-built", choices=['0', '1'], default='0')
 args, remaining = parser.parse_known_args()
 
 def validate(value, schema, document, path="$Report"):
@@ -93,9 +94,9 @@ class Diagnostics(unittest.TestCase):
     def test_capabilities_are_truthful_and_retained(self):
         report = self.report()
         self.assertEqual(report["gpu"], {"status": "unavailable", "reason": "gpu_probe_not_implemented"})
-        self.assertEqual(set(report["features"]), {"platform", "media", "ui", "hardwareTests", "ndi"})
+        self.assertEqual(set(report["features"]), {"platform", "media", "ui", "renderer", "hardwareTests", "ndi"})
         for name, feature in report["features"].items():
-            expected = name == 'ui' and args.ui_built == '1'
+            expected = (name == 'ui' and args.ui_built == '1') or (name == 'renderer' and args.renderer_built == '1')
             self.assertIs(feature["configured"], expected)
             self.assertIs(feature["available"], expected)
             self.assertTrue(feature["reason"])

@@ -79,6 +79,10 @@ struct ControlService::State {
     std::uint64_t ownership_generation = 0, event_sequence = 0;
     std::deque<Json> journal;
     std::shared_ptr<const Json> view;
+    std::uint64_t renderer_generation = 0;
+    std::optional<RenderedState> rendered, renderer_watermark;
+    bool renderer_available = false;
+    std::string renderer_reason = "render_worker_not_connected";
     State(Id id,ProjectController project) : service(std::move(id)),controller(std::move(project)) {}
     void event(const char* kind,const ServiceLimits& limits) {
         require(event_sequence < std::numeric_limits<std::uint64_t>::max(),"capacity_exceeded","Event sequence exhausted");
@@ -95,11 +99,21 @@ struct ControlService::State {
         require(value->dump().size() <= limits.response_bytes-4096,"response_capacity","Authored state exceeds the configured snapshot response budget");
         view = std::move(value);
     }
+    Json renderer() const {
+        Json time = nullptr;
+        if (rendered) time = {{"ticks",std::to_string(rendered->show_time.ticks)},
+            {"timeBase",{{"numerator",std::to_string(rendered->show_time.time_base.numerator)},
+                         {"denominator",std::to_string(rendered->show_time.time_base.denominator)}}}};
+        return {{"available",renderer_available},{"reason",renderer_reason},
+            {"generation",renderer_generation ? Json(std::to_string(renderer_generation)) : Json(nullptr)},
+            {"appliedRevision",rendered ? Json(std::to_string(rendered->revision)) : Json(nullptr)},
+            {"showTime",time},{"frame",rendered ? Json(std::to_string(rendered->frame)) : Json(nullptr)}};
+    }
     Json full_snapshot(const Id& session) const {
         return {{"type","snapshot"},{"serviceId",service.str()},{"authoredRevision",std::to_string(controller.revision())},
             {"eventSequence",std::to_string(event_sequence)},{"editOwner",nullable(owner)},{"isEditor",owner == session},
             {"ownershipGeneration",std::to_string(ownership_generation)},{"data",*view},
-            {"renderer",{{"available",false},{"reason","render_worker_not_connected"},{"appliedRevision",nullptr},{"showTime",nullptr},{"frame",nullptr}}},
+            {"renderer",renderer()},
             {"persistence",{{"available",false},{"reason","durable_storage_not_implemented"},{"savedRevision",nullptr}}}};
     }
     Json events(const Id& session,std::optional<std::uint64_t> after,const ServiceLimits& limits) const {
@@ -118,7 +132,7 @@ struct ControlService::State {
             {"sequence",request ? Json(std::to_string(request->sequence)) : Json(nullptr)},
             {"consumed",consumed},{"replayed",false},{"status",failure.is_null() ? "accepted" : "rejected"},
             {"authoredRevision",std::to_string(controller.revision())},{"payload",std::move(payload)},{"error",std::move(failure)},
-            {"renderer",{{"available",false},{"reason","render_worker_not_connected"},{"appliedRevision",nullptr},{"showTime",nullptr},{"frame",nullptr}}},
+            {"renderer",renderer()},
             {"persistence",{{"available",false},{"reason","durable_storage_not_implemented"},{"savedRevision",nullptr}}}};
     }
 };
@@ -200,7 +214,7 @@ Json ControlService::handle(const Id& connection_session,std::string_view bytes)
         try {
             require(std::none_of(found->second.cache.begin(),found->second.cache.end(),[&](const auto& item){return item.id == request->id;}),"request_id_reused","Request ID is already retained for another sequence");
             const auto& op = operation(request->op); keys(request->payload,op.fields);
-            require(!request->apply_at,"schedule_unavailable","Show-clock scheduling is unavailable until a native worker is connected");
+            require(!request->apply_at,"schedule_unavailable","Show-clock scheduling is not implemented");
             require(!op.editor || candidate->owner == connection_session,"not_editor","Only the current editing owner can change state");
             require(!op.revision || request->revision.has_value(),"revision_required","An authored revision is required for this operation");
             auto& controller = candidate->controller;
@@ -271,4 +285,31 @@ std::optional<Json> ControlService::notifications(const Id& session,std::uint64_
 std::shared_ptr<const ProjectState> ControlService::snapshot() const {return state_->controller.snapshot();}
 std::uint64_t ControlService::revision() const {return state_->controller.revision();}
 ParameterRegistry ControlService::registry() const {return ParameterRegistry{state_->controller};}
+void ControlService::begin_renderer(std::uint64_t generation) {
+    require(generation > state_->renderer_generation,"renderer_generation","Renderer generation must increase");
+    auto candidate = std::make_unique<State>(*state_);
+    candidate->renderer_generation = generation;candidate->rendered.reset();candidate->renderer_available = false;
+    candidate->renderer_reason = "render_worker_preparing";candidate->event("rendererStateChanged",limits_);state_.swap(candidate);
+}
+void ControlService::report_rendered(RenderedState frame,std::string reason) {
+    require(frame.generation != 0 && frame.generation == state_->renderer_generation,"renderer_generation","Stale/unattached renderer observation");
+    require(frame.frame > 0 && frame.revision <= revision() && frame.show_time.ticks >= 0 && frame.show_time.time_base.numerator > 0 &&
+        frame.show_time.time_base.denominator > 0 && reason.size() <= 512,"renderer_observation","Invalid native frame observation");
+    const auto& prior = state_->renderer_watermark;
+    require(!prior || (frame.revision >= prior->revision && frame.show_time.time_base == prior->show_time.time_base &&
+        frame.show_time.ticks >= prior->show_time.ticks && (frame.generation != prior->generation || frame.frame > prior->frame)),
+        "renderer_observation","Native frame/revision/show clock regressed");
+    const bool changed = !state_->rendered || state_->rendered->revision != frame.revision || !state_->renderer_available || state_->renderer_reason != reason;
+    if (changed) {
+        auto candidate = std::make_unique<State>(*state_);candidate->rendered = frame;candidate->renderer_watermark = frame;
+        candidate->renderer_available = true;candidate->renderer_reason = std::move(reason);candidate->event("rendererApplied",limits_);state_.swap(candidate);
+    } else {state_->rendered = frame;state_->renderer_watermark = frame;}
+}
+void ControlService::renderer_failed(std::uint64_t generation,std::string reason) {
+    require(generation != 0 && generation == state_->renderer_generation,"renderer_generation","Stale/unattached renderer failure");
+    require(!reason.empty() && reason.size() <= 512,"renderer_observation","Invalid renderer failure reason");
+    if (!state_->renderer_available && state_->renderer_reason == reason) return;
+    auto candidate = std::make_unique<State>(*state_);candidate->renderer_available = false;candidate->renderer_reason = std::move(reason);
+    candidate->event("rendererStateChanged",limits_);state_.swap(candidate);
+}
 } // namespace mapgyver::protocol

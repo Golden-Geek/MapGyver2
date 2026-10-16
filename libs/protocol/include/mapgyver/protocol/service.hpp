@@ -20,6 +20,10 @@ private:
     std::string code_;
 };
 struct Connection {Id session; Json hello;};
+struct RenderedState {
+    std::uint64_t generation, revision, frame;
+    mapgyver::domain::MediaTime show_time;
+};
 // One control-thread owner. No OS types, native rendering or synchronous IO.
 // Transport authenticates/binds a connection to its returned session ID.
 class ControlService {
@@ -40,6 +44,11 @@ public:
     [[nodiscard]] std::shared_ptr<const mapgyver::control::ProjectState> snapshot() const;
     [[nodiscard]] std::uint64_t revision() const;
     [[nodiscard]] mapgyver::control::ParameterRegistry registry() const;
+    // Control owner consumes native worker observations. Never called from a
+    // render deadline callback; no network operation can write these statuses.
+    void begin_renderer(std::uint64_t generation);
+    void report_rendered(RenderedState frame,std::string reason = {});
+    void renderer_failed(std::uint64_t generation,std::string reason);
 private:
     struct State;
     ServiceLimits limits_;

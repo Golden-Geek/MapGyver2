@@ -92,9 +92,11 @@ struct CompositionRenderer::Impl {
     std::vector<Output> outputs;
     std::uint32_t render_views = 0;
     std::uint64_t sequence = 0, draws = 0;
+    std::uint64_t applied_revision = 0;
     std::chrono::steady_clock::time_point start;
     const std::thread::id owner = std::this_thread::get_id();
     explicit Impl(std::shared_ptr<const render::Plan> value,std::vector<OutputWindow> windows) : plan(std::move(value)) {
+        if (plan) applied_revision = plan->revision;
         check(windows.size() <= 64,"Native output window count exceeds configured capacity");
         std::set<domain::Id> ids;
         outputs.reserve(windows.size());
@@ -240,10 +242,18 @@ struct CompositionRenderer::Impl {
             const auto& config = output.configured;
             output.held = target(config.width,config.height,bgfx::TextureFormat::RGBA8);
             output.presented = target(config.width,config.height,bgfx::TextureFormat::RGBA8);
-            output.window = SDL_CreateWindow(config.name.c_str(),static_cast<int>(config.width),static_cast<int>(config.height),SDL_WINDOW_HIDDEN);
+            output.window = SDL_CreateWindow(config.name.c_str(),static_cast<int>(config.width),static_cast<int>(config.height),
+                SDL_WINDOW_HIDDEN|(config.desktop_position ? SDL_WINDOW_BORDERLESS : 0));
             check(output.window != nullptr,SDL_GetError());
             auto* handle = SDL_GetPointerProperty(SDL_GetWindowProperties(output.window),SDL_PROP_WINDOW_WIN32_HWND_POINTER,nullptr);
             check(handle != nullptr,"Native output window handle unavailable");
+            if (config.desktop_position) {
+                check(SDL_SetWindowPosition(output.window,(*config.desktop_position)[0],(*config.desktop_position)[1]),SDL_GetError());
+                RECT rectangle{};check(GetWindowRect(static_cast<HWND>(handle),&rectangle) != FALSE,"Native display rectangle query failed");
+                check(rectangle.left == (*config.desktop_position)[0] && rectangle.top == (*config.desktop_position)[1] &&
+                    rectangle.right-rectangle.left == static_cast<LONG>(config.width) && rectangle.bottom-rectangle.top == static_cast<LONG>(config.height),
+                    "Native display window pixel rectangle differs from explicit target binding");
+            }
             output.swapchain = bgfx::createFrameBuffer(handle,static_cast<std::uint16_t>(config.width),static_cast<std::uint16_t>(config.height));
             check(bgfx::isValid(output.swapchain),"Native output swapchain allocation failed");
         }
@@ -293,7 +303,7 @@ struct CompositionRenderer::Impl {
         }
         bgfx::frame();
         const auto ticks = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now()-start).count();
-        return {++sequence,plan->revision,{ticks,{1,1000000000}}};
+        return {++sequence,applied_revision,{ticks,{1,1000000000}}};
     }
 };
 CompositionRenderer::CompositionRenderer(std::shared_ptr<const render::Plan> plan,std::vector<OutputWindow> outputs) : impl_(std::make_unique<Impl>(std::move(plan),std::move(outputs))) {impl_->initialize();}
@@ -308,6 +318,11 @@ void CompositionRenderer::output_controls(const domain::Id& id,OutputControls co
     output.configured.controls = controls;
 }
 std::uint64_t CompositionRenderer::held_frame(const domain::Id& id) const {return impl_->output(id).held_frame;}
+void CompositionRenderer::apply_output_controls(std::uint64_t revision,std::span<const OutputControls> controls) {
+    impl_->check_owner();check(controls.size() == impl_->outputs.size() && revision >= impl_->applied_revision,"Native control batch count/revision differs from prepared outputs");
+    for (std::size_t i = 0; i < controls.size(); ++i) output_controls(impl_->outputs[i].configured.id,controls[i]);
+    impl_->applied_revision = revision;
+}
 std::vector<std::uint8_t> CompositionRenderer::capture_for_test(std::uint32_t index) {
     impl_->check_owner();
     const auto found = std::find(impl_->exported_nodes.begin(),impl_->exported_nodes.end(),index);check(found != impl_->exported_nodes.end(),"Offline capture requested an unexported node");
