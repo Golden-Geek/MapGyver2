@@ -219,6 +219,25 @@ and prior composition/output/source/graph regressions. Code
 M04.C03 many-to-many quad mapping, crop/fit/fill, masks and blend rules. All M01
 physical/deadline/recovery gates, preview and later milestones remain open.
 
+M04.C03 current working slice: inverse quad homographies and many-to-many output
+maps compile from stable-ID calibrations into immutable plans; shared continuous
+quad charts preserve composition ownership. Native output has a capacity-counted
+RGBA16F mapping target before opaque sRGB encoding. Engine calibration edits/undo
+use existing graph banks. Top/left inclusive coverage prevents a shared
+pixel-centre seam from blending alpha twice. Unsupported mesh/chart topology
+retains configuration/reasons and the last applied scene. Portable tests pass;
+initial Debug GPU tests pass twelve mapping captures across three windows, maximum
+1/255 at fixed 2/255, including perspective, overlaps and an odd-width shared seam.
+Sixteen engine phases/900 frames pass calibration edit/undo, plus the 120-frame
+source recovery. The expanded probe's Windows macro conflict is fixed with the
+existing NOMINMAX convention. A stalled tool call was inspected, not duplicated.
+Debug/Release working-tree wrappers now pass 24/24 and all native preparation,
+compositor/output/mapping/engine checks. Each passes twelve mapping captures at
+maximum 1/255 and sixteen main phases through applied revision 20. Next: commit
+this slice, retain clean-source Debug/Release evidence and publish. Masks,
+crop/fit/fill and additional blend rules are
+still required C03 work; no milestone or physical-output completion.
+
 - python tools/ci/check.py --preset windows-local --configuration Debug --skip-bootstrap
 - python tools/ci/check.py --preset windows-local --configuration Release --skip-bootstrap
 - python tools/validate_plan.py

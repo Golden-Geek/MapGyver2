@@ -9,7 +9,7 @@ struct NativeOutput {
     OutputWindow configured;
     SDL_Window* window = nullptr;
     bgfx::FrameBufferHandle swapchain = BGFX_INVALID_HANDLE;
-    GraphTexture held, presented;
+    GraphTexture mapped, held, presented;
     std::uint64_t held_frame = 0;
     bgfx::TextureHandle freeze_source = BGFX_INVALID_HANDLE;
     std::array<std::uint32_t,2> freeze_source_size{};

@@ -20,7 +20,12 @@ report = json.loads(result.stdout)
 assert report['windows'] == 3 and report['framesSubmitted'] == 13 and len(report['captures']) == 11
 assert report['foreignOwnerRejected'] is True
 assert all(x['maxChannelError'] <= x['tolerance'] == 2 for x in report['captures'])
+mapping = report['mapping']
+assert mapping['surfaces'] == mapping['windows'] == 3 and mapping['patchCounts'] == [5,5,5,4] and mapping['compositionNodes'] == 2
+assert len(mapping['captures']) == 12 and all(x['maxChannelError'] <= x['tolerance'] == 2 for x in mapping['captures'])
+assert mapping['sourceCpuUploadBytes'] == 4*128*64*16
+assert mapping['oldFramesDuringPreparation'] > 0 and mapping['retirementFrames'] > 0
 report['command'] = [str(args.probe.resolve()), '--json']
 report['probeSha256'] = hashlib.sha256(args.probe.read_bytes()).hexdigest()
 args.report.write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
-print('Passed three actual hidden native windows, thirteen frames and eleven fixed-tolerance captures')
+print('Passed hidden native outputs and many-to-many projective/overlap mapping GPU goldens')

@@ -29,7 +29,7 @@ void PreparedGraph::list_bindings() {
 }
 bool same_graph_layout(const render::Plan& first,const render::Plan& second) {
     if (first.nodes.size() != second.nodes.size() || first.targets.size() != second.targets.size() ||
-        first.surfaces.size() != second.surfaces.size() || first.preview != second.preview) return false;
+        first.surfaces.size() != second.surfaces.size() || first.preview != second.preview || first.output_mappings != second.output_mappings) return false;
     for (std::size_t i = 0; i < first.targets.size(); ++i) if (first.targets[i].width != second.targets[i].width || first.targets[i].height != second.targets[i].height) return false;
     for (std::size_t i = 0; i < first.surfaces.size(); ++i) if (first.surfaces[i].id != second.surfaces[i].id || first.surfaces[i].node != second.surfaces[i].node) return false;
     for (std::size_t i = 0; i < first.nodes.size(); ++i) {
@@ -79,8 +79,9 @@ std::unique_ptr<PreparedGraph> prepare_graph(const PreparationDevice& device,std
     }
     for (const auto node : resources.exported_nodes) export_bytes += static_cast<std::uint64_t>(value.nodes[node].width)*value.nodes[node].height*4;
     const auto count = value.targets.size()+resources.exported_nodes.size()+images.size();
-    check(images.size() <= 256 && resources.render_views+resources.exported_nodes.size()+limits.windows*3 <= limits.views &&
-        draw_count+limits.windows*3 <= limits.draws && limits.active_textures+count <= limits.textures &&
+    for (const auto& output : value.output_mappings) draw_count += output.patches.size();
+    check(images.size() <= 256 && resources.render_views+resources.exported_nodes.size()+limits.windows*4 <= limits.views &&
+        draw_count+limits.windows*4 <= limits.draws && limits.active_textures+count <= limits.textures &&
         limits.active_framebuffers+value.targets.size()+resources.exported_nodes.size() <= limits.framebuffers,"Prepared graph exceeds actual concurrent handle/view/draw capacity");
     const auto candidate_bytes = target_bytes+export_bytes+image_bytes;
     check(target_bytes <= render::Limits{}.target_bytes && image_bytes <= render::Limits{}.image_bytes &&

@@ -164,6 +164,7 @@ std::shared_ptr<const Plan> compile(const control::ProjectState& project,std::ui
     require(plan->target_bytes <= limits.total_payload_bytes-plan->export_bytes &&
         plan->image_upload_bytes <= limits.total_payload_bytes-plan->export_bytes-plan->target_bytes &&
         plan->fallback_bytes <= limits.total_payload_bytes-plan->export_bytes-plan->target_bytes-plan->image_upload_bytes,"Native texture payload exceeds total capacity");
+    plan->output_mappings = compile_mappings(project,*plan,limits.mapping_patches);
     return plan;
 }
 std::shared_ptr<const Image> rgba8(Id id,std::uint64_t generation,std::uint32_t width,std::uint32_t height,
@@ -201,7 +202,8 @@ std::shared_ptr<const Image> pattern(Id id,std::uint64_t generation,std::uint32_
     return rgba8(std::move(id),generation,width,height,data,{},limit);
 }
 Pixel over(Pixel a,Pixel b) noexcept {return {a.r+b.r*(1-a.a),a.g+b.g*(1-a.a),a.b+b.b*(1-a.a),a.a+b.a*(1-a.a)};}
-std::vector<std::uint8_t> reference(const Plan& plan,std::uint32_t result,bool display) {
+namespace {
+std::vector<Pixel> reference_linear(const Plan& plan,std::uint32_t result) {
     require(result < plan.nodes.size(),"Reference output node is missing");
     std::vector<std::vector<Pixel>> targets;
     for (const auto& target : plan.targets) targets.emplace_back(static_cast<std::size_t>(target.width)*target.height);
@@ -222,18 +224,42 @@ std::vector<std::uint8_t> reference(const Plan& plan,std::uint32_t result,bool d
             }
         }
     }
-    const auto& node = plan.nodes[result]; std::vector<std::uint8_t> output(static_cast<std::size_t>(node.width)*node.height*4);
-    for (std::uint32_t y = 0; y < node.height; ++y) for (std::uint32_t x = 0; x < node.width; ++x) {
-        const auto p = pixel(result,x,y); std::array<float,3> colour{p.r,p.g,p.b};
-        const auto offset = (static_cast<std::size_t>(y)*node.width+x)*4;
+    const auto& node = plan.nodes[result];std::vector<Pixel> output(static_cast<std::size_t>(node.width)*node.height);
+    for (std::uint32_t y = 0; y < node.height; ++y) for (std::uint32_t x = 0; x < node.width; ++x) output[static_cast<std::size_t>(y)*node.width+x] = pixel(result,x,y);
+    return output;
+}
+std::vector<std::uint8_t> encode(std::span<const Pixel> pixels,Encoding encoding,bool display) {
+    std::vector<std::uint8_t> output(pixels.size()*4);
+    for (std::size_t i = 0; i < pixels.size(); ++i) {
+        const auto p = pixels[i];const std::array<float,3> colour{p.r,p.g,p.b};const auto offset = i*4;
         for (std::size_t c = 0; c < 3; ++c) {
             auto value = display ? colour[c] : (p.a > 0 ? colour[c]/p.a : 0.F);
-            if (display || node.encoding.transfer == Transfer::srgb) value = srgb(value);
-            if (!display && node.encoding.alpha == Alpha::premultiplied) value *= p.a;
+            if (display || encoding.transfer == Transfer::srgb) value = srgb(value);
+            if (!display && encoding.alpha == Alpha::premultiplied) value *= p.a;
             output[offset+c] = static_cast<std::uint8_t>(std::lround(std::clamp(value,0.F,1.F)*255));
         }
         output[offset+3] = display ? 255 : static_cast<std::uint8_t>(std::lround(std::clamp(p.a,0.F,1.F)*255));
     }
     return output;
+}
+}
+std::vector<std::uint8_t> reference(const Plan& plan,std::uint32_t result,bool display) {
+    return encode(reference_linear(plan,result),plan.nodes.at(result).encoding,display);
+}
+std::vector<std::uint8_t> reference_output(const Plan& plan,const Id& output,std::uint32_t width,std::uint32_t height) {
+    require(width && height && width <= Limits{}.dimension && height <= Limits{}.dimension && bytes(width,height,16) <= Limits{}.total_payload_bytes,"Reference output exceeds capacity");
+    const auto found = std::find_if(plan.output_mappings.begin(),plan.output_mappings.end(),[&](const auto& item){return item.id == output;});
+    require(found != plan.output_mappings.end() && found->reason.empty(),"Reference output mapping is unavailable");
+    std::map<std::uint32_t,std::vector<Pixel>> sources;
+    for (const auto& patch : found->patches) if (!sources.contains(patch.node)) sources.emplace(patch.node,reference_linear(plan,patch.node));
+    std::vector<Pixel> pixels(static_cast<std::size_t>(width)*height);
+    for (const auto& patch : found->patches) {
+        const auto& node = plan.nodes.at(patch.node);const auto& source = sources.at(patch.node);
+        for (std::uint32_t y = 0; y < height; ++y) for (std::uint32_t x = 0; x < width; ++x) {
+            const auto mapped = mapped_pixel(patch,x,y,width,height,node.width,node.height);if (!mapped) continue;
+            auto& pixel = pixels[static_cast<std::size_t>(y)*width+x];pixel = over(source[static_cast<std::size_t>((*mapped)[1])*node.width+(*mapped)[0]],pixel);
+        }
+    }
+    return encode(pixels,{},true);
 }
 }

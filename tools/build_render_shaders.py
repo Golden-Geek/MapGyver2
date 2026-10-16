@@ -14,7 +14,7 @@ parser.add_argument('--output', type=Path, required=True)
 args = parser.parse_args()
 args.output.mkdir(parents=True, exist_ok=True)
 parts, records = [], []
-for name, kind, profile in [('fullscreen', 'vertex', 's_5_0'), ('composite', 'fragment', 's_5_0'), ('encode', 'fragment', 's_5_0')]:
+for name, kind, profile in [('fullscreen', 'vertex', 's_5_0'), ('composite', 'fragment', 's_5_0'), ('encode', 'fragment', 's_5_0'), ('mapping', 'fragment', 's_5_0')]:
     source = args.source/(name+'.sc')
     target = args.output/(name+'.bin')
     command = [str(args.compiler), '-f', str(source), '-o', str(target), '--type', kind,

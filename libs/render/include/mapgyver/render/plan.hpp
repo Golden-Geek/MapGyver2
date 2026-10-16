@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 #include <mapgyver/control/project.hpp>
+#include <mapgyver/render/mapping.hpp>
 #include <array>
 #include <span>
 
@@ -37,11 +38,13 @@ struct Plan {
     std::uint32_t preview;
     std::vector<Issue> issues;
     std::uint64_t target_bytes = 0, image_upload_bytes = 0, export_bytes = 0, fallback_bytes = 0;
+    std::vector<OutputMapping> output_mappings{};
 };
 struct Limits {
     std::size_t nodes = 16384, layers = 262144, targets = 256;
     std::uint32_t dimension = 16384;
     std::uint64_t target_bytes = 268435456, image_bytes = 268435456, total_payload_bytes = 536870912;
+    std::size_t mapping_patches = 16384;
 };
 class Error : public std::runtime_error {public: using std::runtime_error::runtime_error;};
 // Control/preparation path only. Never performs IO or touches native SDK objects.
@@ -56,4 +59,5 @@ class Error : public std::runtime_error {public: using std::runtime_error::runti
 // Display reference composites linear premultiplied content over black, then
 // encodes opaque sRGB. Named canvas exports retain their declared alpha/transfer.
 [[nodiscard]] std::vector<std::uint8_t> reference(const Plan& plan,std::uint32_t node,bool display = false);
+[[nodiscard]] std::vector<std::uint8_t> reference_output(const Plan& plan,const Id& output,std::uint32_t width,std::uint32_t height);
 } // namespace mapgyver::render

@@ -238,15 +238,23 @@ try:
         restored_windows = until(lambda: observed(client, 14, ''))
         assert restored_windows['data']['project']['stage'] == original_graph['data']['project']['stage']
         phases.append({'name': 'atomic_window_resize_remove_add_frozen_carry_and_undo', 'replaced': replaced['renderer'], 'restored': restored_windows['renderer']})
-        unsupported = copy.deepcopy(restored_windows['data']['project']['stage'])
-        next(iter(unsupported['patches'].values()))['calibration']['vertices'][1]['projectorPixels']['y'] = 1.0
-        client.call('transaction', {'commands': [{'schemaVersion': 1, 'command': {'type': 'ReplaceStage', 'value': {'value': unsupported}}}]}, 14)
-        held_mapping = until(lambda: observed(client, 14, 'render_state_requires_preparation', after=int(restored_windows['renderer']['frame'])))
-        assert held_mapping['authoredRevision'] == '15'
+        calibrated = copy.deepcopy(restored_windows['data']['project']['stage'])
+        calibration = next(iter(calibrated['patches'].values()))['calibration']
+        calibration['vertices'][1]['projectorPixels']['y'] = calibration['referenceHeight']*.1
+        client.call('transaction', {'commands': [{'schemaVersion': 1, 'command': {'type': 'ReplaceStage', 'value': {'value': calibrated}}}]}, 14)
+        quad_applied = until(lambda: observed(client, 15, '', after=int(restored_windows['renderer']['frame'])))
         client.call('undo', revision=15)
-        mapping_recovered = until(lambda: observed(client, 16, ''))
+        quad_restored = until(lambda: observed(client, 16, ''))
+        phases.append({'name': 'authored_four_corner_calibration_handoff_and_undo', 'applied': quad_applied['renderer'], 'restored': quad_restored['renderer']})
+        unsupported = copy.deepcopy(quad_restored['data']['project']['stage'])
+        next(iter(unsupported['patches'].values()))['calibration']['mode'] = 'mesh'
+        client.call('transaction', {'commands': [{'schemaVersion': 1, 'command': {'type': 'ReplaceStage', 'value': {'value': unsupported}}}]}, 16)
+        held_mapping = until(lambda: observed(client, 16, 'render_state_requires_preparation', after=int(quad_restored['renderer']['frame'])))
+        assert held_mapping['authoredRevision'] == '17'
+        client.call('undo', revision=17)
+        mapping_recovered = until(lambda: observed(client, 18, ''))
         phases.append({'name': 'unsupported_mapping_retains_scene_and_authored_calibration_then_undo', 'pending': held_mapping['renderer'], 'recovered': mapping_recovered['renderer']})
-        final_revision = 18
+        final_revision = 20
     owner = client.snapshot()
     client.call('transferEdit', {'expectedOwnershipGeneration': owner['ownershipGeneration'], 'targetSession': ready['oscquery']['oscSessionId']})
     def osc_string(value):
@@ -257,7 +265,7 @@ try:
     bundle = b'#bundle\0'+struct.pack('>Q', 1)+b''.join(struct.pack('>I', len(message))+message for message in messages)
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as osc: osc.sendto(bundle, ('127.0.0.1', ready['oscquery']['oscPort']))
     if args.hot_images:
-        osc_source = until(lambda: observed(client, 17, ''))
+        osc_source = until(lambda: observed(client, 19, ''))
         phases.append({'name': 'granted_OSC_atomic_source_and_output_handoff', 'renderer': osc_source['renderer']})
         # Hold only after the new alpha pixels were submitted; the final golden
         # can then compare that held image against the final compiled source.
@@ -272,7 +280,7 @@ try:
     assert native['framesSubmitted'] == 900 and native['appliedRevision'] == final_revision and len(native['captures']) == 3
     if args.hot_images:
         assert native['sceneGeneration'] >= 7 and native['sourceGpuCopySubmissions'] >= 3
-        assert native['graphGenerationsApplied'] >= 4 and native['internalConstantCpuUploadBytes'] == 16
+        assert native['graphGenerationsApplied'] >= 8 and native['internalConstantCpuUploadBytes'] == 16
         assert native['windowGenerationsApplied'] == 2
         assert native['preparedGenerations'] >= native['sourceGpuCopySubmissions']+native['graphGenerationsApplied']
         assert native['sourceCopiedPayloadBytes'] == native['sourceGpuCopySubmissions']*131072

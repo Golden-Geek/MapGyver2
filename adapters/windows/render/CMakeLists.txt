@@ -21,7 +21,7 @@ add_custom_command(OUTPUT "${shader_output}/render_shaders.hpp" "${shader_output
     --compiler "${MAPGYVER_SHADERC}" --include "${VCPKG_INSTALLED_DIR}/${VCPKG_HOST_TRIPLET}/include/bgfx"
     --source "${shader_sources}" --output "${shader_output}"
   DEPENDS "${PROJECT_SOURCE_DIR}/tools/build_render_shaders.py"
-    "${shader_sources}/fullscreen.sc" "${shader_sources}/composite.sc" "${shader_sources}/encode.sc" "${shader_sources}/resample.sh" "${shader_sources}/varying.def.sc"
+    "${shader_sources}/fullscreen.sc" "${shader_sources}/composite.sc" "${shader_sources}/encode.sc" "${shader_sources}/mapping.sc" "${shader_sources}/resample.sh" "${shader_sources}/varying.def.sc"
   VERBATIM)
 add_library(mapgyver_windows_renderer STATIC ../composition_renderer.cpp ../preparation_device.cpp ../prepared_graph.cpp ../prepared_windows.cpp ../display_inventory.cpp ../native_program.cpp "${shader_output}/render_shaders.hpp")
 target_include_directories(mapgyver_windows_renderer PRIVATE "${shader_output}")
@@ -36,6 +36,7 @@ target_compile_options(mapgyver_composition_probe PRIVATE /W4 /WX /permissive- /
 add_executable(mapgyver_output_probe "${PROJECT_SOURCE_DIR}/tests/hardware/output_probe.cpp")
 set_target_properties(mapgyver_output_probe PROPERTIES OUTPUT_NAME mapgyver-output-probe)
 target_link_libraries(mapgyver_output_probe PRIVATE mapgyver_windows_renderer mapgyver_core nlohmann_json::nlohmann_json)
+target_compile_definitions(mapgyver_output_probe PRIVATE NOMINMAX WIN32_LEAN_AND_MEAN)
 target_compile_options(mapgyver_output_probe PRIVATE /W4 /WX /permissive- /utf-8)
 add_executable(mapgyver_preparation_probe "${PROJECT_SOURCE_DIR}/tests/hardware/preparation_probe.cpp")
 set_target_properties(mapgyver_preparation_probe PROPERTIES OUTPUT_NAME mapgyver-preparation-probe)

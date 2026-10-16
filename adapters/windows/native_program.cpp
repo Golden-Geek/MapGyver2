@@ -29,7 +29,7 @@ struct Routing {
     std::vector<OutputWindow> windows;
     std::vector<std::size_t> indices;
     Json reasons = Json::array();
-    bool unavailable = false;
+    bool unavailable = false, invalid_mapping = false;
 };
 std::shared_ptr<Routing> prepare_routing(const control::ProjectState& state,const render::Plan& plan,bool hidden) {
     if (state.stage.data().outputs.size() > max_outputs) throw render::Error("Native output inventory exceeds bounded control capacity");
@@ -40,19 +40,15 @@ std::shared_ptr<Routing> prepare_routing(const control::ProjectState& state,cons
     for (std::size_t index = 0; index < bindings.size(); ++index) {
         auto& binding = bindings[index];const auto& original = state.stage.data().outputs.at(binding.desired.id);
         if (binding.reason.empty()) {
-            const ProjectionPatch* patch = nullptr;std::size_t count = 0;
-            for (const auto& [id,item] : state.stage.data().patches) {static_cast<void>(id);if (item.output == original.id) {patch = &item;++count;}}
-            if (count != 1 || !state.stage.data().layouts.empty() || patch->calibration != quad_calibration(patch->calibration.reference_width,patch->calibration.reference_height) ||
-                state.stage.data().surfaces.at(patch->surface).geometry != unit_quad()) binding.reason = "projection_mapping_unavailable";
+            const auto mapping = std::find_if(plan.output_mappings.begin(),plan.output_mappings.end(),[&](const auto& item){return item.id == original.id;});
+            if (mapping == plan.output_mappings.end() || !mapping->reason.empty()) {
+                binding.reason = mapping == plan.output_mappings.end() ? "projection_mapping_unavailable" : mapping->reason;result->invalid_mapping = true;
+            }
             else {
-                const auto surface = std::find_if(plan.surfaces.begin(),plan.surfaces.end(),[&](const auto& item){return item.id == patch->surface;});
-                if (surface == plan.surfaces.end()) binding.reason = "surface_content_unavailable";
-                else {
-                    OutputWindow output{original.id,original.name,original.desired.width,original.desired.height,surface->node,hidden,
-                        {original.enabled,original.blackout,original.freeze}};
-                    if (binding.display) output.desktop_position = std::array{binding.display->x,binding.display->y};
-                    result->windows.push_back(std::move(output));result->indices.push_back(index);
-                }
+                OutputWindow output{original.id,original.name,original.desired.width,original.desired.height,mapping->patches.empty() ? plan.preview : mapping->patches.front().node,hidden,
+                    {original.enabled,original.blackout,original.freeze}};
+                if (binding.display) output.desktop_position = std::array{binding.display->x,binding.display->y};
+                result->windows.push_back(std::move(output));result->indices.push_back(index);
             }
         }
         result->reasons.push_back({{"id",original.id.str()},{"reason",binding.reason},{"configuredAdapter",original.adapter},{"configuredEndpoint",original.endpoint}});
@@ -177,8 +173,7 @@ struct NativeProgram::Impl {
                     auto next_plan = render::compile(*work.state,work.revision,patterns(*work.state,work.generation,134217728));
                     if (!next_plan->issues.empty()) throw render::Error("Configured source frames/encoding are unavailable");
                     auto next_routing = prepare_routing(*work.state,*next_plan,options.hidden);
-                    for (const auto& reason : next_routing->reasons) if (reason["reason"] == "projection_mapping_unavailable")
-                        throw render::Error("Nontrivial projection mapping requires prepared mapping resources");
+                    if (next_routing->invalid_mapping) throw render::Error("Configured projection mapping is unavailable");
                     {
                         std::lock_guard lock{input_mutex};
                         if (stop.stop_requested() || pending.generation != work.generation) {++discarded_generations;continue;}
@@ -282,16 +277,14 @@ struct NativeProgram::Impl {
             const auto& windows = active_routing->windows;
             for (std::size_t i = 0; i < windows.size(); ++i) {
                 const auto actual = renderer.capture_output_for_test(windows[i].id);
-                const auto base = render::reference(*plan,windows[i].node,true);
+                const auto base = render::reference_output(*plan,windows[i].id,windows[i].width,windows[i].height);
                 const auto held = renderer.held_frame(windows[i].id);
                 const bool black = !controls[i].enabled || controls[i].blackout || !held;
-                const auto& node = plan->nodes[windows[i].node];unsigned maximum = 0;
+                unsigned maximum = 0;
                 for (std::uint32_t y = 0; y < windows[i].height; ++y) for (std::uint32_t x = 0; x < windows[i].width; ++x) {
                     const auto offset = (static_cast<std::size_t>(y)*windows[i].width+x)*4;
-                    const auto sx = (static_cast<std::uint64_t>(x)*2+1)*node.width/(static_cast<std::uint64_t>(windows[i].width)*2);
-                    const auto sy = (static_cast<std::uint64_t>(y)*2+1)*node.height/(static_cast<std::uint64_t>(windows[i].height)*2);
                     for (std::size_t c = 0; c < 4; ++c) {
-                        const auto expected = black ? (c == 3 ? 255 : 0) : base[static_cast<std::size_t>((sy*node.width+sx)*4)+c];
+                        const auto expected = black ? (c == 3 ? 255 : 0) : base[offset+c];
                         maximum = std::max(maximum,static_cast<unsigned>(std::abs(static_cast<int>(actual[offset+c])-expected)));
                     }
                 }
@@ -314,7 +307,7 @@ struct NativeProgram::Impl {
                 {"sourceCopiedPayloadBytes",renderer.image_handoff_state().copied_payload_bytes},
                 {"lastPreparationError",preparation_error},
                 {"deviceId",gpu[1]},{"luidHigh",gpu[2]},{"luidLow",gpu[3]},{"configuredOutputs",active_routing->reasons},{"captures",captures},
-                {"scope","Actual engine native owner, source-image, composition-graph and output-window resource handoffs. Offline final intermediate captures, not physical scanout, encoded preview or sustained deadline qualification. Nontrivial patch mapping remains open."}};
+                {"scope","Actual engine native owner, source-image/graph/window handoffs and projective quad mapping with shared composition UV charts. Offline final intermediate captures, not physical scanout, encoded preview or sustained deadlines. Mesh warps, masks, crop/fit/fill and additional blend modes remain open."}};
             report["sourceIssues"] = Json::array();
             for (const auto& issue : plan->issues) report["sourceIssues"].push_back({{"instance",issue.source.first.str()},{"port",issue.source.second.str()},{"reason",issue.reason}});
             std::ofstream output{std::filesystem::path{std::u8string{options.report.begin(),options.report.end()}},std::ios::binary};output << report.dump(2) << '\n';

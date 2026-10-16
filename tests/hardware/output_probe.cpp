@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "adapters/windows/composition_renderer.hpp"
 #include "adapters/windows/display_inventory.hpp"
+#include "adapters/windows/preparation_device.hpp"
+#include "adapters/windows/prepared_graph.hpp"
 #include <mapgyver/build_info.hpp>
 #include <mapgyver/control/wire.hpp>
 #include <nlohmann/json.hpp>
@@ -8,6 +10,7 @@
 #include <iostream>
 #include <thread>
 #include <fstream>
+#include <future>
 
 using namespace mapgyver;
 using namespace domain;
@@ -42,6 +45,96 @@ std::shared_ptr<const render::Plan> fixture() {
     for (const auto& [id,source] : state.instances.instances()) if (source.asset == Id{"alpha"})
         images.emplace(render::PortKey{id,Id{"picture"}},render::pattern(Id{"gradient"},1,128,64,"gradient"));
     return render::compile(state,0,images);
+}
+nlohmann::json mapping_cases() {
+    auto state = project_fixture();control::ProjectController controller{state};
+    const auto root = state.instances.placements().at(state.root_placement).source;
+    const auto surface = state.stage.data().surfaces.begin()->first;
+    const auto output = state.stage.data().outputs.begin()->first;
+    const Id second{"mapped-surface-2"},third{"mapped-surface-3"},group{"mapped-group"},layout{"mapped-layout"};
+    auto stage = state.stage.data();
+    stage.outputs.at(output).desired.width = 129;stage.outputs.at(output).desired.height = 65;
+    stage.surfaces.emplace(second,Surface{second,"Middle",std::nullopt,unit_quad()});
+    stage.surfaces.emplace(third,Surface{third,"Right",std::nullopt,unit_quad()});
+    stage.patches.at(Id{"native-patch-3"}).surface = third;
+    auto& first_patch = stage.patches.begin()->second;
+    first_patch.calibration = quad_calibration(128,64);
+    for (auto& vertex : first_patch.calibration.vertices) vertex.projector_pixels.x /= 3;
+    const auto first_patch_id = first_patch.id;
+    for (unsigned i = 1; i < 3; ++i) {
+        const Id id{"mapped-patch-"+std::to_string(i)};
+        auto calibration = quad_calibration(128,64);
+        for (auto& vertex : calibration.vertices) vertex.projector_pixels.x = (vertex.projector_pixels.x+128*i)/3;
+        stage.patches.emplace(id,ProjectionPatch{id,"Mapped region",i == 1 ? second : third,output,std::move(calibration)});
+    }
+    stage.groups.emplace(group,SurfaceGroup{group,"Shared composition regions",{surface,second,third},{}});
+    static_cast<void>(controller.transact(0,{control::ReplaceStage{stage},control::AssignSurfaceContent{second,root},control::AssignSurfaceContent{third,root}}));
+    stage = controller.snapshot()->stage.data();
+    stage.layouts.emplace(layout,Layout{layout,"Continuous",group,LayoutMode::continuous,
+        {quad_chart(surface,{0,0},{1.0/3,1}),quad_chart(second,{1.0/3,0},{2.0/3,1}),quad_chart(third,{2.0/3,0},{1,1})}});
+    static_cast<void>(controller.transact(1,{control::ReplaceStage{stage}}));
+    const auto images = [&](std::uint64_t generation) {
+        render::Images result;for (const auto& [id,source] : controller.snapshot()->instances.instances()) if (source.asset == Id{"alpha"})
+            result.emplace(render::PortKey{id,Id{"picture"}},render::pattern(Id{"mapping-gradient"},generation,128,64,"gradient"));
+        return result;
+    };
+    auto plan = render::compile(*controller.snapshot(),2,images(1));
+    auto device = std::make_shared<windows::PreparationDevice>();std::vector<windows::OutputWindow> outputs;
+    for (const auto& [id,item] : stage.outputs) outputs.push_back({id,item.name,item.desired.width,item.desired.height,plan->preview,true,{}});
+    windows::CompositionRenderer renderer{plan,outputs,device};nlohmann::json captures = nlohmann::json::array();
+    std::uint64_t frames = 0,staging_frames = 0,retirement_frames = 0;std::int64_t ticks = -1;
+    const auto frame = [&](std::uint64_t revision) {
+        const auto value = renderer.frame();check(value.sequence == ++frames && value.revision == revision && value.show_time.ticks >= ticks,"Mapping handoff regressed native frame/revision/clock");ticks = value.show_time.ticks;
+    };
+    const auto capture = [&](const char* phase) {
+        for (const auto& target : outputs) {
+            const auto actual = renderer.capture_output_for_test(target.id),expected = render::reference_output(*plan,target.id,target.width,target.height);
+            check(actual.size() == expected.size(),"Mapped output dimensions differ");unsigned maximum = 0;std::size_t mismatch = 0;
+            for (std::size_t i = 0; i < actual.size(); ++i) {
+                const auto difference = static_cast<unsigned>(std::abs(static_cast<int>(actual[i])-expected[i]));
+                if (difference > maximum) {maximum = difference;mismatch = i;}
+            }
+            if (maximum > 2) std::cerr << phase << " output=" << target.id.str() << " max=" << maximum << " x=" << (mismatch/4)%target.width << " y=" << (mismatch/4)/target.width << " channel=" << mismatch%4 << " actual=" << unsigned(actual[mismatch]) << " expected=" << unsigned(expected[mismatch]) << '\n';
+            check(maximum <= 2,"Mapped output differs from fixed linear-display reference tolerance");
+            captures.push_back({{"phase",phase},{"output",target.id.str()},{"width",target.width},{"height",target.height},{"maxChannelError",maximum},{"tolerance",2},
+                {"validationCpuReadbackBytes",actual.size()},{"validationGpuCopySubmissions",1}});
+        }
+    };
+    const auto apply = [&](std::shared_ptr<const render::Plan> next,std::uint64_t generation) {
+        const auto limits = renderer.graph_limits();auto preparing = std::async(std::launch::async,[&] {
+            return windows::prepare_graph(*device,next,generation,limits,std::vector<std::uint32_t>(outputs.size(),next->preview));
+        });
+        const auto deadline = std::chrono::steady_clock::now()+std::chrono::seconds{3};
+        while (preparing.wait_for(std::chrono::milliseconds{0}) != std::future_status::ready) {frame(plan->revision);++staging_frames;check(std::chrono::steady_clock::now() < deadline,"Mapping preparation timed out");}
+        auto candidate = preparing.get();while (!renderer.stage_graph(candidate)) {frame(plan->revision);++staging_frames;check(std::chrono::steady_clock::now() < deadline,"Mapping staging timed out");}
+        plan = std::move(next);frame(plan->revision);
+        std::unique_ptr<windows::PreparedGraph> retired;
+        while (!(retired = renderer.retire_graph())) {frame(plan->revision);++retirement_frames;check(std::chrono::steady_clock::now() < deadline,"Mapping retirement timed out");}
+        auto cleanup = std::async(std::launch::async,[retired=std::move(retired)]() mutable {retired.reset();});cleanup.get();
+    };
+    frame(2);capture("continuous-three-regions-many-to-many");
+    auto changed = controller.snapshot()->stage.data();auto& perspective = changed.patches.at(first_patch_id).calibration;
+    const std::array<Vec2,4> corners{{{4,4},{39,8},{35,59},{8,55}}};
+    for (std::size_t i = 0; i < 4; ++i) perspective.vertices[i].projector_pixels = corners[i];
+    static_cast<void>(controller.transact(2,{control::ReplaceStage{changed}}));
+    apply(render::compile(*controller.snapshot(),3,images(2)),2);capture("projective-quad-black-border");
+    changed = controller.snapshot()->stage.data();changed.patches.at(Id{"mapped-patch-1"}).calibration = quad_calibration(128,64);
+    static_cast<void>(controller.transact(3,{control::ReplaceStage{changed}}));
+    apply(render::compile(*controller.snapshot(),4,images(3)),3);capture("overlapping-linear-premultiplied-patches");
+    changed = controller.snapshot()->stage.data();changed.patches.erase(Id{"mapped-patch-2"});
+    auto left_half = quad_calibration(128,64),right_half = left_half;
+    for (auto& vertex : left_half.vertices) vertex.projector_pixels.x *= .5;
+    for (auto& vertex : right_half.vertices) vertex.projector_pixels.x = 64+vertex.projector_pixels.x*.5;
+    changed.patches.at(first_patch_id).calibration = std::move(left_half);
+    changed.patches.at(Id{"mapped-patch-1"}).calibration = std::move(right_half);
+    changed.layouts.at(layout).charts = {quad_chart(surface,{0,0},{.5,1}),quad_chart(second,{.5,0},{1,1}),quad_chart(third,{2.0/3,0},{1,1})};
+    static_cast<void>(controller.transact(4,{control::ReplaceStage{changed}}));
+    apply(render::compile(*controller.snapshot(),5,images(4)),4);capture("shared-boundary-pixel-centre");
+    const auto identity = renderer.adapter_identity();
+    return {{"evidenceClass","native-hardware-GPU-hidden-projective-mapping"},{"surfaces",3},{"windows",3},{"patchCounts",{5,5,5,4}},{"compositionNodes",plan->nodes.size()},
+        {"framesSubmitted",frames},{"oldFramesDuringPreparation",staging_frames},{"retirementFrames",retirement_frames},{"captures",captures},
+        {"vendorId",identity[0]},{"deviceId",identity[1]},{"luidHigh",identity[2]},{"luidLow",identity[3]},{"sourceCpuUploadBytes",device->cpu_upload_bytes()},
+        {"scope","One shared composition over three charted surface regions, one surface across outputs, several surfaces on one output, perspective quad coverage and overlapping linear-light premultiplied patches. Real background graph handoff and native completion. Intermediate texture captures, not physical scanout, mesh warps, masks, crop/fit/fill or sustained deadline qualification."}};
 }
 nlohmann::json run() {
     nlohmann::json displays = nlohmann::json::array();
@@ -110,7 +203,7 @@ int main(int argc,char** argv) {
     if (argc == 2 && std::string_view{argv[1]} == "--version") {std::cout << "MapGyver native output window qualification\n";return 0;}
     if (argc != 2 || std::string_view{argv[1]} != "--json") {std::cerr << "Usage: mapgyver-output-probe --json\n";return 2;}
     try {
-        auto result = run();const auto build = build_info();result["sourceRevision"] = build.revision;result["sourceDirty"] = build.dirty ? nlohmann::json(*build.dirty) : nlohmann::json(nullptr);result["configuration"] = build.configuration;
+        auto result = run();result["mapping"] = mapping_cases();const auto build = build_info();result["sourceRevision"] = build.revision;result["sourceDirty"] = build.dirty ? nlohmann::json(*build.dirty) : nlohmann::json(nullptr);result["configuration"] = build.configuration;
         std::cout << result.dump(2) << '\n';return std::cout ? 0 : 1;
     } catch (const std::exception& error) {std::cerr << "Native output qualification failed: " << error.what() << '\n';return 1;}
 }

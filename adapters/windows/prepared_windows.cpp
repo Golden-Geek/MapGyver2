@@ -25,7 +25,7 @@ std::unique_ptr<PreparedWindows> prepare_windows(const PreparationDevice& device
         check(ids.insert(config.id).second && config.width && config.height && config.width <= limits.dimension && config.height <= limits.dimension,
             "Prepared window identity/dimensions invalid");
         check(config.name.size() <= 65536,"Prepared window title exceeds bounded capacity");
-        const auto bytes = static_cast<std::uint64_t>(config.width)*config.height*8;
+        const auto bytes = static_cast<std::uint64_t>(config.width)*config.height*16;
         check(bytes <= 536870912-desired_payload,"Prepared window payload exceeds capacity");desired_payload += bytes;
         const auto found = std::find_if(current.begin(),current.end(),[&](const auto& old){return footprint(old,config);});
         const auto reuse = found == current.end() ? SIZE_MAX : static_cast<std::size_t>(found-current.begin());
@@ -33,16 +33,18 @@ std::unique_ptr<PreparedWindows> prepare_windows(const PreparationDevice& device
         result->outputs.push_back({std::move(config)});result->reuse.push_back(reuse);
     }
     check(limits.active_payload <= 536870896 && new_payload <= 536870896-limits.active_payload &&
-        limits.active_textures+created*2 <= limits.textures && limits.active_framebuffers+created*3 <= limits.framebuffers,
+        limits.active_textures+created*3 <= limits.textures && limits.active_framebuffers+created*4 <= limits.framebuffers,
         "Prepared windows exceed concurrent payload/handle capacity");
     result->combined_limits = limits;result->combined_limits.windows = result->outputs.size();
     result->combined_limits.output_payload = desired_payload;result->combined_limits.active_payload += new_payload;
-    result->combined_limits.active_textures += created*2;result->combined_limits.active_framebuffers += created*3;
+    result->combined_limits.active_textures += created*3;result->combined_limits.active_framebuffers += created*4;
     for (std::size_t i = 0; i < result->outputs.size(); ++i) if (result->reuse[i] == SIZE_MAX) {
         auto& output = result->outputs[i];
+        auto mapped = device.target(output.configured.width,output.configured.height,DXGI_FORMAT_R16G16B16A16_FLOAT);
         auto held = device.target(output.configured.width,output.configured.height,DXGI_FORMAT_R8G8B8A8_UNORM);
         auto presented = device.target(output.configured.width,output.configured.height,DXGI_FORMAT_R8G8B8A8_UNORM);
         output.held.native = std::move(held.texture);output.held.borrowed = true;
+        output.mapped.native = std::move(mapped.texture);output.mapped.borrowed = true;
         output.presented.native = std::move(presented.texture);output.presented.borrowed = true;
     }
     const D3D11_QUERY_DESC query{D3D11_QUERY_EVENT,0};

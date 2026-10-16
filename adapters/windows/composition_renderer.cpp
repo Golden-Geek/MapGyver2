@@ -81,8 +81,9 @@ struct CompositionRenderer::Impl : GraphResources {
     Texture* qualification_target = nullptr;
     std::array<std::uint16_t,2> qualification_size{};
     DXGI_ADAPTER_DESC1 identity{};
-    bgfx::ProgramHandle composite = BGFX_INVALID_HANDLE, encode = BGFX_INVALID_HANDLE;
+    bgfx::ProgramHandle composite = BGFX_INVALID_HANDLE, encode = BGFX_INVALID_HANDLE, mapping = BGFX_INVALID_HANDLE;
     bgfx::UniformHandle sampler = BGFX_INVALID_HANDLE, encoding = BGFX_INVALID_HANDLE, resample = BGFX_INVALID_HANDLE;
+    bgfx::UniformHandle mapping_rows = BGFX_INVALID_HANDLE, mapping_edges = BGFX_INVALID_HANDLE, mapping_identity = BGFX_INVALID_HANDLE;
     bgfx::VertexBufferHandle vertices = BGFX_INVALID_HANDLE;
     bgfx::TextureHandle transparent = BGFX_INVALID_HANDLE;
     using Input = GraphInput;
@@ -125,7 +126,7 @@ struct CompositionRenderer::Impl : GraphResources {
     }
     static void destroy_output_handles(Output& output) {
         if (bgfx::isValid(output.swapchain)) {bgfx::destroy(output.swapchain);output.swapchain = BGFX_INVALID_HANDLE;}
-        for (auto* texture : {&output.held,&output.presented}) {
+        for (auto* texture : {&output.mapped,&output.held,&output.presented}) {
             if (bgfx::isValid(texture->framebuffer)) {bgfx::destroy(texture->framebuffer);texture->framebuffer = BGFX_INVALID_HANDLE;}
             if (bgfx::isValid(texture->texture)) {bgfx::destroy(texture->texture);texture->texture = BGFX_INVALID_HANDLE;}
         }
@@ -142,9 +143,10 @@ struct CompositionRenderer::Impl : GraphResources {
             output.swapchain = bgfx::createFrameBuffer(handle,static_cast<std::uint16_t>(output.configured.width),static_cast<std::uint16_t>(output.configured.height));
             check(bgfx::isValid(output.swapchain),"Prepared output swapchain handle failed");
         } else {
-            auto& texture = candidate.step < 4 ? output.held : output.presented;
+            auto& texture = candidate.step < 4 ? output.mapped : candidate.step < 6 ? output.held : output.presented;
+            const auto format = candidate.step < 4 ? bgfx::TextureFormat::RGBA16F : bgfx::TextureFormat::RGBA8;
             if (candidate.step%2 == 0) {
-                texture.texture = bgfx::createTexture2D(1,1,false,1,bgfx::TextureFormat::RGBA8,BGFX_TEXTURE_RT|sampling);
+                texture.texture = bgfx::createTexture2D(1,1,false,1,format,BGFX_TEXTURE_RT|sampling);
                 check(bgfx::isValid(texture.texture),"Prepared output placeholder failed");
             } else {
                 const auto pointer = reinterpret_cast<std::uintptr_t>(texture.native.Get());
@@ -154,7 +156,7 @@ struct CompositionRenderer::Impl : GraphResources {
                 check(bgfx::isValid(texture.framebuffer),"Prepared output framebuffer handle failed");
             }
         }
-        if (++candidate.step == 6) {candidate.step = 0;++candidate.cursor;}
+        if (++candidate.step == 8) {candidate.step = 0;++candidate.cursor;}
         return false; // Realize queued owner/DXGI work with the old scene still active.
     }
     void apply_windows(std::unique_ptr<PreparedWindows>& candidate) {
@@ -163,7 +165,7 @@ struct CompositionRenderer::Impl : GraphResources {
             if (reuse != SIZE_MAX) {
                 check(reuse < outputs.size(),"Prepared window reuse index invalid");auto& prior = outputs[reuse];
                 next.window = std::exchange(prior.window,nullptr);std::swap(next.swapchain,prior.swapchain);
-                std::swap(next.held,prior.held);std::swap(next.presented,prior.presented);std::swap(next.held_frame,prior.held_frame);
+                std::swap(next.mapped,prior.mapped);std::swap(next.held,prior.held);std::swap(next.presented,prior.presented);std::swap(next.held_frame,prior.held_frame);
                 next.show_pending = !next.configured.hidden && next.configured.controls.enabled && !prior.configured.controls.enabled;
                 if (!next.configured.hidden && !next.configured.controls.enabled) check(SDL_HideWindow(next.window),SDL_GetError());
             } else {
@@ -224,7 +226,7 @@ struct CompositionRenderer::Impl : GraphResources {
             }
             for (auto& output : outputs) {
                 if (bgfx::isValid(output.swapchain)) bgfx::destroy(output.swapchain);
-                for (auto* t : {&output.held,&output.presented}) {
+                for (auto* t : {&output.mapped,&output.held,&output.presented}) {
                     if (bgfx::isValid(t->framebuffer)) bgfx::destroy(t->framebuffer);
                     if (bgfx::isValid(t->texture)) bgfx::destroy(t->texture);
                     if (!t->borrowed) t->native.Reset();
@@ -235,9 +237,13 @@ struct CompositionRenderer::Impl : GraphResources {
             for (const auto& [id,t] : images) {static_cast<void>(id); bgfx::destroy(t.texture);}
             if (bgfx::isValid(composite)) bgfx::destroy(composite);
             if (bgfx::isValid(encode)) bgfx::destroy(encode);
+            if (bgfx::isValid(mapping)) bgfx::destroy(mapping);
             if (bgfx::isValid(sampler)) bgfx::destroy(sampler);
             if (bgfx::isValid(encoding)) bgfx::destroy(encoding);
             if (bgfx::isValid(resample)) bgfx::destroy(resample);
+            if (bgfx::isValid(mapping_rows)) bgfx::destroy(mapping_rows);
+            if (bgfx::isValid(mapping_edges)) bgfx::destroy(mapping_edges);
+            if (bgfx::isValid(mapping_identity)) bgfx::destroy(mapping_identity);
             if (bgfx::isValid(vertices)) bgfx::destroy(vertices);
             if (bgfx::isValid(transparent)) bgfx::destroy(transparent);
             // The size/format override creates a bgfx-owned resource. Drop our
@@ -307,16 +313,19 @@ struct CompositionRenderer::Impl : GraphResources {
         for (const auto& surface : plan->surfaces) if (std::find(exported_nodes.begin(),exported_nodes.end(),surface.node) == exported_nodes.end()) exported_nodes.push_back(surface.node);
         views.resize(plan->nodes.size());
         for (std::size_t index = 0; index < plan->nodes.size(); ++index) if (plan->nodes[index].target) views[index] = static_cast<bgfx::ViewId>(render_views++);
-        check(render_views+exported_nodes.size()+outputs.size()*3 <= caps->limits.maxViews,"Native compositor exceeds actual view capacity");
+        check(render_views+exported_nodes.size()+outputs.size()*4 <= caps->limits.maxViews,"Native compositor exceeds actual view capacity");
         std::uint64_t draw_count = exported_nodes.size();for (const auto& node : plan->nodes) draw_count += node.layers.size();
-        check(draw_count+outputs.size()*3 <= caps->limits.maxDrawCalls,"Native compositor exceeds actual draw capacity");
-        check(plan->targets.size()+exported_nodes.size()+outputs.size()*3 <= caps->limits.maxFrameBuffers,"Native compositor exceeds actual framebuffer capacity");
+        for (const auto& output : plan->output_mappings) draw_count += output.patches.size();
+        check(draw_count+outputs.size()*4 <= caps->limits.maxDrawCalls,"Native compositor exceeds actual draw capacity");
+        check(plan->targets.size()+exported_nodes.size()+outputs.size()*4 <= caps->limits.maxFrameBuffers,"Native compositor exceeds actual framebuffer capacity");
         std::uint64_t payload = plan->target_bytes+plan->image_upload_bytes+plan->export_bytes+16;
         check(payload <= 536870912,"Native graph/global constant payload exceeds capacity");
         for (const auto& output : outputs) {
             const auto& config = output.configured;
+            const auto mapped = std::find_if(plan->output_mappings.begin(),plan->output_mappings.end(),[&](const auto& item){return item.id == config.id;});
+            check(mapped == plan->output_mappings.end() || mapped->reason.empty(),"Native output mapping is unavailable");
             check(std::find(exported_nodes.begin(),exported_nodes.end(),config.node) != exported_nodes.end() && config.width && config.height && config.width <= caps->limits.maxTextureSize && config.height <= caps->limits.maxTextureSize && config.width <= UINT16_MAX && config.height <= UINT16_MAX,"Native output node/dimensions exceed actual capacity");
-            const auto size = static_cast<std::uint64_t>(config.width)*config.height*8;
+            const auto size = static_cast<std::uint64_t>(config.width)*config.height*16;
             check(payload <= 536870912 && size <= 536870912-payload,"Native output textures exceed total payload capacity");payload += size;
         }
         owned_payload_bytes = payload;
@@ -331,13 +340,18 @@ struct CompositionRenderer::Impl : GraphResources {
         // with its immutable native image. Exports/output textures follow imports.
         check(plan->target_bytes+plan->image_upload_bytes+plan->fallback_bytes <= 536870912-largest_image,
             "Native startup image import exceeds bounded transient payload capacity");
-        check(image_ids.size()+plan->targets.size()+exported_nodes.size()+outputs.size()*2+1 <= caps->limits.maxTextures,
+        check(image_ids.size()+plan->targets.size()+exported_nodes.size()+outputs.size()*3+1 <= caps->limits.maxTextures,
               "Native compositor exceeds actual texture handle capacity");
         for (const auto& node : plan->nodes) check(node.width <= caps->limits.maxTextureSize && node.height <= caps->limits.maxTextureSize && node.width <= UINT16_MAX && node.height <= UINT16_MAX,"Native compositor exceeds actual texture dimension capacity");
         composite = program(shaders::composite,sizeof(shaders::composite)); encode = program(shaders::encode,sizeof(shaders::encode));
+        mapping = program(shaders::mapping,sizeof(shaders::mapping));
         sampler = bgfx::createUniform("s_image",bgfx::UniformType::Sampler);encoding = bgfx::createUniform("u_encoding",bgfx::UniformType::Vec4);
         resample = bgfx::createUniform("u_resample",bgfx::UniformType::Vec4);
+        mapping_rows = bgfx::createUniform("u_mappingRows",bgfx::UniformType::Vec4,3);
+        mapping_edges = bgfx::createUniform("u_mappingEdges",bgfx::UniformType::Vec4,4);
+        mapping_identity = bgfx::createUniform("u_mappingIdentity",bgfx::UniformType::Vec4);
         check(bgfx::isValid(sampler) && bgfx::isValid(encoding) && bgfx::isValid(resample),"Native compositor uniform creation failed");
+        check(bgfx::isValid(mapping_rows) && bgfx::isValid(mapping_edges) && bgfx::isValid(mapping_identity),"Native mapping uniform creation failed");
         struct Vertex {float x,y,z,u,v;}; constexpr std::array triangle{Vertex{-1,-1,0,0,1},Vertex{3,-1,0,2,1},Vertex{-1,3,0,0,-1}};
         bgfx::VertexLayout layout; layout.begin(bgfx::RendererType::Direct3D11).add(bgfx::Attrib::Position,3,bgfx::AttribType::Float).add(bgfx::Attrib::TexCoord0,2,bgfx::AttribType::Float).end();
         vertices = bgfx::createVertexBuffer(bgfx::copy(triangle.data(),sizeof(triangle)),layout);check(bgfx::isValid(vertices),"Native compositor geometry allocation failed");
@@ -370,6 +384,7 @@ struct CompositionRenderer::Impl : GraphResources {
         exports.reserve(exported_nodes.size());for (const auto index : exported_nodes) exports.push_back(target(plan->nodes[index].width,plan->nodes[index].height,bgfx::TextureFormat::RGBA8));
         for (auto& output : outputs) {
             const auto& config = output.configured;
+            output.mapped = target(config.width,config.height,bgfx::TextureFormat::RGBA16F);
             output.held = target(config.width,config.height,bgfx::TextureFormat::RGBA8);
             output.presented = target(config.width,config.height,bgfx::TextureFormat::RGBA8);
             output.window = SDL_CreateWindow(config.name.c_str(),static_cast<int>(config.width),static_cast<int>(config.height),
@@ -419,7 +434,7 @@ struct CompositionRenderer::Impl : GraphResources {
         }
         for (std::size_t index = 0; index < outputs.size(); ++index) {
             auto& output = outputs[index];const auto& config = output.configured;
-            const auto base_view = render_views+exported_nodes.size()+index*3;
+            const auto base_view = render_views+exported_nodes.size()+index*4;
             const auto view = [&](std::size_t offset,bgfx::FrameBufferHandle framebuffer) {
                 const auto id = static_cast<bgfx::ViewId>(base_view+offset);
                 bgfx::setViewFrameBuffer(id,framebuffer);bgfx::setViewRect(id,0,0,static_cast<std::uint16_t>(config.width),static_cast<std::uint16_t>(config.height));
@@ -431,21 +446,38 @@ struct CompositionRenderer::Impl : GraphResources {
             };
             bool carried = false;
             if (bgfx::isValid(output.freeze_source)) {
-                if (config.controls.freeze) {draw(view(0,output.held.framebuffer),output.freeze_source,composite,output.freeze_source_size[0],output.freeze_source_size[1]);carried = true;}
+                if (config.controls.freeze) {draw(view(1,output.held.framebuffer),output.freeze_source,composite,output.freeze_source_size[0],output.freeze_source_size[1]);carried = true;}
                 else output.held_frame = 0;
                 output.freeze_source = BGFX_INVALID_HANDLE;
             }
             if (!carried && config.controls.enabled && !config.controls.freeze) {
-                const auto id = view(0,output.held.framebuffer);
+                const auto mapped_view = view(0,output.mapped.framebuffer);
+                bgfx::setViewMode(mapped_view,bgfx::ViewMode::Sequential);bgfx::setViewClear(mapped_view,BGFX_CLEAR_COLOR,0);
+                const auto configured = std::find_if(plan->output_mappings.begin(),plan->output_mappings.end(),[&](const auto& item){return item.id == config.id;});
+                if (configured == plan->output_mappings.end()) {
+                    sampling_size(plan->nodes[config.node].width,plan->nodes[config.node].height,config.width,config.height);
+                    bgfx::setVertexBuffer(0,vertices);bgfx::setTexture(0,sampler,inputs[config.node]);
+                    bgfx::setState(BGFX_STATE_WRITE_RGB|BGFX_STATE_WRITE_A);bgfx::submit(mapped_view,composite);++draws;
+                } else {
+                    for (const auto& patch : configured->patches) {
+                        const auto& source = plan->nodes[patch.node];sampling_size(source.width,source.height,config.width,config.height);
+                        bgfx::setUniform(mapping_rows,patch.rows.data(),3);bgfx::setUniform(mapping_edges,patch.edges.data(),4);
+                        const std::array<float,4> identity_parameters{patch.identity ? 1.F : 0.F,0,0,0};bgfx::setUniform(mapping_identity,identity_parameters.data());
+                        bgfx::setVertexBuffer(0,vertices);bgfx::setTexture(0,sampler,inputs[patch.node]);
+                        bgfx::setState(BGFX_STATE_WRITE_RGB|BGFX_STATE_WRITE_A|BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE,BGFX_STATE_BLEND_INV_SRC_ALPHA));
+                        bgfx::submit(mapped_view,mapping);++draws;
+                    }
+                }
+                const auto id = view(1,output.held.framebuffer);
                 constexpr std::array<float,4> display_encoding{1,0,1,0};
-                bgfx::setUniform(encoding,display_encoding.data());draw(id,inputs[config.node],encode,plan->nodes[config.node].width,plan->nodes[config.node].height);output.held_frame = sequence+1;
-            } else if (!carried && !output.held_frame) static_cast<void>(view(0,output.held.framebuffer));
-            const auto presented = view(1,output.presented.framebuffer);
+                bgfx::setUniform(encoding,display_encoding.data());draw(id,output.mapped.texture,encode,config.width,config.height);output.held_frame = sequence+1;
+            } else if (!carried && !output.held_frame) static_cast<void>(view(1,output.held.framebuffer));
+            const auto presented = view(2,output.presented.framebuffer);
             if (config.controls.enabled && !config.controls.blackout && output.held_frame) draw(presented,output.held.texture,composite,config.width,config.height);
-            draw(view(2,output.swapchain),output.presented.texture,composite,config.width,config.height);
+            draw(view(3,output.swapchain),output.presented.texture,composite,config.width,config.height);
         }
         if (qualification_target) {
-            const auto view = static_cast<bgfx::ViewId>(render_views+exported_nodes.size()+outputs.size()*3);
+            const auto view = static_cast<bgfx::ViewId>(render_views+exported_nodes.size()+outputs.size()*4);
             bgfx::setViewFrameBuffer(view,qualification_target->framebuffer);
             bgfx::setViewRect(view,0,0,qualification_size[0],qualification_size[1]);bgfx::setViewClear(view,BGFX_CLEAR_COLOR,0);
             const auto& node = plan->nodes[plan->preview];const std::array<float,4> parameters{
@@ -544,10 +576,10 @@ std::uint64_t CompositionRenderer::constant_upload_bytes() const noexcept {retur
 GraphLimits CompositionRenderer::graph_limits() const {
     impl_->check_owner();const auto& limits = bgfx::getCaps()->limits;
     std::uint64_t output_payload = 0;
-    for (const auto& output : impl_->outputs) output_payload += static_cast<std::uint64_t>(output.configured.width)*output.configured.height*8;
+    for (const auto& output : impl_->outputs) output_payload += static_cast<std::uint64_t>(output.configured.width)*output.configured.height*16;
     return {limits.maxTextureSize,limits.maxViews,limits.maxTextures,limits.maxFrameBuffers,limits.maxDrawCalls,
-        impl_->targets.size()+impl_->exports.size()+impl_->images.size()+impl_->outputs.size()*2+1,
-        impl_->targets.size()+impl_->exports.size()+impl_->outputs.size()*3,impl_->outputs.size(),impl_->owned_payload_bytes,output_payload};
+        impl_->targets.size()+impl_->exports.size()+impl_->images.size()+impl_->outputs.size()*3+1,
+        impl_->targets.size()+impl_->exports.size()+impl_->outputs.size()*4,impl_->outputs.size(),impl_->owned_payload_bytes,output_payload};
 }
 bool CompositionRenderer::stage_graph(std::unique_ptr<PreparedGraph>& candidate) {
     std::unique_ptr<PreparedWindows> no_windows;return stage_scene(candidate,no_windows);
@@ -561,8 +593,13 @@ bool CompositionRenderer::stage_scene(std::unique_ptr<PreparedGraph>& candidate,
     if (windows) {
         check(windows->generation == candidate->generation && windows->owner_device.Get() == impl_->device.Get() && !windows->retiring,
             "Prepared window generation/device invalid");
-        if (!impl_->bind_windows(*windows)) return false;
     }
+    for (const auto& output : windows ? windows->outputs : impl_->outputs) {
+        const auto& mappings = candidate->resources.plan->output_mappings;
+        const auto mapped = std::find_if(mappings.begin(),mappings.end(),[&](const auto& item){return item.id == output.configured.id;});
+        check(mapped == mappings.end() || mapped->reason.empty(),"Prepared native output mapping is unavailable");
+    }
+    if (windows && !impl_->bind_windows(*windows)) return false;
     if (candidate->last_step_frame == impl_->sequence) return false;
     candidate->last_step_frame = impl_->sequence;
     if (candidate->cursor < candidate->binding_count) {
@@ -589,11 +626,11 @@ bool CompositionRenderer::stage_scene(std::unique_ptr<PreparedGraph>& candidate,
             node.target ? next.targets[*node.target].texture : impl_->transparent;
     }
     const auto revision = next.plan->revision;
-    const auto previous_views = impl_->render_views+impl_->exported_nodes.size()+impl_->outputs.size()*3;
+    const auto previous_views = impl_->render_views+impl_->exported_nodes.size()+impl_->outputs.size()*4;
     impl_->context->End(candidate->completion.Get());impl_->context->Flush(); // Covers last reads of the old graph.
     if (windows) impl_->apply_windows(windows);
     static_cast<GraphResources&>(*impl_).swap(next);
-    const auto current_views = impl_->render_views+impl_->exported_nodes.size()+impl_->outputs.size()*3;
+    const auto current_views = impl_->render_views+impl_->exported_nodes.size()+impl_->outputs.size()*4;
     for (auto view = current_views; view < previous_views; ++view) bgfx::resetView(static_cast<bgfx::ViewId>(view));
     for (std::size_t i = 0; i < impl_->outputs.size(); ++i) impl_->outputs[i].configured.node = candidate->output_nodes[i];
     impl_->applied_revision = revision;impl_->image_state.generation = candidate->generation;
@@ -662,7 +699,7 @@ std::vector<std::uint8_t> CompositionRenderer::qualify_borrowed_target(PreparedT
         "Borrowed target native description differs from its prepared metadata");
     ComPtr<ID3D11Device> device;target.texture->GetDevice(&device);check(device.Get() == impl_->device.Get(),"Borrowed target belongs to another device");
     const auto* caps = bgfx::getCaps();
-    check(impl_->render_views+impl_->exported_nodes.size()+impl_->outputs.size()*3 < caps->limits.maxViews &&
+    check(impl_->render_views+impl_->exported_nodes.size()+impl_->outputs.size()*4 < caps->limits.maxViews &&
         target.width <= caps->limits.maxTextureSize && target.height <= caps->limits.maxTextureSize &&
         static_cast<std::uint64_t>(target.width)*target.height*4 <= 536870912-impl_->owned_payload_bytes,
         "Borrowed target experiment exceeds actual view/dimension/payload capacity");
@@ -673,7 +710,7 @@ std::vector<std::uint8_t> CompositionRenderer::qualify_borrowed_target(PreparedT
         Impl& impl;Texture& target;
         ~Cleanup() {
             impl.qualification_target = nullptr;
-            bgfx::resetView(static_cast<bgfx::ViewId>(impl.render_views+impl.exported_nodes.size()+impl.outputs.size()*3));
+            bgfx::resetView(static_cast<bgfx::ViewId>(impl.render_views+impl.exported_nodes.size()+impl.outputs.size()*4));
             if (bgfx::isValid(target.framebuffer)) bgfx::destroy(target.framebuffer);
             if (bgfx::isValid(target.texture)) bgfx::destroy(target.texture);
             static_cast<void>(impl.frame()); // Drain queued owner-side destruction while native ownership survives.

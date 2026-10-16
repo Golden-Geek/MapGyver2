@@ -38,3 +38,10 @@ SDL/DXGI/SRV/RTV calls still perform SDK work on the owner. Bounded staging step
 do not establish bounded driver latency or zero allocations. Qualification records
 observed owner work time, with no sustained budget claim. Physical scanout,
 hotplug/device-loss recovery, nontrivial mapping and M01 hardware gates remain open.
+
+The subsequent C03 quad-mapping slice adds a per-window RGBA16F linear mapping
+target ahead of held/presented RGBA8 display textures. The complete output payload
+is now 16 bytes/pixel with three textures, four framebuffers including swapchain,
+and four view slots. Window preparation/import/reuse/retirement covers the added
+target under the same concurrent limits. This does not change the DXGI/driver
+buffer exclusion or qualify sustained owner latency.

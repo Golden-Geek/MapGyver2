@@ -10,8 +10,9 @@ Prepared images use finite SDR linear-sRGB premultiplied float pixels. RGBA8
 preparation decodes the declared transfer function before premultiplication.
 Compositing uses back-to-front premultiplied over. Exports unpremultiply, encode
 the named canvas transfer function and optionally premultiply its encoded RGB.
-Nearest sampling uses pixel centres. Masks, geometry mapping, blend modes other
-than over, HDR and media decoding are subsequent work.
+Nearest sampling uses pixel centres. Quad projection mapping and shared UV charts
+are compiled below. Masks, crop/fit/fill, blend modes other than over, HDR and
+media decoding remain subsequent work.
 
 Plans bound node/layer counts, dimensions, prepared-image bytes, compatible
 RGBA16F target slots and total texture payload. Lifetime intervals prevent a
@@ -29,9 +30,27 @@ SDK objects remain private to the adapter. `frame()` submits an already prepared
 plan; resource creation, shader compilation and synchronous readback are outside
 that function. The adapter provides offline qualification and the engine's
 independent native owner. [Native window controls](../runtime/README.md)
-prepare independent swapchains and bounded held/presented textures. Hot resource
-handoff, nontrivial patch mapping and preview remain open. This implementation
+prepare independent swapchains and bounded linear mapped/held/presented textures.
+Image/graph/window handoffs and four-corner mapping are implemented; encoded
+preview and the remaining mapping rules stay open. This implementation
 does not accept the renderer or complete M04.
+
+`compile_mappings()` resolves stable-ID calibration boundaries into normalized
+inverse homographies, retaining the authored reference resolution. Unit-UV quad
+surface/chart topology must cover the full quad; unsupported mesh topology and
+ambiguous chart ownership retain their objects and explicit reasons. Continuous
+and independent quad charts map surface UV to composition UV. Patches share the
+resolved composition node and render back-to-front in stable patch-ID order.
+Per-output RGBA16F mapping targets blend linear premultiplied content before one
+opaque sRGB display encoding. All three output textures count toward capacity.
+
+Canonical float coefficients are shared by the native shader and CPU reference.
+Coverage uses inclusive top/left and exclusive bottom/right edges, including
+shared edges exactly on a pixel centre. Identity mappings retain exact unsigned
+integer pixel-centre sampling. Other mappings use nearest texel loads inside
+the calibrated quad/composition UV range and transparent coverage outside it.
+The mapping-patch capacity is 16,384 before native hardware view/draw/handle limits.
+Compilation and reference rendering allocate only on preparation/offline paths.
 
 Build/check on the Windows laptop:
 
