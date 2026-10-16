@@ -193,9 +193,9 @@ M04.C01 current working slice:
    Window replacement and C03 mapping remain required, not covered by graph banks.
    C03 homography/masks/color rules, encoded preview and C04 full scenarios remain.
 
-The engine now has a stateless-pattern native program path, fixed-layout image
-and graph handoff on existing windows, with actual browser-loss evidence.
-No animated-media/window replacement/mapping,
+The engine now has a stateless-pattern native program path, image/graph/window
+handoff, with actual browser-loss evidence.
+No animated-media/nontrivial mapping,
 encoded preview, physical scanout,
 sustained budgets or recovery claim. M01/M03 prerequisites still prevent milestone
 qualification. No M01/M02/M03/M04 tag.
@@ -212,8 +212,10 @@ fixes the measured 4/255 float tie without widening the 2/255 tolerance. ADR-022
 records SDK threading and capacity/deadline limits. Debug/Release working-tree
 wrappers pass 23/23, eight window goldens each (maximum 1/255), fifteen main
 engine phases/900 frames with two window generations, unavailable-source recovery
-and prior composition/output/source/graph regressions. Next: commit this tested
-slice, collect clean-source Debug/Release evidence and publish. Then implement
+and prior composition/output/source/graph regressions. Code
+`ce20c0629e5844420173c26ee3a24ede8e204c05` now has clean Debug/Release
+23/23 and all GPU/engine checks, dirty=false, captured in
+`docs/progress/M04-window-handoff-local.json`. Publish code and evidence. Then implement
 M04.C03 many-to-many quad mapping, crop/fit/fill, masks and blend rules. All M01
 physical/deadline/recovery gates, preview and later milestones remain open.
 
