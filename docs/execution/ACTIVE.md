@@ -77,6 +77,11 @@
    the WS timer and using tcp_stream.close fixes the cause. Both focused native
    fixture tests now pass, including shutdown with live clients. Final wrappers
    are rerunning; preserve the five-second drain deadline and owned buffers.
+   Code is now 6daac46016d3d11f01794a26e388e84bce867a4d. Clean Debug/Release
+   21/21 and three Chromium scenarios each pass, plus native 7+8+6+6+12 phases;
+   installed Release static serving works with Node absent from its child PATH.
+   Evidence/screenshot are M03-C03-local.json / M03-C03-ui.png. Commit evidence,
+   push and inspect its own source CI. macOS saturation is still unverified.
 4. M03.C04 current coverage includes actual browser/native create/edit/delete,
    duplicate replay, revision/owner/readonly/atomic failure and subscriptions.
    Durable save still needs M12; rendered applied-frame/preview outcomes need

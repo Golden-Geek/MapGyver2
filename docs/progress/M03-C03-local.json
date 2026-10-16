@@ -1,0 +1,2179 @@
+{
+  "schemaVersion": 1,
+  "milestone": "M03",
+  "slice": "M03.C03 partial: reliable local browser and packaged static editor; related C02/C04 traffic/parity work",
+  "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+  "evidenceClass": "native-Windows-build-IPC-sockets-Chromium-static-editor-contracts",
+  "scope": "Actual engine/native sockets/browser with deliberate one-ACK loss; same-service replay, validated state and static serving. No physical output, encoded native preview, durable save, remote/TLS, HMR/shader/output or clean-machine installer qualification. macOS saturation fix awaits source CI.",
+  "runs": [
+    {
+      "environment": {
+        "schemaVersion": 1,
+        "evidenceClass": "native-build-and-non-hardware-tests",
+        "startedUtc": "2026-10-16T01:55:54.013120+00:00",
+        "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+        "sourceDirty": false,
+        "hosted": false,
+        "ciRunUrl": null,
+        "host": {
+          "system": "Windows",
+          "release": "11",
+          "version": "10.0.26300",
+          "machine": "AMD64",
+          "python": "3.14.6"
+        },
+        "runner": {
+          "ImageOS": null,
+          "ImageVersion": null,
+          "RUNNER_OS": null,
+          "RUNNER_ARCH": null
+        },
+        "preset": "windows-local",
+        "configuration": "Debug",
+        "dependencyBaseline": "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+        "commands": [
+          {
+            "name": "cmake-version",
+            "command": [
+              "cmake",
+              "--version"
+            ],
+            "exitCode": 0,
+            "log": "cmake-version.log"
+          },
+          {
+            "name": "git-version",
+            "command": [
+              "git",
+              "--version"
+            ],
+            "exitCode": 0,
+            "log": "git-version.log"
+          },
+          {
+            "name": "dependency-identity",
+            "command": [
+              "git",
+              "-C",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\deps\\vcpkg",
+              "rev-parse",
+              "HEAD"
+            ],
+            "exitCode": 0,
+            "log": "dependency-identity.log"
+          },
+          {
+            "name": "configure",
+            "command": [
+              "cmake",
+              "--preset",
+              "windows-local"
+            ],
+            "exitCode": 0,
+            "log": "configure.log"
+          },
+          {
+            "name": "build",
+            "command": [
+              "cmake",
+              "--build",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-local",
+              "--config",
+              "Debug",
+              "--parallel",
+              "2"
+            ],
+            "exitCode": 0,
+            "log": "build.log"
+          },
+          {
+            "name": "node-version",
+            "command": [
+              "node",
+              "--version"
+            ],
+            "exitCode": 0,
+            "log": "node-version.log"
+          },
+          {
+            "name": "npm-version",
+            "command": [
+              "C:\\Program Files\\nodejs\\node.EXE",
+              "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+              "--version"
+            ],
+            "exitCode": 0,
+            "log": "npm-version.log"
+          },
+          {
+            "name": "browser-test-inputs",
+            "command": [
+              "C:\\Program Files\\nodejs\\node.EXE",
+              "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+              "--prefix",
+              "D:\\Projects\\Dev\\MapGyver2\\ui",
+              "exec",
+              "--",
+              "playwright",
+              "install",
+              "chromium"
+            ],
+            "exitCode": 0,
+            "log": "browser-test-inputs.log"
+          },
+          {
+            "name": "test",
+            "command": [
+              "ctest",
+              "--test-dir",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-local",
+              "-C",
+              "Debug",
+              "--output-on-failure",
+              "--no-tests=error",
+              "-LE",
+              "hardware",
+              "--output-junit",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\reports\\windows-local\\Debug\\test-results.xml"
+            ],
+            "exitCode": 0,
+            "log": "test.log"
+          },
+          {
+            "name": "diagnostics",
+            "command": [
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-local\\Debug\\mapgyver-engine.exe",
+              "--diagnose",
+              "--json",
+              "--no-gpu"
+            ],
+            "exitCode": 0,
+            "log": "diagnostics.log"
+          }
+        ],
+        "result": "passed",
+        "diagnostics": {
+          "build": {
+            "cmakeVersion": "4.4.1",
+            "compiler": {
+              "id": "MSVC",
+              "version": "19.50.35730.0"
+            },
+            "configuration": "Debug",
+            "dirty": false,
+            "revision": "6daac46016d3d11f01794a26e388e84bce867a4d"
+          },
+          "features": {
+            "hardwareTests": {
+              "available": false,
+              "configured": false,
+              "reason": "no_hardware_suite"
+            },
+            "media": {
+              "available": false,
+              "configured": false,
+              "reason": "not_implemented"
+            },
+            "ndi": {
+              "available": false,
+              "configured": false,
+              "reason": "owner_approval_required"
+            },
+            "platform": {
+              "available": false,
+              "configured": false,
+              "reason": "not_implemented"
+            },
+            "ui": {
+              "available": true,
+              "configured": true,
+              "reason": "static_editor_built"
+            }
+          },
+          "gpu": {
+            "reason": "disabled_by_request",
+            "status": "not_probed"
+          },
+          "platform": {
+            "architecture": "x64",
+            "byteOrder": "little",
+            "os": "Windows",
+            "pointerBits": 64
+          },
+          "product": {
+            "name": "MapGyver",
+            "version": "0.1.0-dev"
+          },
+          "schemaVersion": 1
+        },
+        "windowsSdk": "10.0.26100.0",
+        "resolvedPackages": [
+          {
+            "Package": "vcpkg-cmake-config",
+            "Version": "2026-07-21",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "vcpkg-cmake",
+            "Version": "2025-08-07",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "nlohmann-json",
+            "Version": "3.12.0",
+            "Port-Version": "2",
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "vcpkg-boost",
+            "Version": "2026-08-21",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-uninstall",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-cmake",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-headers",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-config",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-predef",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-winapi",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-type-traits",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-assert",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-throw-exception",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-mp11",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-describe",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-container-hash",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-type-index",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-variant2",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-compat",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-system",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-preprocessor",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-io",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-core",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-utility",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-static-string",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-smart-ptr",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-optional",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-logic",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-move",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-intrusive",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-endian",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-container",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-bind",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-integer",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-pool",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-context",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-mpl",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-typeof",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-tuple",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-detail",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-function-types",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-fusion",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-concept-check",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-iterator",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-tokenizer",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-static-assert",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-regex",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-conversion",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-array",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-range",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-numeric-conversion",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-lexical-cast",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-unordered",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-function",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-exception",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-algorithm",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-date-time",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-align",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-asio",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-asio",
+            "Version": null,
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-asio",
+            "Version": null,
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-beast",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          }
+        ],
+        "finishedUtc": "2026-10-16T01:56:52.801354+00:00"
+      },
+      "tests": [
+        {
+          "name": "ui.generated-contracts",
+          "status": "passed"
+        },
+        {
+          "name": "ui.browser",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.network",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.browser-network",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.engine-network",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.engine-browser-network",
+          "status": "passed"
+        },
+        {
+          "name": "diagnostics.contract",
+          "status": "passed"
+        },
+        {
+          "name": "build.source-identity",
+          "status": "passed"
+        },
+        {
+          "name": "build.feature-rejection",
+          "status": "passed"
+        },
+        {
+          "name": "planning.contract",
+          "status": "passed"
+        },
+        {
+          "name": "ci.quality-gate",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.windows-pipe",
+          "status": "passed"
+        },
+        {
+          "name": "domain.definitions",
+          "status": "passed"
+        },
+        {
+          "name": "domain.instances",
+          "status": "passed"
+        },
+        {
+          "name": "domain.stage",
+          "status": "passed"
+        },
+        {
+          "name": "control.project",
+          "status": "passed"
+        },
+        {
+          "name": "control.registry",
+          "status": "passed"
+        },
+        {
+          "name": "control.wire",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.service",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.osc",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.oscquery",
+          "status": "passed"
+        }
+      ],
+      "nativeIntegration": [
+        {
+          "schemaVersion": 1,
+          "evidenceClass": "native-loopback-sockets-independent-stdlib-clients",
+          "ready": {
+            "access": "loopback_operator_granted_osc_channel",
+            "address": "127.0.0.1",
+            "authoredRevision": "0",
+            "discovery": "unavailable",
+            "fixtureGrantsOsc": true,
+            "httpPort": 54280,
+            "httpReadTimeouts": 0,
+            "httpTimeoutMs": 5000,
+            "messageBytes": 1048576,
+            "notificationRejections": 0,
+            "oscPort": 55061,
+            "oscSessionId": "d7fb1ba2-6a22-4dc6-b74b-d756030dc4d4",
+            "oscStringBytes": 262144,
+            "peerCloses": 0,
+            "peerLimit": 16,
+            "queueBytes": 4194304,
+            "queueMessages": 256,
+            "remoteAuthorization": "unavailable",
+            "socketSendBufferObservedBytes": null,
+            "socketSendBufferRequestedBytes": 16384,
+            "sourceDirty": false,
+            "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+            "udpAccepted": 0,
+            "udpRejected": 0,
+            "websocketIdleTimeoutMs": 30000,
+            "websocketPort": 54280,
+            "websocketWriteTimeouts": 0,
+            "writeTimeoutMs": 2000
+          },
+          "readyOmittedFields": [
+            "editor"
+          ],
+          "phases": [
+            {
+              "name": "actual-HTTP-complete-tree-HOST_INFO-access-and-loopback-policy",
+              "status": "passed",
+              "methods": 74
+            },
+            {
+              "name": "actual-UDP-UTF8-whole-bundle-validation-and-unavailable-scheduling",
+              "status": "passed"
+            },
+            {
+              "name": "RFC6455-fragments-exact-LISTEN-IGNORE-reconnect-binary-OSC",
+              "status": "passed"
+            },
+            {
+              "name": "real-structural-commands-PATH_CHANGED-and-preserved-configuration",
+              "status": "passed"
+            },
+            {
+              "name": "actual-kernel-write-stall-deadline-healthy-client-progress",
+              "status": "passed",
+              "sentBytes": 3840768,
+              "drainedBytes": 20500,
+              "closeClass": "native_eof",
+              "clientReceiveBufferBytes": 1024,
+              "serverSendBufferBytes": 16384
+            },
+            {
+              "name": "partial-HTTP-deadline-malformed-WebSocket-isolation",
+              "status": "passed",
+              "closeClass": "native_connection_reset"
+            },
+            {
+              "name": "actual-peer-capacity-refusal-existing-client-progress-recovery",
+              "status": "passed",
+              "heldPartialRequests": 15
+            }
+          ],
+          "scope": "Actual HTTP/UDP/WebSocket sockets. Fixture ownership grant is test-only; engine mode grants over actual ACL-protected named pipe. No remote, Bonjour, GPU or durable-save qualification.",
+          "readyEvidenceOmittedFields": [
+            "project",
+            "registry",
+            "editor"
+          ],
+          "originalReportSha256": "acbeeaf6667d648ea9dbd0c9348408218458ce21ca5daab7a137731fb74f6680"
+        },
+        {
+          "schemaVersion": 1,
+          "evidenceClass": "native-loopback-sockets-independent-stdlib-clients",
+          "ready": {
+            "access": "current_user_acl",
+            "connections": 16,
+            "endpoint": "\\\\.\\pipe\\MapGyver.network-bef3dbf7e8f84db0ae23feec3c9ce756",
+            "event": "control_ready",
+            "frameTimeoutMs": 5000,
+            "oscquery": {
+              "access": "loopback_operator_granted_osc_channel",
+              "address": "127.0.0.1",
+              "authoredRevision": "0",
+              "discovery": "unavailable",
+              "httpPort": 54652,
+              "httpReadTimeouts": 0,
+              "httpTimeoutMs": 5000,
+              "messageBytes": 1048576,
+              "notificationRejections": 0,
+              "oscPort": 51732,
+              "oscSessionId": "94b8ea66-871b-4391-b3f6-f3a625bf355d",
+              "oscStringBytes": 262144,
+              "peerCloses": 0,
+              "peerLimit": 16,
+              "queueBytes": 4194304,
+              "queueMessages": 256,
+              "remoteAuthorization": "unavailable",
+              "socketSendBufferObservedBytes": null,
+              "socketSendBufferRequestedBytes": 16384,
+              "udpAccepted": 0,
+              "udpRejected": 0,
+              "websocketIdleTimeoutMs": 30000,
+              "websocketPort": 54652,
+              "websocketWriteTimeouts": 0,
+              "writeTimeoutMs": 2000
+            },
+            "remoteClients": "rejected_by_pipe_flag",
+            "requestBytes": 1048576,
+            "responseBytes": 4194304,
+            "sourceDirty": false,
+            "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+            "transport": "windows_named_pipe",
+            "writeTimeoutMs": 2000
+          },
+          "readyOmittedFields": [
+            "editor"
+          ],
+          "phases": [
+            {
+              "name": "accepted-model-value-exceeding-OSC-capacity-isolates-subscriber",
+              "status": "passed"
+            },
+            {
+              "name": "actual-HTTP-complete-tree-HOST_INFO-access-and-loopback-policy",
+              "status": "passed",
+              "methods": 74
+            },
+            {
+              "name": "actual-UDP-UTF8-whole-bundle-validation-and-unavailable-scheduling",
+              "status": "passed"
+            },
+            {
+              "name": "RFC6455-fragments-exact-LISTEN-IGNORE-reconnect-binary-OSC",
+              "status": "passed"
+            },
+            {
+              "name": "real-structural-commands-PATH_CHANGED-and-preserved-configuration",
+              "status": "passed"
+            },
+            {
+              "name": "actual-kernel-write-stall-deadline-healthy-client-progress",
+              "status": "passed",
+              "sentBytes": 3840768,
+              "drainedBytes": 20500,
+              "closeClass": "native_eof",
+              "clientReceiveBufferBytes": 1024,
+              "serverSendBufferBytes": 16384
+            },
+            {
+              "name": "partial-HTTP-deadline-malformed-WebSocket-isolation",
+              "status": "passed",
+              "closeClass": "native_connection_reset"
+            },
+            {
+              "name": "actual-peer-capacity-refusal-existing-client-progress-recovery",
+              "status": "passed",
+              "heldPartialRequests": 15
+            }
+          ],
+          "scope": "Actual HTTP/UDP/WebSocket sockets. Fixture ownership grant is test-only; engine mode grants over actual ACL-protected named pipe. No remote, Bonjour, GPU or durable-save qualification.",
+          "readyEvidenceOmittedFields": [
+            "project",
+            "registry",
+            "editor"
+          ],
+          "originalReportSha256": "1576c83e3de612c5beaace0fad64f49f3c7d858a1bfb11011bdd52e213245c19"
+        },
+        {
+          "schemaVersion": 1,
+          "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+          "sourceDirty": false,
+          "evidenceClass": "native-capability-bound-WebSocket-independent-stdlib-clients",
+          "phases": [
+            {
+              "name": "OS-capability-Origin-denial-private-bootstrap-UTF8-preloaded-static-assets",
+              "status": "passed"
+            },
+            {
+              "name": "real-WebSocket-lost-ACK-resume-exact-terminal-replay",
+              "status": "passed"
+            },
+            {
+              "name": "same-owner-revision-readonly-atomic-validator-unavailable-save",
+              "status": "passed"
+            },
+            {
+              "name": "actual-structural-create-delete-notifications-reconnect-resubscription",
+              "status": "passed"
+            },
+            {
+              "name": "malformed-duplicate-JSON-and-binary-control-refusal-isolation",
+              "status": "passed"
+            },
+            {
+              "name": "actual-control-hello-deadline-healthy-peer-progress",
+              "status": "passed"
+            }
+          ],
+          "scope": "Loopback native socket and real protocol/ownership validation. No remote TLS, rendering or durable-save claim. Bootstrap capability omitted.",
+          "originalReportSha256": "08a15166330c86529747b01b07527b72384c4b9dee026507ad86da02255a014d"
+        },
+        {
+          "schemaVersion": 1,
+          "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+          "sourceDirty": false,
+          "evidenceClass": "native-capability-bound-WebSocket-independent-stdlib-clients",
+          "phases": [
+            {
+              "name": "OS-capability-Origin-denial-private-bootstrap-UTF8-preloaded-static-assets",
+              "status": "passed"
+            },
+            {
+              "name": "real-WebSocket-lost-ACK-resume-exact-terminal-replay",
+              "status": "passed"
+            },
+            {
+              "name": "same-owner-revision-readonly-atomic-validator-unavailable-save",
+              "status": "passed"
+            },
+            {
+              "name": "actual-structural-create-delete-notifications-reconnect-resubscription",
+              "status": "passed"
+            },
+            {
+              "name": "malformed-duplicate-JSON-and-binary-control-refusal-isolation",
+              "status": "passed"
+            },
+            {
+              "name": "actual-control-hello-deadline-healthy-peer-progress",
+              "status": "passed"
+            }
+          ],
+          "scope": "Loopback native socket and real protocol/ownership validation. No remote TLS, rendering or durable-save claim. Bootstrap capability omitted.",
+          "originalReportSha256": "08a15166330c86529747b01b07527b72384c4b9dee026507ad86da02255a014d"
+        },
+        {
+          "schemaVersion": 1,
+          "evidenceClass": "native-Windows-named-pipe-separate-process-integration",
+          "ready": {
+            "access": "current_user_acl",
+            "connections": 16,
+            "endpoint": "\\\\.\\pipe\\MapGyver.qualification-4c57b30c1ba849feab2133803ea71085",
+            "event": "control_ready",
+            "frameTimeoutMs": 5000,
+            "remoteClients": "rejected_by_pipe_flag",
+            "requestBytes": 1048576,
+            "responseBytes": 4194304,
+            "sourceDirty": false,
+            "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+            "transport": "windows_named_pipe",
+            "writeTimeoutMs": 2000
+          },
+          "phases": [
+            {
+              "name": "real-process-handshake-fragmented-frames",
+              "status": "passed",
+              "serverPid": 27524
+            },
+            {
+              "name": "native-DACL-readback",
+              "status": "passed",
+              "actualAcl": {
+                "aceCount": 1,
+                "currentUserOnly": true
+              },
+              "remotePolicy": "rejected_by_pipe_flag",
+              "remoteProbe": "not-performed"
+            },
+            {
+              "name": "lost-ack-disconnect-resume-exact-replay",
+              "status": "passed"
+            },
+            {
+              "name": "real-client-revision-owner-readonly-parity",
+              "status": "passed"
+            },
+            {
+              "name": "native-push-subscription-and-calibration-preservation",
+              "status": "passed"
+            },
+            {
+              "name": "malformed-JSON-and-invalid-native-frame-lengths",
+              "status": "passed"
+            },
+            {
+              "name": "partial-header-body-deadlines-healthy-client-progress",
+              "status": "passed"
+            },
+            {
+              "name": "native-disconnect-recycle-handle-count",
+              "status": "passed",
+              "before": 133,
+              "after": 133,
+              "recycledPeers": 20
+            },
+            {
+              "name": "real-output-buffer-backpressure-write-deadline",
+              "status": "passed",
+              "configuredWriteTimeoutMs": 2000
+            },
+            {
+              "name": "cancelled-large-reply-resume-preserves-terminal-cache",
+              "status": "passed"
+            },
+            {
+              "name": "first-instance-collision-does-not-hijack-live-server",
+              "status": "passed",
+              "nativeFlagProbe": {
+                "availableSlotCollision": 5,
+                "fullPoolCollision": 231
+              },
+              "engineError": "Engine failure: CreateNamedPipe failed, Win32=231"
+            },
+            {
+              "name": "owned-server-forced-restart-old-identity-rejected",
+              "status": "passed",
+              "persistenceClaim": "none; new default project as reported by unavailable persistence"
+            }
+          ],
+          "scope": "Real Windows SDK IO and independent Python clients; no GPU/rendered-frame/durable-save/remote-SMB qualification",
+          "readyEvidenceOmittedFields": [
+            "project",
+            "registry",
+            "editor"
+          ],
+          "originalReportSha256": "e67e1554958f36119aea407012ff3985f5c7592121dbefab662f1a5fec8a5393"
+        }
+      ],
+      "browser": {
+        "identity": {
+          "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+          "sourceDirty": false,
+          "processMode": "native-Windows-engine",
+          "assets": "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-local\\Debug\\ui",
+          "capability": "omitted"
+        },
+        "stats": {
+          "startTime": "2026-10-16T01:56:04.486Z",
+          "duration": 3548.6440000000002,
+          "expected": 3,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "scenarios": [
+          {
+            "title": "packaged editor shows real state, edits, history and ownership",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 1956
+              }
+            ]
+          },
+          {
+            "title": "launch capability stays out of public metadata and static content",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 122
+              }
+            ]
+          },
+          {
+            "title": "separate Vite UI reload keeps native authored state",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 278
+              }
+            ]
+          }
+        ],
+        "originalReportSha256": "3722de14d7e54b8badbaf557845320ed7103b4b1f2abfbc031deb158af5b5906",
+        "screenshotSha256": "f72d943b6e86dc42a44526e1ba61af807ea572505f49d0397a028c0bcaadf3d6"
+      },
+      "engineSha256": "8bc2e8f2f0d3e258e569328dcb9a454603a224a430b981f49c6004474edb9039"
+    },
+    {
+      "environment": {
+        "schemaVersion": 1,
+        "evidenceClass": "native-build-and-non-hardware-tests",
+        "startedUtc": "2026-10-16T01:58:47.170006+00:00",
+        "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+        "sourceDirty": false,
+        "hosted": false,
+        "ciRunUrl": null,
+        "host": {
+          "system": "Windows",
+          "release": "11",
+          "version": "10.0.26300",
+          "machine": "AMD64",
+          "python": "3.14.6"
+        },
+        "runner": {
+          "ImageOS": null,
+          "ImageVersion": null,
+          "RUNNER_OS": null,
+          "RUNNER_ARCH": null
+        },
+        "preset": "windows-local",
+        "configuration": "Release",
+        "dependencyBaseline": "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+        "commands": [
+          {
+            "name": "cmake-version",
+            "command": [
+              "cmake",
+              "--version"
+            ],
+            "exitCode": 0,
+            "log": "cmake-version.log"
+          },
+          {
+            "name": "git-version",
+            "command": [
+              "git",
+              "--version"
+            ],
+            "exitCode": 0,
+            "log": "git-version.log"
+          },
+          {
+            "name": "dependency-identity",
+            "command": [
+              "git",
+              "-C",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\deps\\vcpkg",
+              "rev-parse",
+              "HEAD"
+            ],
+            "exitCode": 0,
+            "log": "dependency-identity.log"
+          },
+          {
+            "name": "configure",
+            "command": [
+              "cmake",
+              "--preset",
+              "windows-local"
+            ],
+            "exitCode": 0,
+            "log": "configure.log"
+          },
+          {
+            "name": "build",
+            "command": [
+              "cmake",
+              "--build",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-local",
+              "--config",
+              "Release",
+              "--parallel",
+              "2"
+            ],
+            "exitCode": 0,
+            "log": "build.log"
+          },
+          {
+            "name": "node-version",
+            "command": [
+              "node",
+              "--version"
+            ],
+            "exitCode": 0,
+            "log": "node-version.log"
+          },
+          {
+            "name": "npm-version",
+            "command": [
+              "C:\\Program Files\\nodejs\\node.EXE",
+              "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+              "--version"
+            ],
+            "exitCode": 0,
+            "log": "npm-version.log"
+          },
+          {
+            "name": "browser-test-inputs",
+            "command": [
+              "C:\\Program Files\\nodejs\\node.EXE",
+              "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+              "--prefix",
+              "D:\\Projects\\Dev\\MapGyver2\\ui",
+              "exec",
+              "--",
+              "playwright",
+              "install",
+              "chromium"
+            ],
+            "exitCode": 0,
+            "log": "browser-test-inputs.log"
+          },
+          {
+            "name": "test",
+            "command": [
+              "ctest",
+              "--test-dir",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-local",
+              "-C",
+              "Release",
+              "--output-on-failure",
+              "--no-tests=error",
+              "-LE",
+              "hardware",
+              "--output-junit",
+              "D:\\Projects\\Dev\\MapGyver2\\out\\reports\\windows-local\\Release\\test-results.xml"
+            ],
+            "exitCode": 0,
+            "log": "test.log"
+          },
+          {
+            "name": "diagnostics",
+            "command": [
+              "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-local\\Release\\mapgyver-engine.exe",
+              "--diagnose",
+              "--json",
+              "--no-gpu"
+            ],
+            "exitCode": 0,
+            "log": "diagnostics.log"
+          }
+        ],
+        "result": "passed",
+        "diagnostics": {
+          "build": {
+            "cmakeVersion": "4.4.1",
+            "compiler": {
+              "id": "MSVC",
+              "version": "19.50.35730.0"
+            },
+            "configuration": "Release",
+            "dirty": false,
+            "revision": "6daac46016d3d11f01794a26e388e84bce867a4d"
+          },
+          "features": {
+            "hardwareTests": {
+              "available": false,
+              "configured": false,
+              "reason": "no_hardware_suite"
+            },
+            "media": {
+              "available": false,
+              "configured": false,
+              "reason": "not_implemented"
+            },
+            "ndi": {
+              "available": false,
+              "configured": false,
+              "reason": "owner_approval_required"
+            },
+            "platform": {
+              "available": false,
+              "configured": false,
+              "reason": "not_implemented"
+            },
+            "ui": {
+              "available": true,
+              "configured": true,
+              "reason": "static_editor_built"
+            }
+          },
+          "gpu": {
+            "reason": "disabled_by_request",
+            "status": "not_probed"
+          },
+          "platform": {
+            "architecture": "x64",
+            "byteOrder": "little",
+            "os": "Windows",
+            "pointerBits": 64
+          },
+          "product": {
+            "name": "MapGyver",
+            "version": "0.1.0-dev"
+          },
+          "schemaVersion": 1
+        },
+        "windowsSdk": "10.0.26100.0",
+        "resolvedPackages": [
+          {
+            "Package": "vcpkg-cmake-config",
+            "Version": "2026-07-21",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "vcpkg-cmake",
+            "Version": "2025-08-07",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "nlohmann-json",
+            "Version": "3.12.0",
+            "Port-Version": "2",
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "vcpkg-boost",
+            "Version": "2026-08-21",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-uninstall",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-cmake",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-headers",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-config",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-predef",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-winapi",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-type-traits",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-assert",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-throw-exception",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-mp11",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-describe",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-container-hash",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-type-index",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-variant2",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-compat",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-system",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-preprocessor",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-io",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-core",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-utility",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-static-string",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-smart-ptr",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-optional",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-logic",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-move",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-intrusive",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-endian",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-container",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-bind",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-integer",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-pool",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-context",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-mpl",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-typeof",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-tuple",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-detail",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-function-types",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-fusion",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-concept-check",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-iterator",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-tokenizer",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-static-assert",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-regex",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-conversion",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-array",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-range",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-numeric-conversion",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-lexical-cast",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-unordered",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-function",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-exception",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-algorithm",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-date-time",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-align",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-asio",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-asio",
+            "Version": null,
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-asio",
+            "Version": null,
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          },
+          {
+            "Package": "boost-beast",
+            "Version": "1.92.0",
+            "Port-Version": null,
+            "Architecture": "x64-windows"
+          }
+        ],
+        "finishedUtc": "2026-10-16T01:59:42.331608+00:00"
+      },
+      "tests": [
+        {
+          "name": "ui.generated-contracts",
+          "status": "passed"
+        },
+        {
+          "name": "ui.browser",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.network",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.browser-network",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.engine-network",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.engine-browser-network",
+          "status": "passed"
+        },
+        {
+          "name": "diagnostics.contract",
+          "status": "passed"
+        },
+        {
+          "name": "build.source-identity",
+          "status": "passed"
+        },
+        {
+          "name": "build.feature-rejection",
+          "status": "passed"
+        },
+        {
+          "name": "planning.contract",
+          "status": "passed"
+        },
+        {
+          "name": "ci.quality-gate",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.windows-pipe",
+          "status": "passed"
+        },
+        {
+          "name": "domain.definitions",
+          "status": "passed"
+        },
+        {
+          "name": "domain.instances",
+          "status": "passed"
+        },
+        {
+          "name": "domain.stage",
+          "status": "passed"
+        },
+        {
+          "name": "control.project",
+          "status": "passed"
+        },
+        {
+          "name": "control.registry",
+          "status": "passed"
+        },
+        {
+          "name": "control.wire",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.service",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.osc",
+          "status": "passed"
+        },
+        {
+          "name": "protocol.oscquery",
+          "status": "passed"
+        }
+      ],
+      "nativeIntegration": [
+        {
+          "schemaVersion": 1,
+          "evidenceClass": "native-loopback-sockets-independent-stdlib-clients",
+          "ready": {
+            "access": "loopback_operator_granted_osc_channel",
+            "address": "127.0.0.1",
+            "authoredRevision": "0",
+            "discovery": "unavailable",
+            "fixtureGrantsOsc": true,
+            "httpPort": 51257,
+            "httpReadTimeouts": 0,
+            "httpTimeoutMs": 5000,
+            "messageBytes": 1048576,
+            "notificationRejections": 0,
+            "oscPort": 58501,
+            "oscSessionId": "f63165bc-6749-4028-a8dc-4adb389f908e",
+            "oscStringBytes": 262144,
+            "peerCloses": 0,
+            "peerLimit": 16,
+            "queueBytes": 4194304,
+            "queueMessages": 256,
+            "remoteAuthorization": "unavailable",
+            "socketSendBufferObservedBytes": null,
+            "socketSendBufferRequestedBytes": 16384,
+            "sourceDirty": false,
+            "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+            "udpAccepted": 0,
+            "udpRejected": 0,
+            "websocketIdleTimeoutMs": 30000,
+            "websocketPort": 51257,
+            "websocketWriteTimeouts": 0,
+            "writeTimeoutMs": 2000
+          },
+          "readyOmittedFields": [
+            "editor"
+          ],
+          "phases": [
+            {
+              "name": "actual-HTTP-complete-tree-HOST_INFO-access-and-loopback-policy",
+              "status": "passed",
+              "methods": 74
+            },
+            {
+              "name": "actual-UDP-UTF8-whole-bundle-validation-and-unavailable-scheduling",
+              "status": "passed"
+            },
+            {
+              "name": "RFC6455-fragments-exact-LISTEN-IGNORE-reconnect-binary-OSC",
+              "status": "passed"
+            },
+            {
+              "name": "real-structural-commands-PATH_CHANGED-and-preserved-configuration",
+              "status": "passed"
+            },
+            {
+              "name": "actual-kernel-write-stall-deadline-healthy-client-progress",
+              "status": "passed",
+              "sentBytes": 3840768,
+              "drainedBytes": 20500,
+              "closeClass": "native_eof",
+              "clientReceiveBufferBytes": 1024,
+              "serverSendBufferBytes": 16384
+            },
+            {
+              "name": "partial-HTTP-deadline-malformed-WebSocket-isolation",
+              "status": "passed",
+              "closeClass": "native_connection_reset"
+            },
+            {
+              "name": "actual-peer-capacity-refusal-existing-client-progress-recovery",
+              "status": "passed",
+              "heldPartialRequests": 15
+            }
+          ],
+          "scope": "Actual HTTP/UDP/WebSocket sockets. Fixture ownership grant is test-only; engine mode grants over actual ACL-protected named pipe. No remote, Bonjour, GPU or durable-save qualification.",
+          "readyEvidenceOmittedFields": [
+            "project",
+            "registry",
+            "editor"
+          ],
+          "originalReportSha256": "27c4b3a909f79e0caa17f50cc106ea8bfc24e4f76015166ffd34b7072cb69289"
+        },
+        {
+          "schemaVersion": 1,
+          "evidenceClass": "native-loopback-sockets-independent-stdlib-clients",
+          "ready": {
+            "access": "current_user_acl",
+            "connections": 16,
+            "endpoint": "\\\\.\\pipe\\MapGyver.network-30455e730b7c485b824670866e9feb70",
+            "event": "control_ready",
+            "frameTimeoutMs": 5000,
+            "oscquery": {
+              "access": "loopback_operator_granted_osc_channel",
+              "address": "127.0.0.1",
+              "authoredRevision": "0",
+              "discovery": "unavailable",
+              "httpPort": 50485,
+              "httpReadTimeouts": 0,
+              "httpTimeoutMs": 5000,
+              "messageBytes": 1048576,
+              "notificationRejections": 0,
+              "oscPort": 49408,
+              "oscSessionId": "448e9664-1130-4d36-8421-d78fcc0a3d57",
+              "oscStringBytes": 262144,
+              "peerCloses": 0,
+              "peerLimit": 16,
+              "queueBytes": 4194304,
+              "queueMessages": 256,
+              "remoteAuthorization": "unavailable",
+              "socketSendBufferObservedBytes": null,
+              "socketSendBufferRequestedBytes": 16384,
+              "udpAccepted": 0,
+              "udpRejected": 0,
+              "websocketIdleTimeoutMs": 30000,
+              "websocketPort": 50485,
+              "websocketWriteTimeouts": 0,
+              "writeTimeoutMs": 2000
+            },
+            "remoteClients": "rejected_by_pipe_flag",
+            "requestBytes": 1048576,
+            "responseBytes": 4194304,
+            "sourceDirty": false,
+            "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+            "transport": "windows_named_pipe",
+            "writeTimeoutMs": 2000
+          },
+          "readyOmittedFields": [
+            "editor"
+          ],
+          "phases": [
+            {
+              "name": "accepted-model-value-exceeding-OSC-capacity-isolates-subscriber",
+              "status": "passed"
+            },
+            {
+              "name": "actual-HTTP-complete-tree-HOST_INFO-access-and-loopback-policy",
+              "status": "passed",
+              "methods": 74
+            },
+            {
+              "name": "actual-UDP-UTF8-whole-bundle-validation-and-unavailable-scheduling",
+              "status": "passed"
+            },
+            {
+              "name": "RFC6455-fragments-exact-LISTEN-IGNORE-reconnect-binary-OSC",
+              "status": "passed"
+            },
+            {
+              "name": "real-structural-commands-PATH_CHANGED-and-preserved-configuration",
+              "status": "passed"
+            },
+            {
+              "name": "actual-kernel-write-stall-deadline-healthy-client-progress",
+              "status": "passed",
+              "sentBytes": 3840768,
+              "drainedBytes": 20500,
+              "closeClass": "native_eof",
+              "clientReceiveBufferBytes": 1024,
+              "serverSendBufferBytes": 16384
+            },
+            {
+              "name": "partial-HTTP-deadline-malformed-WebSocket-isolation",
+              "status": "passed",
+              "closeClass": "native_connection_reset"
+            },
+            {
+              "name": "actual-peer-capacity-refusal-existing-client-progress-recovery",
+              "status": "passed",
+              "heldPartialRequests": 15
+            }
+          ],
+          "scope": "Actual HTTP/UDP/WebSocket sockets. Fixture ownership grant is test-only; engine mode grants over actual ACL-protected named pipe. No remote, Bonjour, GPU or durable-save qualification.",
+          "readyEvidenceOmittedFields": [
+            "project",
+            "registry",
+            "editor"
+          ],
+          "originalReportSha256": "9ef8088828ac85e3882e5d7deceecce54d0b704be7c50c450f26710cf5577a3f"
+        },
+        {
+          "schemaVersion": 1,
+          "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+          "sourceDirty": false,
+          "evidenceClass": "native-capability-bound-WebSocket-independent-stdlib-clients",
+          "phases": [
+            {
+              "name": "OS-capability-Origin-denial-private-bootstrap-UTF8-preloaded-static-assets",
+              "status": "passed"
+            },
+            {
+              "name": "real-WebSocket-lost-ACK-resume-exact-terminal-replay",
+              "status": "passed"
+            },
+            {
+              "name": "same-owner-revision-readonly-atomic-validator-unavailable-save",
+              "status": "passed"
+            },
+            {
+              "name": "actual-structural-create-delete-notifications-reconnect-resubscription",
+              "status": "passed"
+            },
+            {
+              "name": "malformed-duplicate-JSON-and-binary-control-refusal-isolation",
+              "status": "passed"
+            },
+            {
+              "name": "actual-control-hello-deadline-healthy-peer-progress",
+              "status": "passed"
+            }
+          ],
+          "scope": "Loopback native socket and real protocol/ownership validation. No remote TLS, rendering or durable-save claim. Bootstrap capability omitted.",
+          "originalReportSha256": "08a15166330c86529747b01b07527b72384c4b9dee026507ad86da02255a014d"
+        },
+        {
+          "schemaVersion": 1,
+          "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+          "sourceDirty": false,
+          "evidenceClass": "native-capability-bound-WebSocket-independent-stdlib-clients",
+          "phases": [
+            {
+              "name": "OS-capability-Origin-denial-private-bootstrap-UTF8-preloaded-static-assets",
+              "status": "passed"
+            },
+            {
+              "name": "real-WebSocket-lost-ACK-resume-exact-terminal-replay",
+              "status": "passed"
+            },
+            {
+              "name": "same-owner-revision-readonly-atomic-validator-unavailable-save",
+              "status": "passed"
+            },
+            {
+              "name": "actual-structural-create-delete-notifications-reconnect-resubscription",
+              "status": "passed"
+            },
+            {
+              "name": "malformed-duplicate-JSON-and-binary-control-refusal-isolation",
+              "status": "passed"
+            },
+            {
+              "name": "actual-control-hello-deadline-healthy-peer-progress",
+              "status": "passed"
+            }
+          ],
+          "scope": "Loopback native socket and real protocol/ownership validation. No remote TLS, rendering or durable-save claim. Bootstrap capability omitted.",
+          "originalReportSha256": "08a15166330c86529747b01b07527b72384c4b9dee026507ad86da02255a014d"
+        },
+        {
+          "schemaVersion": 1,
+          "evidenceClass": "native-Windows-named-pipe-separate-process-integration",
+          "ready": {
+            "access": "current_user_acl",
+            "connections": 16,
+            "endpoint": "\\\\.\\pipe\\MapGyver.qualification-1deb15ae742b48c2b0e0be137e3f4ff4",
+            "event": "control_ready",
+            "frameTimeoutMs": 5000,
+            "remoteClients": "rejected_by_pipe_flag",
+            "requestBytes": 1048576,
+            "responseBytes": 4194304,
+            "sourceDirty": false,
+            "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+            "transport": "windows_named_pipe",
+            "writeTimeoutMs": 2000
+          },
+          "phases": [
+            {
+              "name": "real-process-handshake-fragmented-frames",
+              "status": "passed",
+              "serverPid": 43860
+            },
+            {
+              "name": "native-DACL-readback",
+              "status": "passed",
+              "actualAcl": {
+                "aceCount": 1,
+                "currentUserOnly": true
+              },
+              "remotePolicy": "rejected_by_pipe_flag",
+              "remoteProbe": "not-performed"
+            },
+            {
+              "name": "lost-ack-disconnect-resume-exact-replay",
+              "status": "passed"
+            },
+            {
+              "name": "real-client-revision-owner-readonly-parity",
+              "status": "passed"
+            },
+            {
+              "name": "native-push-subscription-and-calibration-preservation",
+              "status": "passed"
+            },
+            {
+              "name": "malformed-JSON-and-invalid-native-frame-lengths",
+              "status": "passed"
+            },
+            {
+              "name": "partial-header-body-deadlines-healthy-client-progress",
+              "status": "passed"
+            },
+            {
+              "name": "native-disconnect-recycle-handle-count",
+              "status": "passed",
+              "before": 133,
+              "after": 133,
+              "recycledPeers": 20
+            },
+            {
+              "name": "real-output-buffer-backpressure-write-deadline",
+              "status": "passed",
+              "configuredWriteTimeoutMs": 2000
+            },
+            {
+              "name": "cancelled-large-reply-resume-preserves-terminal-cache",
+              "status": "passed"
+            },
+            {
+              "name": "first-instance-collision-does-not-hijack-live-server",
+              "status": "passed",
+              "nativeFlagProbe": {
+                "availableSlotCollision": 5,
+                "fullPoolCollision": 231
+              },
+              "engineError": "Engine failure: CreateNamedPipe failed, Win32=231"
+            },
+            {
+              "name": "owned-server-forced-restart-old-identity-rejected",
+              "status": "passed",
+              "persistenceClaim": "none; new default project as reported by unavailable persistence"
+            }
+          ],
+          "scope": "Real Windows SDK IO and independent Python clients; no GPU/rendered-frame/durable-save/remote-SMB qualification",
+          "readyEvidenceOmittedFields": [
+            "project",
+            "registry",
+            "editor"
+          ],
+          "originalReportSha256": "63aa37a4efd9d211dcdfff61c450d2c451f01054c0605c720eb492a34a0a0aef"
+        }
+      ],
+      "browser": {
+        "identity": {
+          "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+          "sourceDirty": false,
+          "processMode": "native-Windows-engine",
+          "assets": "D:\\Projects\\Dev\\MapGyver2\\out\\build\\windows-local\\Release\\ui",
+          "capability": "omitted"
+        },
+        "stats": {
+          "startTime": "2026-10-16T01:58:57.734Z",
+          "duration": 2951.617,
+          "expected": 3,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "scenarios": [
+          {
+            "title": "packaged editor shows real state, edits, history and ownership",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 1398
+              }
+            ]
+          },
+          {
+            "title": "launch capability stays out of public metadata and static content",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 119
+              }
+            ]
+          },
+          {
+            "title": "separate Vite UI reload keeps native authored state",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 278
+              }
+            ]
+          }
+        ],
+        "originalReportSha256": "34b67f910d6238f34ae986cd79948c4644a206714d9f35c570e1cd842ae658fc",
+        "screenshotSha256": "0d4d1423c0bc9ab1161c5b712772b507bb314544811a1c0f95c965ab966fd6e6"
+      },
+      "engineSha256": "cb584af063ddca12502a9e66d9af28b9d3253be88f87076c9ca00c12a584b7a5"
+    }
+  ],
+  "installedStaticEditor": {
+    "schemaVersion": 1,
+    "sourceRevision": "6daac46016d3d11f01794a26e388e84bce867a4d",
+    "sourceDirty": false,
+    "evidenceClass": "native-Windows-installed-static-editor-without-Node-on-child-PATH",
+    "nodeOnChildPath": false,
+    "staticAssets": true,
+    "assets": [
+      {
+        "path": "/editor/assets/index-BAZj40H_.js",
+        "sha256": "07cfc0c01443aeccd9170935bdea05fa37738bd226628d4bd7b2f02c6498c181"
+      },
+      {
+        "path": "/editor/assets/index-DuqkMi5o.css",
+        "sha256": "723c08eee4a587b4c2c993ce224f838b449d6ded7434d3f081a4da8a1dad363c"
+      }
+    ],
+    "engineSha256": "cb584af063ddca12502a9e66d9af28b9d3253be88f87076c9ca00c12a584b7a5",
+    "scope": "Actual installed Windows engine serves compiled static assets and notices on this laptop. Node remains installed on the host; only the engine child PATH excludes it. No clean-machine/installer/GPU/rendered/durable-save qualification."
+  },
+  "installCommands": [
+    [
+      "cmake",
+      "--install",
+      "out/build/windows-local",
+      "--config",
+      "Release",
+      "--prefix",
+      "out/qualification/c03-installed"
+    ],
+    [
+      "python",
+      "tools/qualification/check_static_editor.py",
+      "--prefix",
+      "out/qualification/c03-installed",
+      "--report",
+      "out/reports/c03-installed.json"
+    ]
+  ],
+  "fixtureSources": [
+    {
+      "path": "ui/tests/editor.spec.ts",
+      "sha256": "5b831683798b451116c2696f0c32011c5c7f0ed57e8f5b8f09a199d9604a3cf4"
+    },
+    {
+      "path": "tests/protocol/test_browser_transport.py",
+      "sha256": "e4e1e431120a92bc301683a5d9e34ede25adabde9940ead705a7b8e539ac167d"
+    },
+    {
+      "path": "tests/protocol/test_network.py",
+      "sha256": "44d2be447226e7aa5fd5365cf78c1be1991e3b873fb7571a281b13342da13ea2"
+    },
+    {
+      "path": "tools/qualification/check_static_editor.py",
+      "sha256": "3ac8d155c10dbd24bfe03e92f509cdcb9fe342d579837671e51ad6a4d4bd267d"
+    },
+    {
+      "path": "ui/package-lock.json",
+      "sha256": "87e3b1d2a0cdccbaa167c6876256a5b231bed748e59e47c411e5d8a46f10a212"
+    }
+  ]
+}
