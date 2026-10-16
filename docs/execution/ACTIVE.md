@@ -93,12 +93,18 @@ M04.C01 current working slice:
    M04-C02-local.json retains exact source, commands/JUnit, drivers, binaries,
    shader/compiler and GPU reports. Commit evidence and publish C02; inspect its
    source CI. C01 hosted Windows jobs were still running at last check.
-7. Native display inventory working slice: actual Windows active device paths,
-   desktop rectangles/rational reported modes, bounded topology retries and UTF-8
-   conversion. Clone-source constraints are retained. Focused Debug/Release native
-   window probe and portable binding checks pass; one laptop panel observed.
-   Commit inventory slice, run clean wrappers/output probe, retain evidence.
-8. Next C02 work: logical monitor binding/window orchestration,
+7. Native inventory code `4d4bcc3325c28aa348c113f797878eb719304151` is committed locally.
+   Clean windows-render Debug/Release 23/23, dirty=false, and both actual native
+   output probes pass (three windows/13 frames/11 captures/foreign-owner refusal).
+   M04-C02-inventory-local.json retains actual one-panel device path/OS-reported
+   mode, commands/JUnit and binary/shader/GPU evidence. Bounded topology retry,
+   identity conversion and clone constraints implemented; no hotplug qualification.
+   Local C02 commits: 0c98675, 90b3c41, 4d4bcc3 plus this evidence commit. Origin
+   remains at C01 evidence 0aa62c5547de512565a83f0aaa20c2c1f0da26bd. Publish pending
+   tested commits after CI 38843868195 becomes terminal, then inspect the new CI.
+   Windows jobs 116789825642/116789825931 still running at last check; Linux/macOS
+   and plan already passed. Do not cancel that build for an evidence-only push.
+8. Continue independent C02 work while CI runs: logical monitor binding/window orchestration,
    render/control worker handoff, engine applied-frame/status and production native
    output/browser-loss. C03 quad mapping/masks/color rules and C04 remain open.
 
