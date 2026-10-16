@@ -234,7 +234,11 @@ existing NOMINMAX convention. A stalled tool call was inspected, not duplicated.
 Debug/Release working-tree wrappers now pass 24/24 and all native preparation,
 compositor/output/mapping/engine checks. Each passes twelve mapping captures at
 maximum 1/255 and sixteen main phases through applied revision 20. Next: commit
-this slice, retain clean-source Debug/Release evidence and publish. Masks,
+this slice, retain clean-source Debug/Release evidence and publish. Code
+`2e790c75f992dea7d88bb5fc67a2cf133b0a2e63` now has clean Debug/Release
+24/24 and all actual preparation/compositor/output/mapping/engine checks,
+dirty=false, retained in `docs/progress/M04-quad-mapping-local.json`. Publish this
+code/evidence, then implement masks, crop/fit/fill and additional blend modes. Masks,
 crop/fit/fill and additional blend rules are
 still required C03 work; no milestone or physical-output completion.
 
