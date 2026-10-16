@@ -94,7 +94,7 @@ M04.C01 current working slice:
    They were published with evidence/CI fix at 256e2cb4426389ec444ebf6d3af72378e75a04fe.
    CI 38847721626 is fully green on Windows Debug/Release, Linux/macOS, plan and
    quality-gate. Hosted compilation is separate from GPU/physical qualification.
-7. Current uncommitted C02 engine-owner slice: --render creates a native GPU/window
+7. C02 engine-owner code 847d25462c0a65c19c0709fa8715ba96991f7ac8: --render creates a native GPU/window
    owner; control/status mailboxes carry bounded values. Core validates native
    generation/revision/frame/clock and preserves original cached outcome metadata.
    Svelte output flags and edit release share pipe/OSC validation. Actual 900-frame
@@ -102,9 +102,11 @@ M04.C01 current working slice:
    2s, native controls, pending resource shape/undo and granted OSC bundle. Final
    offline three-window captures use fixed tolerance 2/255. Initial Node stdin
    teardown bug fixed without widening deadlines; owned browser job cleanup passes.
-   Dirty-source Debug/Release wrappers pass 23/23 and native engine tests pass.
-   Latest owner initial-revision fix compiles/passes focused Debug. Commit tested
-   slice, collect clean Debug/Release wrappers/native evidence and publish.
+   Clean Debug/Release wrappers pass 23/23, dirty=false, at that code SHA. Both
+   900-frame engine/three-capture runs and compositor/window API regressions pass.
+   M04-C02-native-program-local.json and M04-native-program-ui.png retain actual
+   source/binary/environment/JUnit/GPU/browser evidence. Commit evidence and push;
+   CI 38847721626 for prior window/inventory/timeout code is terminal fully green.
 8. Next: implement actual GPU resource preparation/handoff for new graphs/images,
    sizes, bindings and mapping while the old native scene keeps running. Current
    compatible flags/metadata apply; other edits remain explicitly unapplied.
