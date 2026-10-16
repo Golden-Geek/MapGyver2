@@ -85,16 +85,14 @@ M04.C01 current working slice:
    No application exception/proprietary runtime. Source inventory is not M13 SBOM.
 5. C01 code/evidence pushed at 0aa62c5547de512565a83f0aaa20c2c1f0da26bd.
    CI 38843868195: Linux/macOS/plan passed; Windows jobs still running at last check.
-6. Current C02 working slice: output enable/blackout/freeze intent in the shared
-   registry/wire, exact stable endpoint/mode binding with retained unavailable
-   reasons, bounded runtime inventory and tests. Native compositor has independent
-   windows/swapchains and per-output held/presented textures with owner checks.
-   Initial Debug 3-window/13-frame/11-capture GPU run passed, fixed tolerance 2/255.
-   Expanded fixture at three sizes passes in Debug/Release, with 23/23 full
-   wrapper checks and composition/output GPU regressions. A known blue/half-alpha
-   display reference and foreign GPU-owner rejection also pass focused Debug.
-   Commit tested slice, retain clean-source Debug/Release evidence and push after
-   the current CI is terminal.
+6. C02 binding/window-API code `0c98675065db977864b25eb991bba9f644f1192c` is committed locally.
+   Clean windows-render Debug/Release wrappers each pass 23/23, dirty=false.
+   Both GPU runs pass composition regressions and three different-size native
+   windows, 13 frames/11 captures, fixed tolerance 2/255, normal exit. Foreign
+   owner mutation is rejected; known half-alpha display reference passes.
+   M04-C02-local.json retains exact source, commands/JUnit, drivers, binaries,
+   shader/compiler and GPU reports. Commit evidence and publish C02; inspect its
+   source CI. C01 hosted Windows jobs were still running at last check.
 7. Next C02 work: actual monitor enumeration and logical binding/window orchestration,
    render/control worker handoff, engine applied-frame/status and production native
    output/browser-loss. C03 quad mapping/masks/color rules and C04 remain open.
