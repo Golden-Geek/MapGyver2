@@ -82,3 +82,10 @@ Only shaderc runs during the build; these tools are not installed app runtimes.
 Authored application shaders use the pinned BSD bgfx shader include, with hashes
 and actual compiler commands retained per build. No application license exception
 or proprietary runtime was introduced. M13 still owns binary provenance/packaging.
+
+The native engine install now includes the configured shared SDL3 runtime with
+its inspected installed copyright notice and the application GPL license.
+The runtime is already covered by the pinned graphics inventory; system DLLs,
+MSVC redistributables, Node, shader tools and proprietary SDKs are not copied by
+this rule. M13 still requires the complete actual binary/bundle notice inventory,
+matching source/build materials and clean-machine qualification.

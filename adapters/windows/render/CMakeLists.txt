@@ -1,6 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 find_package(bgfx CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
+get_target_property(mapgyver_sdl_type SDL3::SDL3 TYPE)
+if(mapgyver_sdl_type STREQUAL "SHARED_LIBRARY")
+  install(FILES "$<TARGET_FILE:SDL3::SDL3>" DESTINATION bin)
+endif()
+install(FILES "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/share/sdl3/copyright"
+  DESTINATION share/mapgyver/licenses/sdl3)
 if(NOT VCPKG_HOST_TRIPLET)
   set(VCPKG_HOST_TRIPLET "${VCPKG_TARGET_TRIPLET}")
 endif()
