@@ -59,7 +59,9 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
 - Open product decisions: current NDI licensing/distribution path and exact reference hardware/workload budgets.
 - M05.C01 adds validated reusable-image imports and actual background Windows
   PNG/JPEG CPU decoding, hashes, relative paths and a bounded pixel cache. Initial
-  direct CLI-to-native output works. Organized library, browser import, thumbnails,
+  direct CLI-to-native output, relink/missing-file/undo and registry/OSC fit edits
+  pass clean Debug/Release 27/27 and local GPU checks at code 66a066c; see
+  [M05 evidence](progress/M05.md). Organized library, browser import, thumbnails,
   complete job/readiness reporting and video/audio remain open.
 - Later native targets: Windows ARM64, Linux x64/PipeWire, macOS ARM64/Syphon, Linux ARM64/Raspberry Pi.
 - Separate optional target: 32-bit Linux armhf.

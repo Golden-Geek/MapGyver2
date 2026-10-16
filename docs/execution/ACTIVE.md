@@ -307,6 +307,15 @@ Debug/Release now each pass 27/27 and all native checks, including image capture
 at maximum 1/255 within fixed 2/255. Next: commit this tested slice, rerun clean-
 source evidence, publish, then continue organized library/import jobs.
 
+Image implementation is `66a066c6da28d98f8fb62eb26212ada617228928`.
+Clean Debug/Release wrappers each pass 27/27, dirty=false, and all five native
+checks. Retained `docs/progress/M05-image-import-local.json` includes source,
+binary/shader/schema/types/JUnit/log/fixture/system-codec hashes and commands.
+Both image runs pass six phases/480 frames/applied revision 7 and direct Unicode
+120-frame import at max 1/255. Publish this tested implementation/evidence, then
+continue M05.C01 library organization/search/usages and import jobs/UI. All
+physical/deadline/device-loss/NDI and M01/M04/M05 qualification gates remain open.
+
 - python tools/ci/check.py --preset windows-local --configuration Debug --skip-bootstrap
 - python tools/ci/check.py --preset windows-local --configuration Release --skip-bootstrap
 - python tools/validate_plan.py
