@@ -62,7 +62,8 @@ Installed Release static assets serve with Node absent from the child PATH.
 CI 38838422770 is fully green, attempt 2, on Windows/Linux/macOS. Its first
 macOS job failed a pinned Boost download before compilation/tests; one terminal
 failed-job retry passed. The bounded macOS socket saturation fix is now verified.
-Encoded preview, native applied frames and durable saves remain open.
+Encoded preview and durable saves remain open. The native applied-frame bridge
+is recorded below.
 
 M04.C01 current working slice:
 
@@ -109,12 +110,22 @@ M04.C01 current working slice:
    Install fix 00422799c7105204e15c5ea216b28b74c74cbd00 copies reviewed SDL3 shared runtime/notice
    and GPL license; committed-source installed Release static/60-frame GPU smoke
    passes with Node absent from child PATH. M04-native-install-local.json retained.
-   Publish tested commits/evidence; CI 38847721626 for prior code is fully green.
+   Published at bdde9d5a4d6839a2d161b53adacfc222ee225f5f; CI 38857240163
+   is in progress (Linux/macOS/plan green; Windows still running at last check).
 8. Next: implement actual GPU resource preparation/handoff for new graphs/images,
    sizes, bindings and mapping while the old native scene keeps running. Current
    compatible flags/metadata apply; other edits remain explicitly unapplied.
-   Pinned bgfx source creates a SINGLETHREADED D3D11 device; keep native calls on
-   the owner until a measured owned-device/staged handoff path is qualified.
+   The pinned bgfx default creates a SINGLETHREADED D3D11 device. A follow-up
+   now owns/injects a hardware device without that flag. Startup image imports
+   borrow explicitly owned immutable textures retained through bgfx shutdown.
+   Actual Debug/Release GPU probes each prepare 128 generations on a background
+   thread while 120 native frames advance, retain eight/1 MiB, reject five invalid
+   requests and pass final active-output/bitwise-float readbacks. The actual driver
+   reports concurrent creation support. All immediate-context/bgfx calls still
+   belong to one render owner. Local dirty-source wrappers pass 23/23, and the
+   existing compositor/window/900-frame browser-loss checks pass in both configs.
+   Commit this tested preparation foundation, retain clean-source evidence, then
+   implement runtime generation adoption/retirement and graph/window handoff.
    C03 homography/masks/color rules, encoded preview and C04 full scenarios remain.
 
 The engine now has a static-pattern native program path and actual browser-loss

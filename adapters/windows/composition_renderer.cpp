@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "composition_renderer.hpp"
+#include "preparation_device.hpp"
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
 #include <SDL3/SDL.h>
@@ -77,6 +78,7 @@ struct CompositionRenderer::Impl {
     Callbacks callbacks;
     SDL_Window* window = nullptr;
     bool initialized = false;
+    std::shared_ptr<PreparationDevice> preparation_device;
     ComPtr<ID3D11Device> device;
     ComPtr<ID3D11DeviceContext> context;
     DXGI_ADAPTER_DESC1 identity{};
@@ -86,7 +88,8 @@ struct CompositionRenderer::Impl {
     bgfx::TextureHandle transparent = BGFX_INVALID_HANDLE;
     std::vector<Texture> targets, exports;
     std::vector<bgfx::TextureHandle> inputs;
-    std::map<std::pair<domain::Id,std::uint64_t>,bgfx::TextureHandle> images;
+    struct Input {bgfx::TextureHandle texture;PreparedImage image;};
+    std::map<std::pair<domain::Id,std::uint64_t>,Input> images;
     std::vector<std::uint32_t> exported_nodes;
     std::vector<bgfx::ViewId> views;
     std::vector<Output> outputs;
@@ -95,7 +98,8 @@ struct CompositionRenderer::Impl {
     std::uint64_t applied_revision = 0;
     std::chrono::steady_clock::time_point start;
     const std::thread::id owner = std::this_thread::get_id();
-    explicit Impl(std::shared_ptr<const render::Plan> value,std::vector<OutputWindow> windows) : plan(std::move(value)) {
+    explicit Impl(std::shared_ptr<const render::Plan> value,std::vector<OutputWindow> windows,std::shared_ptr<PreparationDevice> owned_device)
+        : plan(std::move(value)),preparation_device(std::move(owned_device)) {
         if (plan) applied_revision = plan->revision;
         check(windows.size() <= 64,"Native output window count exceeds configured capacity");
         std::set<domain::Id> ids;
@@ -123,7 +127,7 @@ struct CompositionRenderer::Impl {
             }
             for (const auto& t : targets) {if (bgfx::isValid(t.framebuffer)) bgfx::destroy(t.framebuffer);if (bgfx::isValid(t.texture)) bgfx::destroy(t.texture);}
             for (const auto& t : exports) {if (bgfx::isValid(t.framebuffer)) bgfx::destroy(t.framebuffer);if (bgfx::isValid(t.texture)) bgfx::destroy(t.texture);}
-            for (const auto& [id,t] : images) {static_cast<void>(id); bgfx::destroy(t);}
+            for (const auto& [id,t] : images) {static_cast<void>(id); bgfx::destroy(t.texture);}
             if (bgfx::isValid(composite)) bgfx::destroy(composite);
             if (bgfx::isValid(encode)) bgfx::destroy(encode);
             if (bgfx::isValid(sampler)) bgfx::destroy(sampler);
@@ -136,6 +140,9 @@ struct CompositionRenderer::Impl {
             for (auto& t : targets) t.native.Reset();
             for (auto& t : exports) t.native.Reset();
             context.Reset(); device.Reset(); bgfx::shutdown();
+            // Imported textures are borrowed by bgfx. Keep their native owners
+            // through shutdown, including queued use/destruction of their SRVs.
+            images.clear();
         }
         for (auto& output : outputs) if (output.window) SDL_DestroyWindow(output.window);
         if (window) SDL_DestroyWindow(window);
@@ -168,20 +175,15 @@ struct CompositionRenderer::Impl {
         check(window != nullptr,SDL_GetError());
         auto* native = SDL_GetPointerProperty(SDL_GetWindowProperties(window),SDL_PROP_WINDOW_WIN32_HWND_POINTER,nullptr);
         check(native != nullptr,"SDL native window is unavailable");
-        ComPtr<IDXGIFactory1> factory; require(CreateDXGIFactory1(IID_PPV_ARGS(&factory)),"Create native compositor factory failed");
-        DXGI_ADAPTER_DESC1 desired{}; bool found = false;
-        for (UINT index = 0;; ++index) {
-            ComPtr<IDXGIAdapter1> adapter; const auto status = factory->EnumAdapters1(index,&adapter);
-            if (status == DXGI_ERROR_NOT_FOUND) break; require(status,"Enumerate compositor adapters failed");
-            DXGI_ADAPTER_DESC1 description{}; require(adapter->GetDesc1(&description),"Read compositor adapter failed");
-            if (!(description.Flags&DXGI_ADAPTER_FLAG_SOFTWARE) && (!found || description.DedicatedVideoMemory > desired.DedicatedVideoMemory)) {desired = description;found = true;}
-        }
-        check(found,"Native compositor requires an actual hardware GPU");
+        if (!preparation_device) preparation_device = std::make_shared<PreparationDevice>();
+        const auto& desired = preparation_device->identity();
         bgfx::Init init; init.type = bgfx::RendererType::Direct3D11; init.vendorId = static_cast<std::uint16_t>(desired.VendorId);init.deviceId = static_cast<std::uint16_t>(desired.DeviceId);
-        init.platformData.nwh = native; init.resolution.width = 64;init.resolution.height = 64;init.resolution.reset = BGFX_RESET_NONE;init.callback = &callbacks;
+        init.platformData.nwh = native;init.platformData.context = preparation_device->native();
+        init.resolution.width = 64;init.resolution.height = 64;init.resolution.reset = BGFX_RESET_NONE;init.callback = &callbacks;
         check(bgfx::init(init),"Native compositor bgfx initialization failed"); initialized = true;
         check(bgfx::getRendererType() == bgfx::RendererType::Direct3D11,"Native compositor selected another renderer");
-        device = static_cast<ID3D11Device*>(bgfx::getInternalData()->context);check(device != nullptr,"Native compositor device missing");device->GetImmediateContext(&context);
+        device = static_cast<ID3D11Device*>(bgfx::getInternalData()->context);
+        check(device.Get() == preparation_device->native(),"Native compositor did not retain the owned preparation device");device->GetImmediateContext(&context);
         ComPtr<IDXGIDevice> dxgi;require(device.As(&dxgi),"Native compositor DXGI interface missing");ComPtr<IDXGIAdapter> base;require(dxgi->GetAdapter(&base),"Native compositor actual adapter missing");
         ComPtr<IDXGIAdapter1> actual;require(base.As(&actual),"Native compositor adapter identity missing");require(actual->GetDesc1(&identity),"Native compositor adapter description failed");
         check(identity.AdapterLuid.HighPart == desired.AdapterLuid.HighPart && identity.AdapterLuid.LowPart == desired.AdapterLuid.LowPart && !(identity.Flags&DXGI_ADAPTER_FLAG_SOFTWARE),"Native compositor hardware identity differs from requested GPU");
@@ -205,10 +207,16 @@ struct CompositionRenderer::Impl {
             check(payload <= 536870912 && size <= 536870912-payload,"Native output textures exceed total payload capacity");payload += size;
         }
         std::set<std::pair<domain::Id,std::uint64_t>> image_ids;
+        std::uint64_t largest_image = 0;
         for (const auto& node : plan->nodes) if (node.image) {
             check(node.image->pixels->size() <= UINT32_MAX/sizeof(render::Pixel),"Native image upload exceeds bgfx memory capacity");
             image_ids.emplace(node.image->resource,node.image->generation);
+            largest_image = std::max(largest_image,static_cast<std::uint64_t>(node.image->pixels->size())*sizeof(render::Pixel));
         }
+        // During startup import, one realized bgfx placeholder briefly coexists
+        // with its immutable native image. Exports/output textures follow imports.
+        check(plan->target_bytes+plan->image_upload_bytes+plan->fallback_bytes <= 536870912-largest_image,
+            "Native startup image import exceeds bounded transient payload capacity");
         check(image_ids.size()+plan->targets.size()+exported_nodes.size()+outputs.size()*2+(plan->fallback_bytes ? 1U : 0U) <= caps->limits.maxTextures,
               "Native compositor exceeds actual texture handle capacity");
         for (const auto& node : plan->nodes) check(node.width <= caps->limits.maxTextureSize && node.height <= caps->limits.maxTextureSize && node.width <= UINT16_MAX && node.height <= UINT16_MAX,"Native compositor exceeds actual texture dimension capacity");
@@ -230,11 +238,18 @@ struct CompositionRenderer::Impl {
                 auto found_image = images.find(key);
                 if (found_image == images.end()) {
                     static_assert(sizeof(render::Pixel) == 16);
+                    auto prepared = preparation_device->prepare(*node.image);
                     const auto texture = bgfx::createTexture2D(static_cast<std::uint16_t>(node.width),static_cast<std::uint16_t>(node.height),false,1,bgfx::TextureFormat::RGBA32F,sampling,
-                        bgfx::copy(node.image->pixels->data(),static_cast<std::uint32_t>(node.image->pixels->size()*sizeof(render::Pixel))));
-                    check(bgfx::isValid(texture),"Native compositor image upload failed"); found_image = images.emplace(key,texture).first;
+                        nullptr);
+                    check(bgfx::isValid(texture),"Native compositor image handle preparation failed");
+                    bgfx::frame(); // Startup preparation only; realize the import handle.
+                    const auto native_image = reinterpret_cast<std::uintptr_t>(prepared.texture.Get());
+                    if (bgfx::overrideInternal(texture,native_image) != native_image) {
+                        bgfx::destroy(texture);throw render::Error("Native compositor prepared image import failed");
+                    }
+                    found_image = images.emplace(key,Input{texture,std::move(prepared)}).first;
                 }
-                inputs.push_back(found_image->second);
+                inputs.push_back(found_image->second.texture);
             } else inputs.push_back(node.target ? targets.at(*node.target).texture : transparent);
         }
         exports.reserve(exported_nodes.size());for (const auto index : exported_nodes) exports.push_back(target(plan->nodes[index].width,plan->nodes[index].height,bgfx::TextureFormat::RGBA8));
@@ -306,7 +321,8 @@ struct CompositionRenderer::Impl {
         return {++sequence,applied_revision,{ticks,{1,1000000000}}};
     }
 };
-CompositionRenderer::CompositionRenderer(std::shared_ptr<const render::Plan> plan,std::vector<OutputWindow> outputs) : impl_(std::make_unique<Impl>(std::move(plan),std::move(outputs))) {impl_->initialize();}
+CompositionRenderer::CompositionRenderer(std::shared_ptr<const render::Plan> plan,std::vector<OutputWindow> outputs,std::shared_ptr<PreparationDevice> device)
+    : impl_(std::make_unique<Impl>(std::move(plan),std::move(outputs),std::move(device))) {impl_->initialize();}
 CompositionRenderer::~CompositionRenderer() = default;
 RenderedFrame CompositionRenderer::frame() {return impl_->frame();}
 std::array<std::uint32_t,4> CompositionRenderer::adapter_identity() const {return {impl_->identity.VendorId,impl_->identity.DeviceId,static_cast<std::uint32_t>(impl_->identity.AdapterLuid.HighPart),impl_->identity.AdapterLuid.LowPart};}

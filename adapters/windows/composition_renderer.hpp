@@ -4,6 +4,7 @@
 #include <memory>
 
 namespace mapgyver::windows {
+class PreparationDevice;
 struct RenderedFrame {std::uint64_t sequence, revision; domain::MediaTime show_time;};
 struct OutputControls {bool enabled = true, blackout = false, freeze = false;};
 struct OutputWindow {
@@ -18,7 +19,8 @@ struct OutputWindow {
 // Construct/prewarm outside deadline operation; frame() allocates no app resources.
 class CompositionRenderer {
 public:
-    explicit CompositionRenderer(std::shared_ptr<const render::Plan> plan,std::vector<OutputWindow> outputs = {});
+    explicit CompositionRenderer(std::shared_ptr<const render::Plan> plan,std::vector<OutputWindow> outputs = {},
+        std::shared_ptr<PreparationDevice> device = {});
     ~CompositionRenderer();
     CompositionRenderer(const CompositionRenderer&) = delete;
     CompositionRenderer& operator=(const CompositionRenderer&) = delete;

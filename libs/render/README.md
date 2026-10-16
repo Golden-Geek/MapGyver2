@@ -46,3 +46,24 @@ run explicitly, outside default CTest/hosted CI. `capture_for_test()` performs
 bounded synchronous staging/query/readback solely for offline validation. GPU
 copy submissions and CPU readback bytes are reported separately; no hardware
 copy counter is inferred from a successful SDK call.
+
+The Windows adapter now explicitly owns its D3D11 hardware device without the
+`SINGLETHREADED` flag and supplies that device to bgfx. `PreparationDevice`
+creates immutable RGBA32F image generations without using the immediate context.
+Startup imports borrow these textures; native owners retain them through bgfx
+shutdown. Every bgfx/immediate-context call still stays on the render owner.
+The actual driver concurrent-creation/command-list capabilities are reported,
+not inferred from device thread safety. Aggregate job/retained-byte bounds belong
+to the preparation caller; one image is limited to 256 MiB and valid SDR pixels.
+
+```powershell
+python tools/qualification/check_preparation.py --probe out/build/windows-render/adapters/windows/render/Debug/mapgyver-preparation-probe.exe --report out/reports/preparation-Debug.json
+```
+
+That manual real-GPU experiment creates 128 image generations on a background
+thread during 120 native frames, retains at most eight/1 MiB, verifies the active
+output at tolerance 2/255 and bitwise checks a prepared float texture offline.
+It also checks invalid payload rejection and owned-device lifetime after bgfx
+shutdown. Runtime adoption/retirement of new generations, graph/window handoff
+and deadline budgets remain open; background allocation alone does not qualify
+those contracts.
