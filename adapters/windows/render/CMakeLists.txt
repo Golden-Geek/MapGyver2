@@ -23,7 +23,7 @@ add_custom_command(OUTPUT "${shader_output}/render_shaders.hpp" "${shader_output
   DEPENDS "${PROJECT_SOURCE_DIR}/tools/build_render_shaders.py"
     "${shader_sources}/fullscreen.sc" "${shader_sources}/composite.sc" "${shader_sources}/encode.sc" "${shader_sources}/varying.def.sc"
   VERBATIM)
-add_library(mapgyver_windows_renderer STATIC ../composition_renderer.cpp ../preparation_device.cpp ../display_inventory.cpp ../native_program.cpp "${shader_output}/render_shaders.hpp")
+add_library(mapgyver_windows_renderer STATIC ../composition_renderer.cpp ../preparation_device.cpp ../prepared_graph.cpp ../display_inventory.cpp ../native_program.cpp "${shader_output}/render_shaders.hpp")
 target_include_directories(mapgyver_windows_renderer PRIVATE "${shader_output}")
 target_include_directories(mapgyver_windows_renderer PUBLIC "${PROJECT_SOURCE_DIR}")
 target_link_libraries(mapgyver_windows_renderer PUBLIC mapgyver_render mapgyver_runtime PRIVATE mapgyver_protocol bgfx::bgfx SDL3::SDL3 d3d11 dxgi user32)

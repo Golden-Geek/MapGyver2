@@ -171,11 +171,12 @@ try:
     changed = client.call('parameters', {'writes': [{'schemaVersion': 1, 'write': {'address': width,
         'value': {'type': 'unsignedInteger', 'value': '129'}}}]}, 3)
     assert changed['authoredRevision'] == '4'
-    pending = until(lambda: observed(client, 3, 'render_state_requires_preparation', after=int(second['renderer']['frame'])))
-    assert pending['authoredRevision'] == '4'
+    resized = until(lambda: observed(client, 4, '', after=int(second['renderer']['frame'])))
+    assert resized['authoredRevision'] == '4'
+    assert int(resized['renderer']['showTime']['ticks']) > int(second['renderer']['showTime']['ticks'])
     client.call('undo', revision=4)
     restored = until(lambda: observed(client, 5, ''))
-    phases.append({'name': 'resource_change_retains_last_applied_then_undo', 'pending': pending['renderer'], 'restored': restored['renderer']})
+    phases.append({'name': 'prepared_canvas_resize_and_undo', 'resized': resized['renderer'], 'restored': restored['renderer']})
     final_revision = 6
     if args.hot_images:
         locator = next(p['address'] for p in restored['data']['registry']['parameters'] if p['address'].endswith('/locator'))
@@ -195,7 +196,30 @@ try:
         recovered = until(lambda: observed(client, 10, ''))
         assert int(recovered['renderer']['showTime']['ticks']) > int(bars['renderer']['showTime']['ticks'])
         phases.append({'name': 'unavailable_source_retains_last_scene_then_prepared_undo', 'pending': refused['renderer'], 'recovered': recovered['renderer']})
-        final_revision = 12
+        project_state = recovered['data']['project']
+        definitions = project_state['definitions']
+        owner_id = project_state['placements'][project_state['rootPlacement']]['source']['instance']
+        root_asset = project_state['sources'][owner_id]['asset']
+        root_composition = definitions['compositions'][definitions['assets'][root_asset]['source']['value']['composition']]
+        input_id = root_composition['inputs'][0]['id']
+        external_id = next(id for id, asset in definitions['assets'].items() if asset['source']['type'] == 'ExternalSource')
+        canvas = dict(next(iter(root_composition['canvases'].values()))); canvas.update(width=64, height=32)
+        definitions['compositions']['native-nested-comp'] = {'id': 'native-nested-comp', 'name': 'Nested during playback',
+            'inputs': [], 'outputs': [{'id': 'picture', 'name': 'Picture', 'kind': 'video'}],
+            'layers': [{'id': 'content', 'name': 'Content', 'kind': 'video', 'sharedGroup': None,
+                'source': {'type': 'AssetPort', 'value': {'asset': external_id, 'port': 'picture'}}}],
+            'canvases': {'picture': canvas}}
+        definitions['assets']['native-nested-asset'] = {'id': 'native-nested-asset', 'name': 'Nested source',
+            'source': {'type': 'CompositionSource', 'value': {'composition': 'native-nested-comp'}}}
+        client.call('transaction', {'commands': [
+            {'schemaVersion': 1, 'command': {'type': 'ReplaceDefinitions', 'value': {'value': definitions}}},
+            {'schemaVersion': 1, 'command': {'type': 'BindInput', 'value': {'owner': owner_id, 'input': input_id,
+                'source': {'type': 'AssetPort', 'value': {'asset': 'native-nested-asset', 'port': 'picture'}}, 'keepAlive': False}}}]}, 10)
+        nested = until(lambda: observed(client, 11, ''))
+        client.call('undo', revision=11)
+        original_graph = until(lambda: observed(client, 12, ''))
+        phases.append({'name': 'structural_nested_composition_graph_handoff_and_undo', 'nested': nested['renderer'], 'restored': original_graph['renderer']})
+        final_revision = 14
     owner = client.snapshot()
     client.call('transferEdit', {'expectedOwnershipGeneration': owner['ownershipGeneration'], 'targetSession': ready['oscquery']['oscSessionId']})
     def osc_string(value):
@@ -206,7 +230,7 @@ try:
     bundle = b'#bundle\0'+struct.pack('>Q', 1)+b''.join(struct.pack('>I', len(message))+message for message in messages)
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as osc: osc.sendto(bundle, ('127.0.0.1', ready['oscquery']['oscPort']))
     if args.hot_images:
-        osc_source = until(lambda: observed(client, 11, ''))
+        osc_source = until(lambda: observed(client, 13, ''))
         phases.append({'name': 'granted_OSC_atomic_source_and_output_handoff', 'renderer': osc_source['renderer']})
         # Hold only after the new alpha pixels were submitted; the final golden
         # can then compare that held image against the final compiled source.
@@ -220,8 +244,9 @@ try:
     native = json.loads(native_report.read_text(encoding='utf-8'))
     assert native['framesSubmitted'] == 900 and native['appliedRevision'] == final_revision and len(native['captures']) == 3
     if args.hot_images:
-        assert native['sceneGeneration'] >= 7 and native['sourceGpuCopySubmissions'] >= 4
-        assert native['preparedGenerations'] >= native['sourceGpuCopySubmissions']
+        assert native['sceneGeneration'] >= 7 and native['sourceGpuCopySubmissions'] >= 3
+        assert native['graphGenerationsApplied'] >= 4 and native['internalConstantCpuUploadBytes'] == 16
+        assert native['preparedGenerations'] >= native['sourceGpuCopySubmissions']+native['graphGenerationsApplied']
         assert native['sourceCopiedPayloadBytes'] == native['sourceGpuCopySubmissions']*131072
         assert native['sourceCpuUploadBytes'] >= (native['sourceGpuCopySubmissions']+1)*131072
         assert native['captures'][0]['maxChannelError'] <= 2  # Final alpha content differs from the initial gradient.
@@ -229,6 +254,32 @@ try:
     captures = {c['output']: c for c in native['captures']}
     assert captures[outputs[0]]['heldSoftwareFrame'] < 900 and captures[outputs[1]]['heldSoftwareFrame'] == 900
     assert captures[outputs[2]]['heldSoftwareFrame'] < 900
+    if args.hot_images:
+        # A loaded unavailable object remains authored; preparing a supported
+        # locator later must clear the initial readonly unavailable status.
+        engine.stdout.close()
+        unavailable_project = args.report.with_suffix('.unavailable.project.json')
+        unavailable = json.loads(project.read_text(encoding='utf-8'))
+        for asset in unavailable['definitions']['assets'].values():
+            if asset['source']['type'] == 'ExternalSource': asset['source']['value']['locator'] = 'unavailable-configured-pattern'
+        unavailable_project.write_text(json.dumps(unavailable), encoding='utf-8')
+        recovery_report = args.report.with_suffix('.recovery.native.json')
+        recovery_command = [str(args.engine.resolve()), '--serve', '--pipe-name', 'recover-'+uuid.uuid4().hex,
+            '--render', '--render-hidden', '--initial-state', str(unavailable_project.resolve()), '--native-frames', '120',
+            '--native-report', str(recovery_report.resolve())]
+        engine = subprocess.Popen(recovery_command, stdout=subprocess.PIPE, stderr=stderr, text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW)
+        lines = queue.Queue();reader = threading.Thread(target=read_lines, args=(engine.stdout, lines), daemon=True);reader.start()
+        recovery_ready = json.loads(lines.get(timeout=10)); recovery_client = Client(recovery_ready)
+        initial_missing = until(lambda: observed(recovery_client, 0, 'source_frames_unavailable'))
+        recovery_locator = next(p['address'] for p in initial_missing['data']['registry']['parameters'] if p['address'].endswith('/locator'))
+        writes(recovery_client, 0, [(recovery_locator, 'gradient')])
+        initial_recovered = until(lambda: observed(recovery_client, 1, ''))
+        recovery_client.close();engine.wait(timeout=10);assert engine.returncode == 0;reader.join(timeout=2);assert not reader.is_alive()
+        recovery = json.loads(recovery_report.read_text(encoding='utf-8'))
+        assert recovery['framesSubmitted'] == 120 and recovery['graphGenerationsApplied'] == 1 and recovery['appliedRevision'] == 1
+        assert all(c['maxChannelError'] <= c['tolerance'] == 2 for c in recovery['captures'])
+        phases.append({'name': 'loaded_unavailable_source_prepared_recovery', 'initial': initial_missing['renderer'],
+            'recovered': initial_recovered['renderer'], 'command': recovery_command, 'native': recovery})
     phases.append({'name': 'normal_native_shutdown_and_offline_gpu_goldens', 'finalObserved': final['renderer'], 'native': native})
     report = {'evidenceClass': 'native-hardware-engine-control-Chromium-process-death', 'command': command,
         'sourceRevision': ready['sourceRevision'], 'sourceDirty': ready['sourceDirty'], 'phases': phases,
@@ -238,7 +289,7 @@ try:
         'hotImageChanges': args.hot_images,
         'scope': 'Stateless test patterns on three hidden native windows. Real browser reload/process death and no-client interval; fixed-tolerance offline final intermediate captures. Optional hot image changes qualify bounded fixed-layout preparation, supersession and recovery. Not physical scanout, animated media playback, graph/window resource handoff or encoded preview qualification.'}
     args.report.write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
-    print('Passed native engine/control/browser-loss phases, 900 frames and three offline GPU goldens')
+    print('Passed native engine graph/source/browser-loss phases and offline GPU goldens')
 finally:
     for client in clients: client.close()
     if browser_job: browser_job.close()

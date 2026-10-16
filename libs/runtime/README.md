@@ -29,10 +29,11 @@ The Windows engine can now run the prepared scene on a native render owner with
 `--render`; its monotonic show clock runs independently of UI/control requests.
 Output controls and metadata changes use bounded value batches consumed between
 frames. Actual frame observations update reliable control replies/snapshots;
-they never imply physical scanout or durable saving. Fixed-layout source image
-changes now prepare on a separate device worker, then apply before a native frame.
-Graph/window/mapping changes keep the last applied scene and report
-`render_state_requires_preparation`; those resource changes remain required work.
+they never imply physical scanout or durable saving. Source images and composition
+graphs now prepare on a separate device worker, then apply before a native frame.
+Canvas sizes and nested composition structure can change on existing windows.
+Window/stage/mapping changes still keep the last applied scene with
+`render_state_requires_preparation`; those changes remain required work.
 
 Windows native monitor
 inventory now queries active device paths, source desktop rectangles and rational
@@ -86,14 +87,16 @@ its owned Chromium process; then disconnects all control clients while native
 frames continue. An anonymous Windows job contains only that helper/browser tree
 for failure cleanup. Offline final textures check freeze/blackout/disable against
 fixed color tolerance. This remains stateless-pattern/hidden-window evidence;
-animated media, graph/window resources, physical scanout and encoded preview are
+animated media, window replacement/mapping, physical scanout and encoded preview are
 unqualified. Immediate-context/bgfx calls stay on their native owner. Shutdown
 stops/joins preparation before bgfx teardown, drains unretired copy ownership and
 waits for actual owner completion with a five-second fatal boundary.
 
 Append `--hot-images` to also exercise pipe source bursts, an atomic source/output
 batch, unavailable-source retention/undo, and an operator-granted OSC source/output
-bundle. The final alpha-pattern GPU capture proves changed RGB/alpha content is
+bundle. It also atomically adds/routes a nested composition and undoes that graph
+while playback continues; canvas resize/undo uses prepared graph banks. The final
+alpha-pattern GPU capture proves changed RGB/alpha content is
 composited over black, while the other outputs exercise blackout/disable. Browser
 reload/process death and the two-second no-client interval remain in that run.
 
@@ -108,3 +111,16 @@ The native owner tries each mailbox lock once and continues frames if it is busy
 Reports distinguish actual supplied CPU upload bytes (including discarded work),
 explicit GPU-copy submissions/payload bytes and offline validation transfers.
 These are application/API counts, not measured VRAM/bus/hardware counters.
+
+Whole-graph preparation creates native linear targets, source images and exports
+off the render owner. Concurrent active/candidate texture payload stays within
+512 MiB, including a temporary 1x1 placeholder; actual view/handle/draw limits are
+checked before allocation. The owner performs one placeholder or import/framebuffer
+step per submitted frame, then swaps preallocated CPU containers and window node
+routes at one frame boundary. Old GPU reads complete before bounded owner handle
+destruction; native textures/CPU plans return to preparation only after those
+commands execute. Superseded partially bound banks use the same cleanup path.
+Freeze holds the existing window texture across a graph swap. A persistent 16-byte
+transparent constant supports newly empty branches and is reported separately.
+SDK view creation is still bounded owner work; sustained deadline qualification
+remains open.

@@ -169,15 +169,27 @@ M04.C01 current working slice:
    and all target/old-scene, preparation, compositor, window and 900-frame engine
    regressions, dirty=false, in M04-native-target-binding-local.json. Its patch
    bytes match the committed Git blob; source/notice hashes are retained in
-   docs/licenses/bgfx-native-import.json. Publish evidence, then implement prepared
-   graph resource banks:
-   big native textures on preparation, bounded owner placeholder/import/FB steps,
-   atomic frame-boundary swap, actual old-GPU completion, owner view destruction,
-   and background native/CPU disposal. Window replacement and C03 remain required.
+   docs/licenses/bgfx-native-import.json. Published at 8546a55; CI 38874570680
+   is running. Prepared composition graph banks are now implemented: native
+   textures/exports/images allocate on preparation; each owner frame performs
+   one placeholder or import/framebuffer step. A frame-boundary container/node-
+   route swap preserves the clock, then actual old-GPU completion gates bounded
+   owner view/handle destruction and background native/CPU disposal. Concurrent
+   payload and actual SDK counts validate before allocation; partial cancellation
+   follows retirement. Persistent window freeze holds through the swap. Empty
+   branches use one reported 16-byte transparent constant. Tail view references
+   reset before old resources retire. Engine canvas resize and atomic nested-
+   composition graph edit/undo pass actual GPU/browser-loss checks. Release
+   graph-bank checks also pass. Loaded unavailable-source recovery clears actual
+   status in a separate 120-frame/three-capture run. Both configurations pass
+   thirteen main engine phases/900 frames and six adapter graph goldens. Finish
+   clean-source regressions/evidence and commit.
+   Window replacement and C03 mapping remain required, not covered by graph banks.
    C03 homography/masks/color rules, encoded preview and C04 full scenarios remain.
 
 The engine now has a stateless-pattern native program path, fixed-layout image
-handoff and actual browser-loss evidence. No animated-media/graph/window handoff,
+and graph handoff on existing windows, with actual browser-loss evidence.
+No animated-media/window replacement/mapping,
 encoded preview, physical scanout,
 sustained budgets or recovery claim. M01/M03 prerequisites still prevent milestone
 qualification. No M01/M02/M03/M04 tag.

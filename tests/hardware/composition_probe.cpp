@@ -93,7 +93,7 @@ nlohmann::json run() {
             {"framesSubmitted",last.sequence},{"authoredRevisionSubmitted",last.revision},{"lastMonotonicTicks",std::to_string(last.show_time.ticks)},
             {"clockTimeBase",{{"numerator","1"},{"denominator","1000000000"}}},{"drawSubmissions",renderer.submitted_draws()},
             {"planNodes",plan->nodes.size()},{"targetSlots",plan->targets.size()},{"plannedInternalTargetPayloadBytes",plan->target_bytes},{"plannedExportPayloadBytes",plan->export_bytes},
-            {"sourceCpuUploadBytes",plan->image_upload_bytes},{"internalConstantUploadBytes",plan->fallback_bytes},{"unavailableSources",plan->issues.size()},{"captures",captures}});
+            {"sourceCpuUploadBytes",plan->image_upload_bytes},{"internalConstantUploadBytes",renderer.constant_upload_bytes()},{"unavailableSources",plan->issues.size()},{"captures",captures}});
     }
     return {{"schemaVersion",1},{"evidenceClass","native-hardware-GPU-offscreen-bgfx-D3D11-composition-goldens"},{"cases",cases},
         {"scope","Actual GPU rasterization and offline CPU readback. Static prepared render plans, no browser/native output windows or physical scanout. Resource preparation and synchronous validation are outside frame(). Runtime graph handoff, encoded preview, deadline/performance and hardware recovery qualification remain open."}};

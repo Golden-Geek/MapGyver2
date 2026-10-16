@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "composition_renderer.hpp"
 #include "preparation_device.hpp"
+#include "prepared_graph.hpp"
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
 #include <SDL3/SDL.h>
@@ -43,11 +44,7 @@ struct Callbacks : bgfx::CallbackI {
     void captureEnd() override {}
     void captureFrame(const void*,std::uint32_t) override {}
 };
-struct Texture {
-    bgfx::TextureHandle texture = BGFX_INVALID_HANDLE;
-    bgfx::FrameBufferHandle framebuffer = BGFX_INVALID_HANDLE;
-    ComPtr<ID3D11Texture2D> native; // Extra capture reference; bgfx owns the resource.
-};
+using Texture = GraphTexture;
 std::vector<std::uint8_t> readback(ID3D11Device* device,ID3D11DeviceContext* context,ID3D11Texture2D* texture) {
     D3D11_TEXTURE2D_DESC description{};texture->GetDesc(&description);
     description.Usage = D3D11_USAGE_STAGING;description.BindFlags = 0;description.CPUAccessFlags = D3D11_CPU_ACCESS_READ;description.MiscFlags = 0;
@@ -66,7 +63,7 @@ std::vector<std::uint8_t> readback(ID3D11Device* device,ID3D11DeviceContext* con
     require(device->GetDeviceRemovedReason(),"Native compositor device removed");return pixels;
 }
 }
-struct CompositionRenderer::Impl {
+struct CompositionRenderer::Impl : GraphResources {
     struct Output {
         OutputWindow configured;
         SDL_Window* window = nullptr;
@@ -74,7 +71,6 @@ struct CompositionRenderer::Impl {
         Texture held, presented;
         std::uint64_t held_frame = 0;
     };
-    std::shared_ptr<const render::Plan> plan;
     Callbacks callbacks;
     SDL_Window* window = nullptr;
     bool initialized = false;
@@ -83,8 +79,8 @@ struct CompositionRenderer::Impl {
     ComPtr<ID3D11DeviceContext> context;
     ComPtr<ID3D11Query> image_completion;
     std::unique_ptr<PreparedGeneration> image_copy;
+    std::unique_ptr<PreparedGraph> old_graph;
     ImageHandoffState image_state{1,0,0};
-    std::uint64_t owned_payload_bytes = 0;
     Texture* qualification_target = nullptr;
     std::array<std::uint16_t,2> qualification_size{};
     DXGI_ADAPTER_DESC1 identity{};
@@ -92,20 +88,15 @@ struct CompositionRenderer::Impl {
     bgfx::UniformHandle sampler = BGFX_INVALID_HANDLE, encoding = BGFX_INVALID_HANDLE;
     bgfx::VertexBufferHandle vertices = BGFX_INVALID_HANDLE;
     bgfx::TextureHandle transparent = BGFX_INVALID_HANDLE;
-    std::vector<Texture> targets, exports;
-    std::vector<bgfx::TextureHandle> inputs;
-    struct Input {bgfx::TextureHandle texture;PreparedImage image;};
-    std::map<std::pair<domain::Id,std::uint64_t>,Input> images;
-    std::vector<std::uint32_t> exported_nodes;
-    std::vector<bgfx::ViewId> views;
+    using Input = GraphInput;
     std::vector<Output> outputs;
-    std::uint32_t render_views = 0;
     std::uint64_t sequence = 0, draws = 0;
     std::uint64_t applied_revision = 0;
     std::chrono::steady_clock::time_point start;
     const std::thread::id owner = std::this_thread::get_id();
     explicit Impl(std::shared_ptr<const render::Plan> value,std::vector<OutputWindow> windows,std::shared_ptr<PreparationDevice> owned_device)
-        : plan(std::move(value)),preparation_device(std::move(owned_device)) {
+        : preparation_device(std::move(owned_device)) {
+        plan = std::move(value);
         if (plan) applied_revision = plan->revision;
         check(windows.size() <= 64,"Native output window count exceeds configured capacity");
         std::set<domain::Id> ids;
@@ -123,6 +114,22 @@ struct CompositionRenderer::Impl {
     }
     ~Impl() {
         if (initialized) {
+            if (old_graph) {
+                context->Flush();const auto deadline = std::chrono::steady_clock::now()+std::chrono::seconds{2};
+                for (;;) {
+                    BOOL done = FALSE;const auto result = context->GetData(old_graph->completion.Get(),&done,sizeof(done),D3D11_ASYNC_GETDATA_DONOTFLUSH);
+                    if (result == S_OK && done) break;
+                    if (FAILED(result) || std::chrono::steady_clock::now() >= deadline) {
+                        std::fputs("Fatal: graph shutdown completion failed/timed out\n",stderr);std::_Exit(1);
+                    }
+                    std::this_thread::yield();
+                }
+                for (std::size_t i = 0; i < old_graph->binding_count; ++i) {
+                    auto& binding = old_graph->bindings[i];
+                    if (binding.framebuffer && bgfx::isValid(*binding.framebuffer)) bgfx::destroy(*binding.framebuffer);
+                    if (bgfx::isValid(*binding.handle)) bgfx::destroy(*binding.handle);
+                }
+            }
             if (image_copy) {
                 // Shutdown only, outside program deadlines. Keep candidate/native
                 // owners until the actual copy completes, or OS cleanup on fatal.
@@ -156,13 +163,15 @@ struct CompositionRenderer::Impl {
             // The size/format override creates a bgfx-owned resource. Drop our
             // extra capture references while its D3D11 DLL is still loaded;
             // bgfx retains ownership through queued destruction/shutdown.
-            for (auto& t : targets) t.native.Reset();
-            for (auto& t : exports) t.native.Reset();
+            for (auto& t : targets) if (!t.borrowed) t.native.Reset();
+            for (auto& t : exports) if (!t.borrowed) t.native.Reset();
             image_completion.Reset();context.Reset(); device.Reset(); bgfx::shutdown();
             // Imported textures are borrowed by bgfx. Keep their native owners
             // through shutdown, including queued use/destruction of their SRVs.
             images.clear();
+            targets.clear();exports.clear();
             image_copy.reset();
+            old_graph.reset();
         }
         for (auto& output : outputs) if (output.window) SDL_DestroyWindow(output.window);
         if (window) SDL_DestroyWindow(window);
@@ -221,7 +230,8 @@ struct CompositionRenderer::Impl {
         std::uint64_t draw_count = exported_nodes.size();for (const auto& node : plan->nodes) draw_count += node.layers.size();
         check(draw_count+outputs.size()*3 <= caps->limits.maxDrawCalls,"Native compositor exceeds actual draw capacity");
         check(plan->targets.size()+exported_nodes.size()+outputs.size()*3 <= caps->limits.maxFrameBuffers,"Native compositor exceeds actual framebuffer capacity");
-        std::uint64_t payload = plan->target_bytes+plan->image_upload_bytes+plan->export_bytes+plan->fallback_bytes;
+        std::uint64_t payload = plan->target_bytes+plan->image_upload_bytes+plan->export_bytes+16;
+        check(payload <= 536870912,"Native graph/global constant payload exceeds capacity");
         for (const auto& output : outputs) {
             const auto& config = output.configured;
             check(std::find(exported_nodes.begin(),exported_nodes.end(),config.node) != exported_nodes.end() && config.width && config.height && config.width <= caps->limits.maxTextureSize && config.height <= caps->limits.maxTextureSize && config.width <= UINT16_MAX && config.height <= UINT16_MAX,"Native output node/dimensions exceed actual capacity");
@@ -240,7 +250,7 @@ struct CompositionRenderer::Impl {
         // with its immutable native image. Exports/output textures follow imports.
         check(plan->target_bytes+plan->image_upload_bytes+plan->fallback_bytes <= 536870912-largest_image,
             "Native startup image import exceeds bounded transient payload capacity");
-        check(image_ids.size()+plan->targets.size()+exported_nodes.size()+outputs.size()*2+(plan->fallback_bytes ? 1U : 0U) <= caps->limits.maxTextures,
+        check(image_ids.size()+plan->targets.size()+exported_nodes.size()+outputs.size()*2+1 <= caps->limits.maxTextures,
               "Native compositor exceeds actual texture handle capacity");
         for (const auto& node : plan->nodes) check(node.width <= caps->limits.maxTextureSize && node.height <= caps->limits.maxTextureSize && node.width <= UINT16_MAX && node.height <= UINT16_MAX,"Native compositor exceeds actual texture dimension capacity");
         composite = program(shaders::composite,sizeof(shaders::composite)); encode = program(shaders::encode,sizeof(shaders::encode));
@@ -250,7 +260,7 @@ struct CompositionRenderer::Impl {
         bgfx::VertexLayout layout; layout.begin(bgfx::RendererType::Direct3D11).add(bgfx::Attrib::Position,3,bgfx::AttribType::Float).add(bgfx::Attrib::TexCoord0,2,bgfx::AttribType::Float).end();
         vertices = bgfx::createVertexBuffer(bgfx::copy(triangle.data(),sizeof(triangle)),layout);check(bgfx::isValid(vertices),"Native compositor geometry allocation failed");
         targets.reserve(plan->targets.size()); for (const auto& slot : plan->targets) targets.push_back(target(slot.width,slot.height,bgfx::TextureFormat::RGBA16F));
-        if (plan->fallback_bytes) {
+        {
             constexpr render::Pixel zero{};transparent = bgfx::createTexture2D(1,1,false,1,bgfx::TextureFormat::RGBA32F,sampling,bgfx::copy(&zero,sizeof(zero)));
             check(bgfx::isValid(transparent),"Native transparent fallback allocation failed");
         }
@@ -384,7 +394,7 @@ std::vector<std::uint8_t> CompositionRenderer::capture_output_for_test(const dom
 }
 bool CompositionRenderer::apply_images(std::unique_ptr<PreparedGeneration>& candidate) {
     impl_->check_owner();
-    if (impl_->image_copy) return false;
+    if (impl_->image_copy || impl_->old_graph) return false;
     check(candidate && candidate->generation > impl_->image_state.generation && candidate->plan &&
         candidate->plan->revision >= impl_->applied_revision && candidate->images.size() == impl_->images.size() && !candidate->retired_plan,
         "Native image candidate generation/revision/count is stale or invalid");
@@ -425,6 +435,81 @@ std::unique_ptr<PreparedGeneration> CompositionRenderer::retire_images() {
 }
 ImageHandoffState CompositionRenderer::image_handoff_state() const {impl_->check_owner();return impl_->image_state;}
 std::uint64_t CompositionRenderer::resource_payload_bytes() const {impl_->check_owner();return impl_->owned_payload_bytes;}
+std::uint64_t CompositionRenderer::constant_upload_bytes() const noexcept {return sizeof(render::Pixel);}
+GraphLimits CompositionRenderer::graph_limits() const {
+    impl_->check_owner();const auto& limits = bgfx::getCaps()->limits;
+    std::uint64_t output_payload = 0;
+    for (const auto& output : impl_->outputs) output_payload += static_cast<std::uint64_t>(output.configured.width)*output.configured.height*8;
+    return {limits.maxTextureSize,limits.maxViews,limits.maxTextures,limits.maxFrameBuffers,limits.maxDrawCalls,
+        impl_->targets.size()+impl_->exports.size()+impl_->images.size()+impl_->outputs.size()*2+1,
+        impl_->targets.size()+impl_->exports.size()+impl_->outputs.size()*3,impl_->outputs.size(),impl_->owned_payload_bytes,output_payload};
+}
+bool CompositionRenderer::stage_graph(std::unique_ptr<PreparedGraph>& candidate) {
+    impl_->check_owner();if (impl_->old_graph || impl_->image_copy) return false;
+    check(candidate && candidate->generation > impl_->image_state.generation && candidate->resources.plan &&
+        candidate->resources.plan->revision >= impl_->applied_revision && candidate->output_nodes.size() == impl_->outputs.size() &&
+        candidate->owner_device.Get() == impl_->device.Get() && !candidate->retiring,"Prepared graph generation/revision/routes/device invalid");
+    if (candidate->last_step_frame == impl_->sequence) return false;
+    candidate->last_step_frame = impl_->sequence;
+    if (candidate->cursor < candidate->binding_count) {
+        auto& binding = candidate->bindings[candidate->cursor];
+        if (!candidate->imported) {
+            *binding.handle = bgfx::createTexture2D(1,1,false,1,binding.format,sampling|(binding.framebuffer ? BGFX_TEXTURE_RT : 0));
+            check(bgfx::isValid(*binding.handle),"Prepared graph placeholder allocation failed");candidate->imported = true;
+        } else {
+            const auto pointer = reinterpret_cast<std::uintptr_t>(binding.native);
+            ComPtr<ID3D11Device> device;binding.native->GetDevice(&device);check(device.Get() == impl_->device.Get(),"Prepared graph belongs to another device");
+            check(bgfx::overrideInternal2D(*binding.handle,pointer,binding.width,binding.height) == pointer,"Prepared graph native texture import failed");
+            if (binding.framebuffer) {
+                *binding.framebuffer = bgfx::createFrameBuffer(1,binding.handle,false);
+                check(bgfx::isValid(*binding.framebuffer),"Prepared graph framebuffer allocation failed");
+            }
+            ++candidate->cursor;candidate->imported = false;
+        }
+        return false; // Realize commands while the old graph submits this frame.
+    }
+    auto& next = candidate->resources;
+    for (std::size_t i = 0; i < next.plan->nodes.size(); ++i) {
+        const auto& node = next.plan->nodes[i];
+        next.inputs[i] = node.image ? next.images.at({node.image->resource,node.image->generation}).texture :
+            node.target ? next.targets[*node.target].texture : impl_->transparent;
+    }
+    const auto revision = next.plan->revision;
+    const auto previous_views = impl_->render_views+impl_->exported_nodes.size()+impl_->outputs.size()*3;
+    impl_->context->End(candidate->completion.Get());impl_->context->Flush(); // Covers last reads of the old graph.
+    static_cast<GraphResources&>(*impl_).swap(next);
+    const auto current_views = impl_->render_views+impl_->exported_nodes.size()+impl_->outputs.size()*3;
+    for (auto view = current_views; view < previous_views; ++view) bgfx::resetView(static_cast<bgfx::ViewId>(view));
+    for (std::size_t i = 0; i < impl_->outputs.size(); ++i) impl_->outputs[i].configured.node = candidate->output_nodes[i];
+    impl_->applied_revision = revision;impl_->image_state.generation = candidate->generation;
+    candidate->list_bindings();candidate->retiring = true;candidate->last_step_frame = UINT64_MAX;
+    impl_->old_graph = std::move(candidate);return true;
+}
+void CompositionRenderer::cancel_graph(std::unique_ptr<PreparedGraph>& candidate) {
+    impl_->check_owner();check(candidate && candidate->owner_device.Get() == impl_->device.Get() && !impl_->old_graph && !impl_->image_copy,
+        "Graph cancellation ownership/device is busy/invalid");
+    impl_->context->End(candidate->completion.Get());impl_->context->Flush();
+    candidate->retiring = true;candidate->cursor = 0;candidate->last_step_frame = UINT64_MAX;impl_->old_graph = std::move(candidate);
+}
+std::unique_ptr<PreparedGraph> CompositionRenderer::retire_graph() {
+    impl_->check_owner();if (!impl_->old_graph) return {};
+    auto& old = *impl_->old_graph;
+    if (!old.completion_observed) {
+        BOOL done = FALSE;const auto result = impl_->context->GetData(old.completion.Get(),&done,sizeof(done),D3D11_ASYNC_GETDATA_DONOTFLUSH);
+        require(result,"Old graph completion failed");if (result != S_OK || !done) return {};
+        old.completion_observed = true;
+    }
+    if (old.last_step_frame == impl_->sequence) return {};
+    old.last_step_frame = impl_->sequence;
+    if (old.cursor < old.binding_count) {
+        auto& binding = old.bindings[old.cursor++];
+        if (binding.framebuffer && bgfx::isValid(*binding.framebuffer)) {bgfx::destroy(*binding.framebuffer);*binding.framebuffer = BGFX_INVALID_HANDLE;}
+        if (bgfx::isValid(*binding.handle)) {bgfx::destroy(*binding.handle);*binding.handle = BGFX_INVALID_HANDLE;}
+        old.destroyed_frame = impl_->sequence+1;return {};
+    }
+    if (old.destroyed_frame != UINT64_MAX && impl_->sequence < old.destroyed_frame) return {};
+    return std::move(impl_->old_graph);
+}
 std::vector<std::uint8_t> CompositionRenderer::qualify_borrowed_target(PreparedTarget target) {
     impl_->check_owner();
     check(target.texture && target.format == DXGI_FORMAT_R8G8B8A8_UNORM && target.width && target.height,
@@ -447,6 +532,7 @@ std::vector<std::uint8_t> CompositionRenderer::qualify_borrowed_target(PreparedT
         Impl& impl;Texture& target;
         ~Cleanup() {
             impl.qualification_target = nullptr;
+            bgfx::resetView(static_cast<bgfx::ViewId>(impl.render_views+impl.exported_nodes.size()+impl.outputs.size()*3));
             if (bgfx::isValid(target.framebuffer)) bgfx::destroy(target.framebuffer);
             if (bgfx::isValid(target.texture)) bgfx::destroy(target.texture);
             static_cast<void>(impl.frame()); // Drain queued owner-side destruction while native ownership survives.

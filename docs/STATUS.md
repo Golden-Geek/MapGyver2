@@ -31,7 +31,7 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
   and packaged Svelte shell now have native socket/Chromium tests. A native owner
   now supplies applied revision/frame/show time for prepared static scenes and
   live output controls and fixed-layout source image changes. Encoded preview,
-  graph/window resource handoff, complete editor
+  window resource handoff/mapping, complete editor
   workflows and durable saving remain open. CI 38838422770 is green on Windows/Linux/macOS, including the
   bounded socket saturation fix and actual browser tests. Its one failed macOS
   dependency download passed on a terminal failed-job retry.
@@ -41,11 +41,13 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
   shared-registry enable/blackout/freeze intent and an independent native-window
   API path. The engine now runs that path on an independent native owner with
   Svelte/pipe/OSC output controls and browser-loss tests. Fixed-layout source
-  changes now prepare/apply through bounded engine mailboxes. Graph/window edits
-  retain the last applied scene with an explicit pending reason. Hot resource
+  and composition-graph changes now prepare/apply through bounded engine mailboxes.
+  Canvas resize and nested composition edits keep old frames running during
+  preparation. Window/stage edits retain the last applied scene with an explicit
+  pending reason. Hot resource
   preparation now has an explicitly owned thread-safe D3D11 device and actual
   background-allocation GPU checks. A fixed-layout renderer image handoff has
-  native completion/retirement checks and engine integration; graph/window handoff,
+  native completion/retirement checks and engine integration; window handoff,
   nontrivial geometry/masks, preview and hardware
   qualification remain open.
 - Open product decisions: current NDI licensing/distribution path and exact reference hardware/workload budgets.

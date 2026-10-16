@@ -83,8 +83,9 @@ completion, retirement on a preparation thread, rejected old/foreign/oversized
 candidates and six fixed-tolerance freeze/unfreeze/blackout goldens. The engine
 now connects this API to authored source edits through bounded preparation/
 retirement mailboxes; see [native qualification](../runtime/README.md).
-Graph/window resource changes and sustained deadline/recovery qualification
-remain open.
+Composition-graph resource banks now support canvas-size and topology changes on
+existing windows. Window replacement, mapping and sustained deadline/recovery
+qualification remain open.
 
 The downstream bgfx overlay in `ports/bgfx` supports a prepared D3D11 target
 through a realized 1x1 placeholder and `overrideInternal2D` before attachment.
@@ -92,4 +93,7 @@ It updates front/backend dimensions; the original pointer-only call clipped
 resized framebuffer views. The manual preparation probe checks a 257x131 target
 and unchanged old-scene frames, plus invalid pointer/size/attachment refusal.
 See ADR-021 and `docs/licenses/bgfx-native-import.json`. Owner native-view creation
-still needs staged work; this experiment does not implement complete graph banks.
+is staged in the graph-bank path. Background native allocation, incremental owner
+binding, frame-boundary swap and completion-based retirement preserve old frames
+during preparation. The GPU probe resizes a canvas, adds a source/layer with a new
+root node index, verifies freeze/unfreeze and cancels a partially bound graph.

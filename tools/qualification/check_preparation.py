@@ -38,6 +38,10 @@ assert live['maxChannelError'] <= live['tolerance'] == 2
 borrowed = report['borrowedRenderTarget']
 assert (borrowed['width'], borrowed['height']) == (257, 131) and borrowed['oldFramesAdvanced'] >= 5
 assert borrowed['maxChannelError'] <= borrowed['tolerance'] == 2
+graph = report['graphHandoff']
+assert graph['graphsApplied'] == 2 and graph['oldSceneFramesDuringStaging'] > 0 and graph['retirementFrames'] > 0
+assert graph['partiallyBoundGraphCancelled'] and graph['backgroundRetirement'] and graph['captures'] == 6
+assert graph['maxChannelError'] <= graph['tolerance'] == 2
 report['command'] = command
 report['probeSha256'] = hashlib.sha256(args.probe.read_bytes()).hexdigest()
 args.report.write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')

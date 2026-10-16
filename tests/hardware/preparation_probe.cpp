@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "adapters/windows/composition_renderer.hpp"
 #include "adapters/windows/preparation_device.hpp"
+#include "adapters/windows/prepared_graph.hpp"
 #include <mapgyver/build_info.hpp>
 #include <nlohmann/json.hpp>
 #include <atomic>
@@ -154,6 +155,83 @@ nlohmann::json handoff(const std::shared_ptr<windows::PreparationDevice>& device
         {"validationCpuReadbackBytes",captures*128*64*4},{"validationGpuCopySubmissions",captures},
         {"scope","Actual fixed-layout live source image copies on the native render owner, background prepared immutable generations, monotonic frame/revision/clock, freeze/unfreeze/blackout, nonblocking completion and ownership retirement. Hidden-window intermediate/offscreen captures only; no engine control integration or graph/window resource handoff."}};
 }
+nlohmann::json graph_handoff(const std::shared_ptr<windows::PreparationDevice>& device,const std::shared_ptr<const render::Plan>& initial) {
+    const Id output{"graph-window"};
+    windows::CompositionRenderer renderer{initial,{{output,"Graph handoff",128,64,initial->preview,true,{}}},device};
+    std::uint64_t frames = 0, staging_frames = 0, retirement_frames = 0;std::int64_t ticks = -1;unsigned maximum = 0, captures = 0;
+    const auto frame = [&](std::uint64_t revision) {
+        const auto value = renderer.frame();check(value.sequence == ++frames && value.revision == revision && value.show_time.ticks >= ticks,
+            "Graph handoff regressed frame/revision/clock");ticks = value.show_time.ticks;
+    };
+    const auto compare = [&](std::vector<std::uint8_t> actual,const std::shared_ptr<const render::Plan>& expected,std::uint32_t width,std::uint32_t height,bool display) {
+        const auto reference = render::reference(*expected,expected->preview,display);const auto& node = expected->nodes[expected->preview];
+        check(actual.size() == static_cast<std::size_t>(width)*height*4,"Graph capture dimensions differ");
+        for (std::uint32_t y = 0; y < height; ++y) for (std::uint32_t x = 0; x < width; ++x) {
+            const auto sx = (static_cast<std::uint64_t>(x)*2+1)*node.width/(static_cast<std::uint64_t>(width)*2);
+            const auto sy = (static_cast<std::uint64_t>(y)*2+1)*node.height/(static_cast<std::uint64_t>(height)*2);
+            for (std::size_t c = 0; c < 4; ++c) maximum = std::max(maximum,static_cast<unsigned>(std::abs(
+                static_cast<int>(actual[(static_cast<std::size_t>(y)*width+x)*4+c])-reference[static_cast<std::size_t>((sy*node.width+sx)*4)+c])));
+        }
+        check(maximum <= 2,"Graph swap differs from fixed colour/composition reference");++captures;
+    };
+    const auto dispose = [&](std::unique_ptr<windows::PreparedGraph> retired) {
+        const auto owner = std::this_thread::get_id();
+        auto task = std::async(std::launch::async,[owner,value=std::move(retired)]() mutable {
+            check(std::this_thread::get_id() != owner,"Graph disposal remained on render owner");value.reset();
+        });check(task.wait_for(std::chrono::seconds{2}) == std::future_status::ready,"Background graph disposal timed out");task.get();
+    };
+    const auto retire = [&](std::uint64_t revision) {
+        const auto deadline = std::chrono::steady_clock::now()+std::chrono::seconds{2};
+        for (;;) {
+            auto old = renderer.retire_graph();if (old) {dispose(std::move(old));break;}
+            frame(revision);++retirement_frames;check(std::chrono::steady_clock::now() < deadline,"Graph completion/destruction did not drain");
+        }
+    };
+    frame(0);
+    auto resized = std::make_shared<render::Plan>(*initial);resized->revision = 2;
+    auto& root = resized->nodes[resized->preview];root.width = 257;root.height = 131;
+    check(root.target.has_value(),"Graph fixture root target absent");resized->targets[*root.target] = {257,131};
+    resized->target_bytes = 257*131*8;resized->export_bytes = 257*131*4;
+    auto added = std::make_shared<render::Plan>(*initial);added->revision = 3;
+    auto alpha = render::pattern(Id{"graph-alpha"},3,128,64,"alpha");
+    const auto insert = added->preview;
+    added->nodes.insert(added->nodes.begin()+insert,render::Node{{Id{"graph-source"},Id{"picture"}},128,64,{},alpha,{},std::nullopt});
+    ++added->preview;for (auto& surface : added->surfaces) if (surface.node >= insert) ++surface.node;
+    added->nodes[added->preview].layers.push_back(insert);added->image_upload_bytes += 128*64*16;
+    std::shared_ptr<const render::Plan> previous = initial;
+    for (const auto& next : {resized,added}) {
+        const bool freeze = next->revision == 3;
+        if (freeze) renderer.output_controls(output,{true,false,true});
+        const auto limits = renderer.graph_limits();
+        auto preparation = std::async(std::launch::async,[&,limits] {return windows::prepare_graph(*device,next,next->revision,limits,{next->preview});});
+        const auto deadline = std::chrono::steady_clock::now()+std::chrono::seconds{2};
+        while (preparation.wait_for(std::chrono::milliseconds{0}) != std::future_status::ready) {
+            frame(previous->revision);++staging_frames;check(std::chrono::steady_clock::now() < deadline,"Graph preparation timed out");
+        }
+        auto candidate = preparation.get();
+        while (!renderer.stage_graph(candidate)) {
+            frame(previous->revision);++staging_frames;check(std::chrono::steady_clock::now() < deadline,"Graph owner binding timed out");
+        }
+        check(!candidate,"Applied graph ownership was not transferred");frame(next->revision);
+        compare(renderer.capture_for_test(next->preview),next,next->nodes[next->preview].width,next->nodes[next->preview].height,false);
+        compare(renderer.capture_output_for_test(output),freeze ? previous : next,128,64,true);
+        if (freeze) {
+            renderer.output_controls(output,{true,false,false});frame(next->revision);
+            compare(renderer.capture_output_for_test(output),next,128,64,true);
+        }
+        retire(next->revision);previous = next;
+    }
+    const auto limits = renderer.graph_limits();
+    auto cancelled_plan = std::make_shared<render::Plan>(*resized);cancelled_plan->revision = 4;
+    auto preparation = std::async(std::launch::async,[&] {return windows::prepare_graph(*device,cancelled_plan,4,limits,{cancelled_plan->preview});});
+    check(preparation.wait_for(std::chrono::seconds{2}) == std::future_status::ready,"Cancelled graph preparation timed out");
+    auto cancelled = preparation.get();check(!renderer.stage_graph(cancelled),"Partial graph bound in one step unexpectedly");frame(3);
+    renderer.cancel_graph(cancelled);check(!cancelled,"Cancelled graph ownership was not retained for cleanup");retire(3);
+    compare(renderer.capture_output_for_test(output),added,128,64,true);
+    return {{"framesSubmitted",frames},{"oldSceneFramesDuringStaging",staging_frames},{"retirementFrames",retirement_frames},
+        {"graphsApplied",2},{"partiallyBoundGraphCancelled",true},{"backgroundRetirement",true},{"captures",captures},
+        {"maxChannelError",maximum},{"tolerance",2},{"scope","Real background graph textures, incremental owner bindings, canvas resize, added source/layer/changed node index, fixed native window rerouting, GPU completion and cancelled-bank cleanup. Not window replacement, mapping or deadline budgets."}};
+}
 nlohmann::json run() {
     auto device = std::make_shared<windows::PreparationDevice>();
     const auto gradient = render::pattern(Id{"prepared"},1,128,64,"gradient");
@@ -222,6 +300,7 @@ nlohmann::json run() {
     check(survivor.generation == generations+1,"Owned device did not survive compositor shutdown");
     const auto& gpu = device->identity();const auto threading = device->threading();
     auto live = handoff(device,plan,gradient,bars);
+    auto graphs = graph_handoff(device,plan);
     {
         // Leave a real copy unretired: shutdown must retain its candidate and
         // explicitly drain completion before native ownership is disposed.
@@ -273,6 +352,7 @@ nlohmann::json run() {
     }
     return {{"schemaVersion",1},{"evidenceClass","native-hardware-owned-D3D11-device-concurrent-image-preparation"},{"liveImageHandoff",std::move(live)},
         {"borrowedRenderTarget",std::move(borrowed)},
+        {"graphHandoff",std::move(graphs)},
         {"vendorId",gpu.VendorId},{"deviceId",gpu.DeviceId},{"luidHigh",static_cast<std::uint32_t>(gpu.AdapterLuid.HighPart)},{"luidLow",gpu.AdapterLuid.LowPart},
         {"deviceCreationFlags",device->native()->GetCreationFlags()},{"driverConcurrentCreates",threading.DriverConcurrentCreates != FALSE},
         {"driverCommandLists",threading.DriverCommandLists != FALSE},{"framesSubmitted",frames},{"backgroundImageGenerations",completed.load()},
