@@ -53,6 +53,7 @@ PreparedImage PreparationDevice::prepare(const render::Image& image,bool copy_ta
     const D3D11_SUBRESOURCE_DATA data{image.pixels->data(),static_cast<UINT>(image.width*sizeof(render::Pixel)),0};
     PreparedImage result{image.resource,image.generation,image.width,image.height,{}};
     require(device_->CreateTexture2D(&description,&data,&result.texture),"Prepare immutable native image failed");
+    uploads_.fetch_add(count*sizeof(render::Pixel));
     return result;
 }
 std::unique_ptr<PreparedGeneration> prepare_generation(const PreparationDevice& device,const render::Plan& layout,

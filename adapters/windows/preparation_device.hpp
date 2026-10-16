@@ -2,6 +2,7 @@
 #pragma once
 // Adapter-private SDK surface. Never include this from domain/control/protocol.
 #include <mapgyver/render/plan.hpp>
+#include <atomic>
 #include <d3d11.h>
 #include <dxgi1_2.h>
 #include <wrl/client.h>
@@ -22,6 +23,7 @@ public:
     [[nodiscard]] ID3D11Device* native() const noexcept {return device_.Get();}
     [[nodiscard]] const DXGI_ADAPTER_DESC1& identity() const noexcept {return identity_;}
     [[nodiscard]] D3D11_FEATURE_DATA_THREADING threading() const noexcept {return threading_;}
+    [[nodiscard]] std::uint64_t cpu_upload_bytes() const noexcept {return uploads_.load();}
     // Preparation only. Initial data is a CPU upload, not a reported GPU copy.
     // Startup copy targets use DEFAULT usage; producer generations are immutable.
     // Callers bound aggregate retained bytes and concurrent jobs separately.
@@ -30,6 +32,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Device> device_;
     DXGI_ADAPTER_DESC1 identity_{};
     D3D11_FEATURE_DATA_THREADING threading_{};
+    mutable std::atomic<std::uint64_t> uploads_{0}; // Supplied successful initial-data bytes, not bus traffic.
 };
 // A fixed-layout generation. Preparation owns all CPU/native allocations;
 // application transfers ownership to the render owner until its copy completes.

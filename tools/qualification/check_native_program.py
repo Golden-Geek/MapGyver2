@@ -23,6 +23,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--engine', type=Path, required=True)
 parser.add_argument('--probe', type=Path, required=True)
 parser.add_argument('--report', type=Path, required=True)
+parser.add_argument('--hot-images', action='store_true', help='Also qualify pixel-changing source edits, supersession and recovery')
 args = parser.parse_args()
 args.report.parent.mkdir(parents=True, exist_ok=True)
 project = args.report.with_suffix('.project.json')
@@ -107,7 +108,7 @@ def observed(client, revision=None, reason=None, after=None):
 
 def writes(client, revision, values):
     return client.call('parameters', {'writes': [{'schemaVersion': 1, 'write': {'address': address,
-        'value': {'type': 'boolean', 'value': value}}} for address, value in values]}, revision)
+        'value': {'type': 'boolean' if isinstance(value, bool) else 'text', 'value': value}}} for address, value in values]}, revision)
 
 try:
     ready_line = lines.get(timeout=10); assert ready_line is not None
@@ -175,21 +176,55 @@ try:
     client.call('undo', revision=4)
     restored = until(lambda: observed(client, 5, ''))
     phases.append({'name': 'resource_change_retains_last_applied_then_undo', 'pending': pending['renderer'], 'restored': restored['renderer']})
+    final_revision = 6
+    if args.hot_images:
+        locator = next(p['address'] for p in restored['data']['registry']['parameters'] if p['address'].endswith('/locator'))
+        # The latest desired scene wins; intermediate candidates may legitimately
+        # apply before the next command arrives or be cancelled before GPU use.
+        writes(client, 5, [(locator, 'checker')])
+        writes(client, 6, [(locator, 'alpha')])
+        writes(client, 7, [(locator, 'bars'), (paths[1]+'/blackout', True)])
+        bars = until(lambda: observed(client, 8, ''))
+        assert bars['authoredRevision'] == '8'
+        phases.append({'name': 'source_burst_and_atomic_source_output_controls', 'renderer': bars['renderer']})
+        writes(client, 8, [(locator, 'unavailable-configured-pattern')])
+        refused = until(lambda: observed(client, 8, 'render_state_requires_preparation', after=int(bars['renderer']['frame'])))
+        assert refused['authoredRevision'] == '9'
+        assert any(a['source']['value'].get('locator') == 'unavailable-configured-pattern' for a in refused['data']['project']['definitions']['assets'].values())
+        client.call('undo', revision=9)
+        recovered = until(lambda: observed(client, 10, ''))
+        assert int(recovered['renderer']['showTime']['ticks']) > int(bars['renderer']['showTime']['ticks'])
+        phases.append({'name': 'unavailable_source_retains_last_scene_then_prepared_undo', 'pending': refused['renderer'], 'recovered': recovered['renderer']})
+        final_revision = 12
     owner = client.snapshot()
     client.call('transferEdit', {'expectedOwnershipGeneration': owner['ownershipGeneration'], 'targetSession': ready['oscquery']['oscSessionId']})
     def osc_string(value):
         data = value.encode('utf-8')+b'\0'; return data+b'\0'*((-len(data)) % 4)
     messages = [osc_string(path)+osc_string(',T' if value else ',F') for path, value in
-        [(paths[0]+'/freeze', True), (paths[1]+'/blackout', True), (paths[2]+'/enabled', False)]]
+        [(paths[0]+'/freeze', not args.hot_images), (paths[1]+'/blackout', True), (paths[2]+'/enabled', False)]]
+    if args.hot_images: messages.append(osc_string(locator)+osc_string(',s')+osc_string('alpha'))
     bundle = b'#bundle\0'+struct.pack('>Q', 1)+b''.join(struct.pack('>I', len(message))+message for message in messages)
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as osc: osc.sendto(bundle, ('127.0.0.1', ready['oscquery']['oscPort']))
-    final = until(lambda: observed(client, 6))
+    if args.hot_images:
+        osc_source = until(lambda: observed(client, 11, ''))
+        phases.append({'name': 'granted_OSC_atomic_source_and_output_handoff', 'renderer': osc_source['renderer']})
+        # Hold only after the new alpha pixels were submitted; the final golden
+        # can then compare that held image against the final compiled source.
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as osc:
+            osc.sendto(osc_string(paths[0]+'/freeze')+osc_string(',T'), ('127.0.0.1', ready['oscquery']['oscPort']))
+    final = until(lambda: observed(client, final_revision))
     phases.append({'name': 'operator_granted_OSC_bundle_same_native_validator', 'renderer': final['renderer']})
     client.close()
     engine.wait(timeout=25); assert engine.returncode == 0
     reader.join(timeout=2); assert not reader.is_alive()
     native = json.loads(native_report.read_text(encoding='utf-8'))
-    assert native['framesSubmitted'] == 900 and native['appliedRevision'] == 6 and len(native['captures']) == 3
+    assert native['framesSubmitted'] == 900 and native['appliedRevision'] == final_revision and len(native['captures']) == 3
+    if args.hot_images:
+        assert native['sceneGeneration'] >= 7 and native['sourceGpuCopySubmissions'] >= 4
+        assert native['preparedGenerations'] >= native['sourceGpuCopySubmissions']
+        assert native['sourceCopiedPayloadBytes'] == native['sourceGpuCopySubmissions']*131072
+        assert native['sourceCpuUploadBytes'] >= (native['sourceGpuCopySubmissions']+1)*131072
+        assert native['captures'][0]['maxChannelError'] <= 2  # Final alpha content differs from the initial gradient.
     assert native['vendorId'] and all(c['maxChannelError'] <= c['tolerance'] == 2 for c in native['captures'])
     captures = {c['output']: c for c in native['captures']}
     assert captures[outputs[0]]['heldSoftwareFrame'] < 900 and captures[outputs[1]]['heldSoftwareFrame'] == 900
@@ -200,7 +235,8 @@ try:
         'engineSha256': hashlib.sha256(args.engine.read_bytes()).hexdigest(),
         'fixtureSha256': hashlib.sha256(project.read_bytes()).hexdigest(),
         'screenshotSha256': hashlib.sha256(screenshot.read_bytes()).hexdigest(),
-        'scope': 'Static test patterns on three hidden native windows. Real browser reload/process death and no-client interval; fixed-tolerance offline final intermediate captures. Not physical scanout, animated media playback, hot GPU-resource preparation or encoded preview qualification.'}
+        'hotImageChanges': args.hot_images,
+        'scope': 'Stateless test patterns on three hidden native windows. Real browser reload/process death and no-client interval; fixed-tolerance offline final intermediate captures. Optional hot image changes qualify bounded fixed-layout preparation, supersession and recovery. Not physical scanout, animated media playback, graph/window resource handoff or encoded preview qualification.'}
     args.report.write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
     print('Passed native engine/control/browser-loss phases, 900 frames and three offline GPU goldens')
 finally:

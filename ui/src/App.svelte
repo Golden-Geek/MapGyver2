@@ -148,7 +148,7 @@
         </div>
       </div>{:else}<p class="inspector-empty">Select a surface to inspect its authored state.</p>{/if}
       <div class="inspector-footer"><span class:online={view.snapshot?.renderer.available} class="status-dot"></span>
-        {view.snapshot?.renderer.reason === 'render_state_requires_preparation' ? 'Output update unavailable' : view.snapshot?.renderer.reason === 'source_frames_unavailable' ? 'Source frames unavailable' : view.snapshot?.renderer.reason === 'output_targets_unavailable' ? 'No output target is bound' : view.snapshot?.renderer.available ? 'Native compositor active' : view.snapshot?.renderer.reason === 'native_render_owner_failed' ? 'Native compositor failed' : 'Native output not connected'}
+        {view.snapshot?.renderer.reason === 'render_state_preparing' ? 'Preparing content' : view.snapshot?.renderer.reason === 'render_state_requires_preparation' ? 'Output update unavailable' : view.snapshot?.renderer.reason === 'source_frames_unavailable' ? 'Source frames unavailable' : view.snapshot?.renderer.reason === 'output_targets_unavailable' ? 'No output target is bound' : view.snapshot?.renderer.available ? 'Native compositor active' : view.snapshot?.renderer.reason === 'native_render_owner_failed' ? 'Native compositor failed' : 'Native output not connected'}
       </div>
     </aside>
   </main>

@@ -29,9 +29,10 @@ The Windows engine can now run the prepared scene on a native render owner with
 `--render`; its monotonic show clock runs independently of UI/control requests.
 Output controls and metadata changes use bounded value batches consumed between
 frames. Actual frame observations update reliable control replies/snapshots;
-they never imply physical scanout or durable saving. Resource-changing edits
-currently keep the last applied scene and report `render_state_requires_preparation`.
-Hot resource preparation/handoff remains required work, not a completed feature.
+they never imply physical scanout or durable saving. Fixed-layout source image
+changes now prepare on a separate device worker, then apply before a native frame.
+Graph/window/mapping changes keep the last applied scene and report
+`render_state_requires_preparation`; those resource changes remain required work.
 
 Windows native monitor
 inventory now queries active device paths, source desktop rectangles and rational
@@ -84,7 +85,26 @@ operator-granted OSC bundle through the same validator; reloads and terminates
 its owned Chromium process; then disconnects all control clients while native
 frames continue. An anonymous Windows job contains only that helper/browser tree
 for failure cleanup. Offline final textures check freeze/blackout/disable against
-fixed color tolerance. This remains static-pattern/hidden-window evidence;
-animated media, new GPU resources during playback, physical scanout and encoded
-preview are unqualified. Native resources stay on their owner thread, and shutdown
-waits for actual thread/resource completion with a five-second fatal boundary.
+fixed color tolerance. This remains stateless-pattern/hidden-window evidence;
+animated media, graph/window resources, physical scanout and encoded preview are
+unqualified. Immediate-context/bgfx calls stay on their native owner. Shutdown
+stops/joins preparation before bgfx teardown, drains unretired copy ownership and
+waits for actual owner completion with a five-second fatal boundary.
+
+Append `--hot-images` to also exercise pipe source bursts, an atomic source/output
+batch, unavailable-source retention/undo, and an operator-granted OSC source/output
+bundle. The final alpha-pattern GPU capture proves changed RGB/alpha content is
+composited over black, while the other outputs exercise blackout/disable. Browser
+reload/process death and the two-second no-client interval remain in that run.
+
+Preparation has one working/ready/copying/retired candidate slot and one latest
+pending immutable project request. Newer scene generations supersede older jobs;
+completed/discarded native sources and CPU plans are disposed off the render owner.
+The next job starts after retirement disposal. A candidate is capped at 256 images/
+128 MiB and active plus candidate texture payload at 512 MiB. CPU source generation
+is also bounded before native allocation. Output flags/metadata carry the desired
+scene generation and cannot claim a new applied revision on an older scene.
+The native owner tries each mailbox lock once and continues frames if it is busy.
+Reports distinguish actual supplied CPU upload bytes (including discarded work),
+explicit GPU-copy submissions/payload bytes and offline validation transfers.
+These are application/API counts, not measured VRAM/bus/hardware counters.

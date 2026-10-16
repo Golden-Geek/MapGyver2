@@ -33,6 +33,7 @@ assert live['copiedPayloadBytes'] == live['backgroundAcceptedCandidateCpuUploadB
 assert live['candidateOwnershipBackpressureVerified'] and live['actualCompletionBeforeRetirement'] and live['retirementOnPreparationThread']
 assert live['staleForeignLayoutCapacityRequestsRejected'] == 5 and live['captures'] == 6
 assert live['foreignOwnerRequestsRejected'] == 2 and live['validationRejectedCandidateCpuUploadBytes'] == 393216
+assert live['shutdownWithPendingCopy'] and live['shutdownProbeGpuCopySubmissions'] == 1 and live['shutdownProbeCpuUploadBytes'] == 262144
 assert live['maxChannelError'] <= live['tolerance'] == 2
 report['command'] = command
 report['probeSha256'] = hashlib.sha256(args.probe.read_bytes()).hexdigest()

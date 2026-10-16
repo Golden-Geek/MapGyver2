@@ -81,5 +81,7 @@ the same immediate-context order. This does not imply synchronized scanout.
 The manual probe additionally exercises two live image generations, actual copy
 completion, retirement on a preparation thread, rejected old/foreign/oversized
 candidates and six fixed-tolerance freeze/unfreeze/blackout goldens. The engine
-has not connected this API to authored edits yet. Graph/window resource changes,
-engine integration and sustained deadline/recovery qualification remain open.
+now connects this API to authored source edits through bounded preparation/
+retirement mailboxes; see [native qualification](../runtime/README.md).
+Graph/window resource changes and sustained deadline/recovery qualification
+remain open.

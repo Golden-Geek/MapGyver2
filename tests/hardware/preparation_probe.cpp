@@ -222,6 +222,22 @@ nlohmann::json run() {
     check(survivor.generation == generations+1,"Owned device did not survive compositor shutdown");
     const auto& gpu = device->identity();const auto threading = device->threading();
     auto live = handoff(device,plan,gradient,bars);
+    {
+        // Leave a real copy unretired: shutdown must retain its candidate and
+        // explicitly drain completion before native ownership is disposed.
+        windows::CompositionRenderer renderer{plan,{},device};
+        const auto payload = renderer.resource_payload_bytes();
+        auto prepare = std::async(std::launch::async,[&] {
+            auto source = std::make_shared<render::Image>(*bars);source->generation = 2;
+            auto value = std::make_shared<render::Plan>(*plan);value->revision = 2;
+            for (auto& node : value->nodes) if (node.image) node.image = source;
+            return windows::prepare_generation(*device,*plan,std::move(value),2,payload);
+        });
+        check(prepare.wait_for(std::chrono::seconds{2}) == std::future_status::ready,"Pending-shutdown preparation timed out");
+        auto candidate = prepare.get();check(renderer.apply_images(candidate) && !candidate,"Pending-shutdown copy was not submitted");
+    }
+    live["shutdownWithPendingCopy"] = true;live["shutdownProbeGpuCopySubmissions"] = 1;
+    live["shutdownProbeCpuUploadBytes"] = 2*128*64*sizeof(render::Pixel);
     return {{"schemaVersion",1},{"evidenceClass","native-hardware-owned-D3D11-device-concurrent-image-preparation"},{"liveImageHandoff",std::move(live)},
         {"vendorId",gpu.VendorId},{"deviceId",gpu.DeviceId},{"luidHigh",static_cast<std::uint32_t>(gpu.AdapterLuid.HighPart)},{"luidLow",gpu.AdapterLuid.LowPart},
         {"deviceCreationFlags",device->native()->GetCreationFlags()},{"driverConcurrentCreates",threading.DriverConcurrentCreates != FALSE},
@@ -229,6 +245,7 @@ nlohmann::json run() {
         {"preparedAtFirstFrame",first_count},{"preparedAtLastFrame",last_count},{"retainedGenerationCapacity",retained_capacity},
         {"retainedImagePayloadCapacityBytes",retained_capacity*128*64*sizeof(render::Pixel)},
         {"backgroundCpuUploadBytes",generations*128*64*sizeof(render::Pixel)},{"backgroundGpuCopySubmissions",0},
+        {"deviceSuppliedCpuUploadBytesTotal",device->cpu_upload_bytes()},
         {"invalidRequestsRejected",rejections},{"postCompositorShutdownPreparation",true},
         {"activeOutputMaxChannelError",maximum},{"activeOutputTolerance",2},{"backgroundImageBitwiseFloatReadback",true},
         {"validationCpuReadbackBytes",readback_bytes+128*64*4},{"validationGpuCopySubmissions",2},

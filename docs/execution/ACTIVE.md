@@ -138,18 +138,25 @@ M04.C01 current working slice:
    23/23 and existing GPU/window/900-frame engine regressions pass. Code
    073175d67978ed95e1cb42449a8489d62769e6d3 has clean Debug/Release evidence,
    dirty=false, in M04-image-handoff-local.json. Preparation foundation code
-   e83b894 and evidence a6a0fd6 precede it. Publish the tested commits/evidence.
-   Next connect bounded preparation/candidate/retirement mailboxes to engine
-   commands while continuing old output; stop/join preparation before bgfx
-   shutdown. Tag control batches with the desired scene generation: controls for
-   an unapplied scene must not advance applied revision on the old image. Bound
-   working/pending/ready/retired ownership and aggregate candidate bytes; cancel
-   superseded work and dispose it off the render owner. Shape-changing graph/
-   window edits and C03 mapping still remain.
+   e83b894 and evidence a6a0fd6 precede it. Published at
+   2b90278e29830e4b3e6dc32454746468bf24661e; CI 38862241977 is running.
+   Engine mailboxes now connect fixed-layout source changes. One candidate slot
+   covers working/ready/copying/retired ownership plus one latest pending project;
+   it disposes retirement before preparing more. Source/output batches carry the
+   desired scene generation and only advance applied revision for that scene.
+   Superseded work is discarded off the render owner; preparation joins before
+   bgfx teardown. Successful CPU uploads include discarded work in reports.
+   Local Debug/Release wrappers pass 23/23. Initial hot engine checks pass 900
+   frames, pipe source bursts, unavailable source/undo, granted OSC source/output
+   changes and final alpha-content GPU goldens, while retaining UI-loss phases.
+   Finish final validation, commit and retain clean-source evidence. Then implement
+   shape-changing graph/window resource preparation and C03 mapping. Source-only
+   handoff does not fulfill those remaining contracts.
    C03 homography/masks/color rules, encoded preview and C04 full scenarios remain.
 
-The engine now has a static-pattern native program path and actual browser-loss
-evidence. No animated-media/resource-handoff, encoded preview, physical scanout,
+The engine now has a stateless-pattern native program path, fixed-layout image
+handoff and actual browser-loss evidence. No animated-media/graph/window handoff,
+encoded preview, physical scanout,
 sustained budgets or recovery claim. M01/M03 prerequisites still prevent milestone
 qualification. No M01/M02/M03/M04 tag.
 
