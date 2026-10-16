@@ -7,6 +7,8 @@ if(mapgyver_sdl_type STREQUAL "SHARED_LIBRARY")
 endif()
 install(FILES "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/share/sdl3/copyright"
   DESTINATION share/mapgyver/licenses/sdl3)
+install(FILES "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/share/bgfx/copyright"
+  DESTINATION share/mapgyver/licenses/bgfx)
 if(NOT VCPKG_HOST_TRIPLET)
   set(VCPKG_HOST_TRIPLET "${VCPKG_TARGET_TRIPLET}")
 endif()

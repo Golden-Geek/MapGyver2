@@ -56,6 +56,19 @@ PreparedImage PreparationDevice::prepare(const render::Image& image,bool copy_ta
     uploads_.fetch_add(count*sizeof(render::Pixel));
     return result;
 }
+PreparedTarget PreparationDevice::target(std::uint32_t width,std::uint32_t height,DXGI_FORMAT format) const {
+    check(width && height && width <= D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION && height <= D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION,
+        "Prepared target dimensions invalid");
+    check(format == DXGI_FORMAT_R16G16B16A16_FLOAT || format == DXGI_FORMAT_R8G8B8A8_UNORM,"Prepared target format unsupported");
+    const std::uint64_t stride = format == DXGI_FORMAT_R16G16B16A16_FLOAT ? 8 : 4;
+    check(static_cast<std::uint64_t>(width)*height <= 268435456/stride,"Prepared target exceeds 256 MiB payload capacity");
+    D3D11_TEXTURE2D_DESC description{};description.Width = width;description.Height = height;
+    description.MipLevels = 1;description.ArraySize = 1;description.Format = format;description.SampleDesc.Count = 1;
+    description.Usage = D3D11_USAGE_DEFAULT;description.BindFlags = D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
+    PreparedTarget result{width,height,format,{}};
+    require(device_->CreateTexture2D(&description,nullptr,&result.texture),"Prepare native render target failed");
+    return result;
+}
 std::unique_ptr<PreparedGeneration> prepare_generation(const PreparationDevice& device,const render::Plan& layout,
     std::shared_ptr<const render::Plan> next,std::uint64_t generation,std::uint64_t active_payload_bytes) {
     check(next && generation && next->nodes.size() == layout.nodes.size() && next->targets.size() == layout.targets.size() &&

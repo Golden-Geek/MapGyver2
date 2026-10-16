@@ -158,6 +158,16 @@ M04.C01 current working slice:
    Source-only handoff does not fulfill those remaining contracts. Keep the
    measured resource ownership/API constraints in view; do not assume bgfx's
    borrowed sampled-texture override also imports framebuffer render-target views.
+   A measured follow-up now confirms backend native RTV creation, but the
+   unmodified front-end clipped a borrowed 257x131 target to one pixel because
+   placeholder dimensions stayed 1x1 (max error 255, fixed tolerance 2). ADR-021
+   adds a pinned bgfx #2 overlay with GPL contribution/upstream notices and a
+   guarded dimension-metadata API. Debug/Release target goldens now pass at
+   tolerance 2 while old frames continue; wrappers pass 23/23. Finish regressions,
+   commit/provenance/clean evidence. Then implement prepared graph resource banks:
+   big native textures on preparation, bounded owner placeholder/import/FB steps,
+   atomic frame-boundary swap, actual old-GPU completion, owner view destruction,
+   and background native/CPU disposal. Window replacement and C03 remain required.
    C03 homography/masks/color rules, encoded preview and C04 full scenarios remain.
 
 The engine now has a stateless-pattern native program path, fixed-layout image

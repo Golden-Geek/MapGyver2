@@ -85,3 +85,11 @@ now connects this API to authored source edits through bounded preparation/
 retirement mailboxes; see [native qualification](../runtime/README.md).
 Graph/window resource changes and sustained deadline/recovery qualification
 remain open.
+
+The downstream bgfx overlay in `ports/bgfx` supports a prepared D3D11 target
+through a realized 1x1 placeholder and `overrideInternal2D` before attachment.
+It updates front/backend dimensions; the original pointer-only call clipped
+resized framebuffer views. The manual preparation probe checks a 257x131 target
+and unchanged old-scene frames, plus invalid pointer/size/attachment refusal.
+See ADR-021 and `docs/licenses/bgfx-native-import.json`. Owner native-view creation
+still needs staged work; this experiment does not implement complete graph banks.

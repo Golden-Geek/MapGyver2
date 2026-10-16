@@ -1,0 +1,13 @@
+MapGyver bgfx native 2D import contribution
+SPDX-License-Identifier: GPL-3.0-or-later
+
+The upstream bgfx.cmake source archive and original vcpkg dependency patch retain
+their upstream BSD-2-Clause/CC0 and port licensing. This overlay adds authored
+GPL-3.0-or-later code in native-2d-import.patch. The modified library is used in
+the GPL-3.0-or-later MapGyver application. Preserve both the upstream notices and
+this notice/license with distributions. No license exception is introduced.
+
+The extension updates front-end texture dimensions before framebuffer attachment
+when borrowing a prepared D3D11 2D texture in a single-owner build. It allocates
+no native texture and retains caller ownership. Unsupported mode/format/shape
+returns zero; this is not a capability claim for other renderer backends.

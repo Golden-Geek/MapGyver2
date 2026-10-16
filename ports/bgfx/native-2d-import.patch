@@ -1,0 +1,83 @@
+--- a/bgfx/include/bgfx/platform.h
++++ b/bgfx/include/bgfx/platform.h
+@@ -99,6 +99,13 @@
+ 	///
+ 	uintptr_t overrideInternal(TextureHandle _handle, uintptr_t _ptr);
+ 
++	// MapGyver extension, GPL-3.0-or-later: borrowed single-mip 2D import
++	// with coherent front-end dimensions. D3D11, single-owner builds only.
++	// Call before framebuffer attachment. Ownership stays with the caller.
++	// Unsupported mode, invalid dimensions, unrealized/attached handle => 0.
++	uintptr_t overrideInternal2D(TextureHandle _handle, uintptr_t _ptr, uint16_t _width, uint16_t _height);
++
++
+ 	/// Override internal texture by creating new texture. Previously created
+ 	/// internal texture will released.
+ 	///
+--- a/bgfx/src/bgfx.cpp
++++ b/bgfx/src/bgfx.cpp
+@@ -389,6 +389,46 @@
+ 		rci->overrideInternal(_handle, _ptr);
+ 
+ 		return rci->getInternal(_handle);
++	}
++
++	// MapGyver contribution: SPDX-License-Identifier: GPL-3.0-or-later
++	uintptr_t overrideInternal2D(TextureHandle _handle, uintptr_t _ptr, uint16_t _width, uint16_t _height)
++	{
++		BGFX_CHECK_RENDER_THREAD();
++		if (BX_ENABLED(BGFX_CONFIG_MULTITHREADED)
++		|| RendererType::Direct3D11 != getRendererType()
++		|| 0 == _ptr || 0 == _width || 0 == _height
++		|| _width > g_caps.limits.maxTextureSize || _height > g_caps.limits.maxTextureSize)
++		{
++			return 0;
++		}
++		BGFX_CHECK_HANDLE("overrideInternal2D", s_ctx->m_textureHandle, _handle);
++		TextureRef& ref = s_ctx->m_textureRef[_handle.idx];
++		if (ref.isCubeMap() || ref.is3D() || 1 != ref.m_numMips
++		|| 1 != ref.m_numLayers || 1 != ref.m_numSamples || 1 != ref.m_refCount
++		|| BackbufferRatio::Count != ref.m_bbRatio)
++		{
++			return 0;
++		}
++		uint32_t stride = 0;
++		switch (TextureFormat::Enum(ref.m_format))
++		{
++		case TextureFormat::RGBA8:  stride = 4;  break;
++		case TextureFormat::RGBA16F: stride = 8;  break;
++		case TextureFormat::RGBA32F: stride = 16; break;
++		default: return 0;
++		}
++		const uint64_t storage = uint64_t(_width) * _height * stride;
++		if (storage > UINT32_MAX) return 0;
++		const uintptr_t result = overrideInternal(_handle, _ptr);
++		if (0 == result) return 0;
++		const int64_t delta = int64_t(storage) - ref.m_storageSize;
++		if (ref.isRt()) s_ctx->m_rtMemoryUsed += delta;
++		else s_ctx->m_textureMemoryUsed += delta;
++		ref.m_width = _width;
++		ref.m_height = _height;
++		ref.m_storageSize = uint32_t(storage);
++		return result;
+ 	}
+ 
+ 	uintptr_t overrideInternal(TextureHandle _handle, uint16_t _width, uint16_t _height, uint8_t _numMips, TextureFormat::Enum _format, uint64_t _flags)
+--- a/bgfx/src/renderer_d3d11.cpp
++++ b/bgfx/src/renderer_d3d11.cpp
+@@ -4754,6 +4754,15 @@
+ 		m_flags |= BGFX_SAMPLER_INTERNAL_SHARED;
+ 		m_ptr = (ID3D11Resource*)_ptr;
+ 
++		// MapGyver contribution: SPDX-License-Identifier: GPL-3.0-or-later
++		if (Texture2D == m_type)
++		{
++			D3D11_TEXTURE2D_DESC description;
++			m_texture2d->GetDesc(&description);
++			m_width = uint16_t(description.Width);
++			m_height = uint16_t(description.Height);
++		}
++
+ 		if (readable)
+ 		{
+ 			s_renderD3D11->m_device->CreateShaderResourceView(m_ptr, &srvDesc, &m_srv);

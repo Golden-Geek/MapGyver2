@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "scope": "Source/notice provenance for the MapGyver bgfx native 2D import overlay; not a release binary SBOM",
+  "baseline": "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+  "upstreamPort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/bgfx",
+  "upstreamVersion": "1.129.8940-496#1",
+  "overlayVersion": "1.129.8940-496#2",
+  "declaredLicense": "BSD-2-Clause AND CC0-1.0 AND GPL-3.0-or-later",
+  "contributionLicense": "GPL-3.0-or-later",
+  "upstreamPortRecipeLicense": "MIT",
+  "archiveUrl": "https://github.com/bkaradzic/bgfx.cmake/releases/download/v1.129.8940-496/bgfx.cmake.v1.129.8940-496.tar.gz",
+  "archiveSha512": "520c542b65e76e92eae818e32eeb62bb2347ac89a1e10fc07cd5059a3b8a9a543cadca87d451a3bc157c415f6183b1f0e5031248e38fae704b8efd54679d482b",
+  "upstreamPortFiles": {
+    "portfile.cmake": "8d130a5cb013ee53a78e34c232024c60881b0a3c7a3f35640c29465849ee7aaf",
+    "vcpkg.json": "67d48baac94c51f91e3feda2a3e95d72f1743660e86fe9a5f24d3527c399d8aa",
+    "fix-dependencies.patch": "d9580984d81800611a7d2de501b8fde2d78f46296e11b6efbd1a74a2e7813335"
+  },
+  "overlayFiles": {
+    "portfile.cmake": "a926e0dc39551f8aabe483aee8cd40f695bb33efa7ef381d38638c153e3dca4d",
+    "vcpkg.json": "30f68a8b8916ca650674ad2ebfe89bd4f4a570213d2ecbd6d5a7060614014c00",
+    "fix-dependencies.patch": "d9580984d81800611a7d2de501b8fde2d78f46296e11b6efbd1a74a2e7813335",
+    "native-2d-import.patch": "deafac0c0aef9b72633a27d161dbc12c8cc7a3a80ebc27d1ef17e63ba923fd23",
+    "NOTICE.mapgyver": "239fcac293dd1bd63a25a1235b83b35ba072f79d547d62da08abe41a55980f5b",
+    "LICENSE.mapgyver": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+  },
+  "installedNoticeSha256": "d9d9befef003334f6e5fad40eeb2b7677f96f1a38a7290cd9d34ec01b69fd1a5",
+  "installedPlatformHeaderSha256": "adfb8bf64090528a71f243b6b19a74dd3cf812ab632b531e4d291228a34828c0",
+  "notes": "Original BSD/CC0 notices preserved; authored GPL contribution and full license included in installed notice. No license exception or proprietary runtime. Renderer remains provisional."
+}

@@ -14,6 +14,11 @@ struct PreparedImage {
     std::uint32_t width, height;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
 };
+struct PreparedTarget {
+    std::uint32_t width, height;
+    DXGI_FORMAT format;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+};
 // Device resource creation is thread safe. Its immediate context and every bgfx
 // call still belong exclusively to the render owner. Destroy preparation jobs
 // before releasing their device; PreparedImage owns its texture reference.
@@ -28,6 +33,7 @@ public:
     // Startup copy targets use DEFAULT usage; producer generations are immutable.
     // Callers bound aggregate retained bytes and concurrent jobs separately.
     [[nodiscard]] PreparedImage prepare(const render::Image& image,bool copy_target = false) const;
+    [[nodiscard]] PreparedTarget target(std::uint32_t width,std::uint32_t height,DXGI_FORMAT format) const;
 private:
     Microsoft::WRL::ComPtr<ID3D11Device> device_;
     DXGI_ADAPTER_DESC1 identity_{};

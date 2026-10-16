@@ -85,6 +85,8 @@ struct CompositionRenderer::Impl {
     std::unique_ptr<PreparedGeneration> image_copy;
     ImageHandoffState image_state{1,0,0};
     std::uint64_t owned_payload_bytes = 0;
+    Texture* qualification_target = nullptr;
+    std::array<std::uint16_t,2> qualification_size{};
     DXGI_ADAPTER_DESC1 identity{};
     bgfx::ProgramHandle composite = BGFX_INVALID_HANDLE, encode = BGFX_INVALID_HANDLE;
     bgfx::UniformHandle sampler = BGFX_INVALID_HANDLE, encoding = BGFX_INVALID_HANDLE;
@@ -337,6 +339,15 @@ struct CompositionRenderer::Impl {
             if (config.controls.enabled && !config.controls.blackout && output.held_frame) draw(presented,output.held.texture,composite);
             draw(view(2,output.swapchain),output.presented.texture,composite);
         }
+        if (qualification_target) {
+            const auto view = static_cast<bgfx::ViewId>(render_views+exported_nodes.size()+outputs.size()*3);
+            bgfx::setViewFrameBuffer(view,qualification_target->framebuffer);
+            bgfx::setViewRect(view,0,0,qualification_size[0],qualification_size[1]);bgfx::setViewClear(view,BGFX_CLEAR_COLOR,0);
+            const auto& node = plan->nodes[plan->preview];const std::array<float,4> parameters{
+                node.encoding.transfer == render::Transfer::srgb ? 1.F : 0.F,node.encoding.alpha == render::Alpha::premultiplied ? 1.F : 0.F,0,0};
+            bgfx::setUniform(encoding,parameters.data());bgfx::setVertexBuffer(0,vertices);bgfx::setTexture(0,sampler,inputs[plan->preview]);
+            bgfx::setState(BGFX_STATE_WRITE_RGB|BGFX_STATE_WRITE_A);bgfx::submit(view,encode);++draws;
+        }
         bgfx::frame();
         const auto ticks = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now()-start).count();
         return {++sequence,applied_revision,{ticks,{1,1000000000}}};
@@ -414,4 +425,47 @@ std::unique_ptr<PreparedGeneration> CompositionRenderer::retire_images() {
 }
 ImageHandoffState CompositionRenderer::image_handoff_state() const {impl_->check_owner();return impl_->image_state;}
 std::uint64_t CompositionRenderer::resource_payload_bytes() const {impl_->check_owner();return impl_->owned_payload_bytes;}
+std::vector<std::uint8_t> CompositionRenderer::qualify_borrowed_target(PreparedTarget target) {
+    impl_->check_owner();
+    check(target.texture && target.format == DXGI_FORMAT_R8G8B8A8_UNORM && target.width && target.height,
+        "Borrowed target experiment requires a prepared RGBA8 render target");
+    D3D11_TEXTURE2D_DESC description{};target.texture->GetDesc(&description);
+    check(description.Width == target.width && description.Height == target.height && description.Format == target.format &&
+        description.ArraySize == 1 && description.MipLevels == 1 && description.SampleDesc.Count == 1 &&
+        (description.BindFlags&(D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET)) == (D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET),
+        "Borrowed target native description differs from its prepared metadata");
+    ComPtr<ID3D11Device> device;target.texture->GetDevice(&device);check(device.Get() == impl_->device.Get(),"Borrowed target belongs to another device");
+    const auto* caps = bgfx::getCaps();
+    check(impl_->render_views+impl_->exported_nodes.size()+impl_->outputs.size()*3 < caps->limits.maxViews &&
+        target.width <= caps->limits.maxTextureSize && target.height <= caps->limits.maxTextureSize &&
+        static_cast<std::uint64_t>(target.width)*target.height*4 <= 536870912-impl_->owned_payload_bytes,
+        "Borrowed target experiment exceeds actual view/dimension/payload capacity");
+    Texture borrowed;borrowed.native = std::move(target.texture);
+    borrowed.texture = bgfx::createTexture2D(1,1,false,1,bgfx::TextureFormat::RGBA8,BGFX_TEXTURE_RT|sampling);
+    check(bgfx::isValid(borrowed.texture),"Borrowed target placeholder allocation failed");
+    struct Cleanup {
+        Impl& impl;Texture& target;
+        ~Cleanup() {
+            impl.qualification_target = nullptr;
+            if (bgfx::isValid(target.framebuffer)) bgfx::destroy(target.framebuffer);
+            if (bgfx::isValid(target.texture)) bgfx::destroy(target.texture);
+            static_cast<void>(impl.frame()); // Drain queued owner-side destruction while native ownership survives.
+        }
+    } cleanup{*impl_,borrowed};
+    static_cast<void>(impl_->frame()); // Realize only the 1x1 placeholder while old scene continues.
+    const auto pointer = reinterpret_cast<std::uintptr_t>(borrowed.native.Get());
+    check(bgfx::overrideInternal2D(borrowed.texture,pointer,0,static_cast<std::uint16_t>(target.height)) == 0 &&
+        bgfx::overrideInternal2D(borrowed.texture,0,static_cast<std::uint16_t>(target.width),static_cast<std::uint16_t>(target.height)) == 0,
+        "Borrowed target metadata import accepted invalid dimensions/native pointer");
+    check(bgfx::overrideInternal2D(borrowed.texture,pointer,static_cast<std::uint16_t>(target.width),static_cast<std::uint16_t>(target.height)) == pointer,
+        "Borrowed target native import failed");
+    borrowed.framebuffer = bgfx::createFrameBuffer(1,&borrowed.texture,false);
+    check(bgfx::isValid(borrowed.framebuffer),"Borrowed target framebuffer handle creation failed");
+    check(bgfx::overrideInternal2D(borrowed.texture,pointer,static_cast<std::uint16_t>(target.width),static_cast<std::uint16_t>(target.height)) == 0,
+        "Borrowed target metadata import accepted a framebuffer-attached texture");
+    static_cast<void>(impl_->frame()); // Realize its RTV; old frame still renders normally.
+    impl_->qualification_size = {static_cast<std::uint16_t>(target.width),static_cast<std::uint16_t>(target.height)};
+    impl_->qualification_target = &borrowed;static_cast<void>(impl_->frame());
+    return readback(impl_->device.Get(),impl_->context.Get(),borrowed.native.Get());
+}
 }

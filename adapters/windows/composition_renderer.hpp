@@ -6,6 +6,7 @@
 namespace mapgyver::windows {
 class PreparationDevice;
 class PreparedGeneration;
+struct PreparedTarget;
 struct ImageHandoffState {std::uint64_t generation, gpu_copy_submissions, copied_payload_bytes;};
 struct RenderedFrame {std::uint64_t sequence, revision; domain::MediaTime show_time;};
 struct OutputControls {bool enabled = true, blackout = false, freeze = false;};
@@ -45,6 +46,9 @@ public:
     [[nodiscard]] std::unique_ptr<PreparedGeneration> retire_images();
     [[nodiscard]] ImageHandoffState image_handoff_state() const;
     [[nodiscard]] std::uint64_t resource_payload_bytes() const;
+    // Offline adapter experiment. Keeps real old-scene frames running through
+    // bounded handle realization/import/FB creation; captures only afterwards.
+    [[nodiscard]] std::vector<std::uint8_t> qualify_borrowed_target(PreparedTarget target);
 private:
     struct Impl;
     std::unique_ptr<Impl> impl_;

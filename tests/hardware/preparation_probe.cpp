@@ -238,7 +238,41 @@ nlohmann::json run() {
     }
     live["shutdownWithPendingCopy"] = true;live["shutdownProbeGpuCopySubmissions"] = 1;
     live["shutdownProbeCpuUploadBytes"] = 2*128*64*sizeof(render::Pixel);
+    nlohmann::json borrowed;
+    {
+        windows::CompositionRenderer renderer{plan,{},device};
+        const auto before = renderer.frame();
+        auto preparation = std::async(std::launch::async,[device] {return device->target(257,131,DXGI_FORMAT_R8G8B8A8_UNORM);});
+        const auto deadline = std::chrono::steady_clock::now()+std::chrono::seconds{2};
+        while (preparation.wait_for(std::chrono::milliseconds{0}) != std::future_status::ready) {
+            static_cast<void>(renderer.frame());check(std::chrono::steady_clock::now() < deadline,"Background native target preparation timed out");
+        }
+        const auto actual = renderer.qualify_borrowed_target(preparation.get());
+        const auto after = renderer.frame();check(after.sequence >= before.sequence+5 && after.show_time.ticks > before.show_time.ticks,
+            "Old native scene/clock did not continue through target binding");
+        const auto expected = render::reference(*plan,plan->preview);const auto& node = plan->nodes[plan->preview];unsigned target_maximum = 0;
+        check(actual.size() == 257*131*4,"Borrowed target did not capture actual native dimensions");
+        for (std::uint32_t y = 0; y < 131; ++y) for (std::uint32_t x = 0; x < 257; ++x) {
+            const auto sx = (static_cast<std::uint64_t>(x)*2+1)*node.width/(257*2);
+            const auto sy = (static_cast<std::uint64_t>(y)*2+1)*node.height/(131*2);
+            for (std::size_t c = 0; c < 4; ++c) target_maximum = std::max(target_maximum,static_cast<unsigned>(std::abs(
+                static_cast<int>(actual[(static_cast<std::size_t>(y)*257+x)*4+c])-expected[static_cast<std::size_t>((sy*node.width+sx)*4)+c])));
+        }
+        if (target_maximum > 2) {
+            std::size_t nonzero = 0;for (std::size_t i = 0; i < actual.size(); i += 4) if (actual[i] || actual[i+1] || actual[i+2]) ++nonzero;
+            std::cerr << "Borrowed target max error=" << target_maximum << " nonzero RGB pixels=" << nonzero << " of " << 257*131 << '\n';
+        }
+        check(target_maximum <= 2,"Borrowed resized target differs from fixed colour/viewport reference");
+        const auto old = renderer.capture_for_test(plan->preview);
+        for (std::size_t i = 0; i < old.size(); ++i) target_maximum = std::max(target_maximum,static_cast<unsigned>(std::abs(static_cast<int>(old[i])-expected[i])));
+        check(target_maximum <= 2,"Borrowed target binding changed the old active scene");
+        borrowed = {{"width",257},{"height",131},{"oldFramesAdvanced",after.sequence-before.sequence},{"maxChannelError",target_maximum},{"tolerance",2},
+            {"backgroundNativeTargetPayloadBytes",257*131*4},{"ownerPlaceholderPayloadBytes",4},
+            {"ownerImportSrvCreations",1},{"ownerFramebufferRtvCreations",1},{"validationCpuReadbackBytes",actual.size()+old.size()},
+            {"validationGpuCopySubmissions",2},{"scope","Real background D3D11 target allocation, owner 1x1 bgfx placeholder/import/RTV binding with old scene frames continuing, resized target and unchanged-scene GPU goldens. Not complete graph/window handoff or deadline-budget qualification."}};
+    }
     return {{"schemaVersion",1},{"evidenceClass","native-hardware-owned-D3D11-device-concurrent-image-preparation"},{"liveImageHandoff",std::move(live)},
+        {"borrowedRenderTarget",std::move(borrowed)},
         {"vendorId",gpu.VendorId},{"deviceId",gpu.DeviceId},{"luidHigh",static_cast<std::uint32_t>(gpu.AdapterLuid.HighPart)},{"luidLow",gpu.AdapterLuid.LowPart},
         {"deviceCreationFlags",device->native()->GetCreationFlags()},{"driverConcurrentCreates",threading.DriverConcurrentCreates != FALSE},
         {"driverCommandLists",threading.DriverCommandLists != FALSE},{"framesSubmitted",frames},{"backgroundImageGenerations",completed.load()},

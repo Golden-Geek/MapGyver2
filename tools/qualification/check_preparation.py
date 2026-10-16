@@ -35,6 +35,9 @@ assert live['staleForeignLayoutCapacityRequestsRejected'] == 5 and live['capture
 assert live['foreignOwnerRequestsRejected'] == 2 and live['validationRejectedCandidateCpuUploadBytes'] == 393216
 assert live['shutdownWithPendingCopy'] and live['shutdownProbeGpuCopySubmissions'] == 1 and live['shutdownProbeCpuUploadBytes'] == 262144
 assert live['maxChannelError'] <= live['tolerance'] == 2
+borrowed = report['borrowedRenderTarget']
+assert (borrowed['width'], borrowed['height']) == (257, 131) and borrowed['oldFramesAdvanced'] >= 5
+assert borrowed['maxChannelError'] <= borrowed['tolerance'] == 2
 report['command'] = command
 report['probeSha256'] = hashlib.sha256(args.probe.read_bytes()).hexdigest()
 args.report.write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
