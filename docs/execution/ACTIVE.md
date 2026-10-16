@@ -215,7 +215,9 @@ engine phases/900 frames with two window generations, unavailable-source recover
 and prior composition/output/source/graph regressions. Code
 `ce20c0629e5844420173c26ee3a24ede8e204c05` now has clean Debug/Release
 23/23 and all GPU/engine checks, dirty=false, captured in
-`docs/progress/M04-window-handoff-local.json`. Publish code and evidence. Then implement
+`docs/progress/M04-window-handoff-local.json`. Published at
+`2f70463f1a0d32318dcd285ba3b987b59a9af105`; CI 38885553804 is fully green on
+Windows Debug/Release, Linux/macOS, plan and quality-gate. Then implement
 M04.C03 many-to-many quad mapping, crop/fit/fill, masks and blend rules. All M01
 physical/deadline/recovery gates, preview and later milestones remain open.
 
@@ -238,7 +240,8 @@ this slice, retain clean-source Debug/Release evidence and publish. Code
 `2e790c75f992dea7d88bb5fc67a2cf133b0a2e63` now has clean Debug/Release
 24/24 and all actual preparation/compositor/output/mapping/engine checks,
 dirty=false, retained in `docs/progress/M04-quad-mapping-local.json`. Publish this
-code/evidence, then implement masks, crop/fit/fill and additional blend modes. Masks,
+code/evidence, then implement masks, crop/fit/fill and additional blend modes. The
+preceding Windows CI was allowed to finish green before this push. Masks,
 crop/fit/fill and additional blend rules are
 still required C03 work; no milestone or physical-output completion.
 
