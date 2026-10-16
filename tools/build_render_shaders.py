@@ -30,5 +30,6 @@ version = subprocess.run([str(args.compiler), '--version'], check=True, capture_
 (args.output/'shader-build.json').write_text(json.dumps({'compilerVersion':version,
     'compilerSha256':hashlib.sha256(args.compiler.read_bytes()).hexdigest(),
     'varyingDefinitionSha256':hashlib.sha256((args.source/'varying.def.sc').read_bytes()).hexdigest(),
+    'resampleHeaderSha256':hashlib.sha256((args.source/'resample.sh').read_bytes()).hexdigest(),
     'bgfxShaderHeaderSha256':hashlib.sha256((args.include/'bgfx_shader.sh').read_bytes()).hexdigest(),
     'shaders':records},indent=2)+'\n')

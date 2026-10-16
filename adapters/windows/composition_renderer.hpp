@@ -8,6 +8,7 @@ class PreparationDevice;
 class PreparedGeneration;
 struct PreparedTarget;
 class PreparedGraph;
+class PreparedWindows;
 struct GraphLimits;
 struct ImageHandoffState {std::uint64_t generation, gpu_copy_submissions, copied_payload_bytes;};
 struct RenderedFrame {std::uint64_t sequence, revision; domain::MediaTime show_time;};
@@ -53,10 +54,13 @@ public:
     // At most one placeholder/import/FB step per submitted frame. True transfers
     // candidate ownership and applies the whole graph at a frame boundary.
     [[nodiscard]] bool stage_graph(std::unique_ptr<PreparedGraph>& candidate);
+    [[nodiscard]] bool stage_scene(std::unique_ptr<PreparedGraph>& graph,std::unique_ptr<PreparedWindows>& windows);
     void cancel_graph(std::unique_ptr<PreparedGraph>& candidate);
+    void cancel_scene(std::unique_ptr<PreparedGraph>& graph,std::unique_ptr<PreparedWindows>& windows);
     // Actual old-GPU completion, then bounded owner handle destruction. Retired
     // native textures/CPU containers return for background disposal afterwards.
     [[nodiscard]] std::unique_ptr<PreparedGraph> retire_graph();
+    [[nodiscard]] std::unique_ptr<PreparedWindows> retire_windows();
     // Offline adapter experiment. Keeps real old-scene frames running through
     // bounded handle realization/import/FB creation; captures only afterwards.
     [[nodiscard]] std::vector<std::uint8_t> qualify_borrowed_target(PreparedTarget target);

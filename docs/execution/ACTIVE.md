@@ -202,6 +202,21 @@ qualification. No M01/M02/M03/M04 tag.
 
 ## Validation and continuation
 
+M04.C02 window handoff is implemented after graph baseline
+`449a955c90b328b72869b7723f251bf3a56e8f5c` (CI 38879962081 fully green).
+New prepared-window banks share the one candidate/retirement slot with graph
+banks. Background textures, owner SDL/DXGI steps, atomic route/window replacement,
+frozen resize carry, actual completion and background disposal are implemented.
+Shutdown adopts partially staged windows. Exact integer pixel-centre sampling
+fixes the measured 4/255 float tie without widening the 2/255 tolerance. ADR-022
+records SDK threading and capacity/deadline limits. Debug/Release working-tree
+wrappers pass 23/23, eight window goldens each (maximum 1/255), fifteen main
+engine phases/900 frames with two window generations, unavailable-source recovery
+and prior composition/output/source/graph regressions. Next: commit this tested
+slice, collect clean-source Debug/Release evidence and publish. Then implement
+M04.C03 many-to-many quad mapping, crop/fit/fill, masks and blend rules. All M01
+physical/deadline/recovery gates, preview and later milestones remain open.
+
 - python tools/ci/check.py --preset windows-local --configuration Debug --skip-bootstrap
 - python tools/ci/check.py --preset windows-local --configuration Release --skip-bootstrap
 - python tools/validate_plan.py

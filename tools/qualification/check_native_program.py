@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Actual GPU engine/control/browser-loss qualification; never a hosted GPU claim."""
 import argparse
+import copy
 import ctypes as C
 import hashlib
 import json
@@ -219,7 +220,33 @@ try:
         client.call('undo', revision=11)
         original_graph = until(lambda: observed(client, 12, ''))
         phases.append({'name': 'structural_nested_composition_graph_handoff_and_undo', 'nested': nested['renderer'], 'restored': original_graph['renderer']})
-        final_revision = 14
+        stage = copy.deepcopy(original_graph['data']['project']['stage'])
+        calibration = copy.deepcopy(stage['patches'])
+        stage['outputs'][outputs[0]]['desired'].update(width=113, height=59)
+        stage['outputs'][outputs[0]]['freeze'] = True
+        replacement = stage['outputs'].pop(outputs[2]);replacement.update(id='native-replacement-output', name='Replacement during playback')
+        stage['outputs'][replacement['id']] = replacement
+        removed_patch = next(id for id, patch in stage['patches'].items() if patch['output'] == outputs[2])
+        patch = stage['patches'].pop(removed_patch);patch.update(id='native-replacement-patch', output=replacement['id'])
+        stage['patches'][patch['id']] = patch
+        client.call('transaction', {'commands': [{'schemaVersion': 1, 'command': {'type': 'ReplaceStage', 'value': {'value': stage}}}]}, 12)
+        replaced = until(lambda: observed(client, 13, '', after=int(original_graph['renderer']['frame'])))
+        assert outputs[2] not in replaced['data']['project']['stage']['outputs']
+        for id, old in calibration.items():
+            if id != removed_patch: assert replaced['data']['project']['stage']['patches'][id]['calibration'] == old['calibration']
+        client.call('undo', revision=13)
+        restored_windows = until(lambda: observed(client, 14, ''))
+        assert restored_windows['data']['project']['stage'] == original_graph['data']['project']['stage']
+        phases.append({'name': 'atomic_window_resize_remove_add_frozen_carry_and_undo', 'replaced': replaced['renderer'], 'restored': restored_windows['renderer']})
+        unsupported = copy.deepcopy(restored_windows['data']['project']['stage'])
+        next(iter(unsupported['patches'].values()))['calibration']['vertices'][1]['projectorPixels']['y'] = 1.0
+        client.call('transaction', {'commands': [{'schemaVersion': 1, 'command': {'type': 'ReplaceStage', 'value': {'value': unsupported}}}]}, 14)
+        held_mapping = until(lambda: observed(client, 14, 'render_state_requires_preparation', after=int(restored_windows['renderer']['frame'])))
+        assert held_mapping['authoredRevision'] == '15'
+        client.call('undo', revision=15)
+        mapping_recovered = until(lambda: observed(client, 16, ''))
+        phases.append({'name': 'unsupported_mapping_retains_scene_and_authored_calibration_then_undo', 'pending': held_mapping['renderer'], 'recovered': mapping_recovered['renderer']})
+        final_revision = 18
     owner = client.snapshot()
     client.call('transferEdit', {'expectedOwnershipGeneration': owner['ownershipGeneration'], 'targetSession': ready['oscquery']['oscSessionId']})
     def osc_string(value):
@@ -230,7 +257,7 @@ try:
     bundle = b'#bundle\0'+struct.pack('>Q', 1)+b''.join(struct.pack('>I', len(message))+message for message in messages)
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as osc: osc.sendto(bundle, ('127.0.0.1', ready['oscquery']['oscPort']))
     if args.hot_images:
-        osc_source = until(lambda: observed(client, 13, ''))
+        osc_source = until(lambda: observed(client, 17, ''))
         phases.append({'name': 'granted_OSC_atomic_source_and_output_handoff', 'renderer': osc_source['renderer']})
         # Hold only after the new alpha pixels were submitted; the final golden
         # can then compare that held image against the final compiled source.
@@ -246,6 +273,7 @@ try:
     if args.hot_images:
         assert native['sceneGeneration'] >= 7 and native['sourceGpuCopySubmissions'] >= 3
         assert native['graphGenerationsApplied'] >= 4 and native['internalConstantCpuUploadBytes'] == 16
+        assert native['windowGenerationsApplied'] == 2
         assert native['preparedGenerations'] >= native['sourceGpuCopySubmissions']+native['graphGenerationsApplied']
         assert native['sourceCopiedPayloadBytes'] == native['sourceGpuCopySubmissions']*131072
         assert native['sourceCpuUploadBytes'] >= (native['sourceGpuCopySubmissions']+1)*131072
@@ -289,7 +317,7 @@ try:
         'hotImageChanges': args.hot_images,
         'scope': 'Stateless test patterns on three hidden native windows. Real browser reload/process death and no-client interval; fixed-tolerance offline final intermediate captures. Optional hot image changes qualify bounded fixed-layout preparation, supersession and recovery. Not physical scanout, animated media playback, graph/window resource handoff or encoded preview qualification.'}
     args.report.write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
-    print('Passed native engine graph/source/browser-loss phases and offline GPU goldens')
+    print('Passed native engine window/graph/source/browser-loss phases and offline GPU goldens')
 finally:
     for client in clients: client.close()
     if browser_job: browser_job.close()

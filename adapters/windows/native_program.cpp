@@ -3,6 +3,7 @@
 #include "composition_renderer.hpp"
 #include "preparation_device.hpp"
 #include "prepared_graph.hpp"
+#include "prepared_windows.hpp"
 #include "display_inventory.hpp"
 #include <algorithm>
 #include <atomic>
@@ -24,6 +25,40 @@ constexpr std::size_t max_outputs = 256;
 using Controls = std::array<OutputControls,max_outputs>;
 struct Update {std::uint64_t generation = 1, revision = 0;Controls outputs{};};
 struct Request {std::uint64_t generation = 1, revision = 0;std::shared_ptr<const control::ProjectState> state;};
+struct Routing {
+    std::vector<OutputWindow> windows;
+    std::vector<std::size_t> indices;
+    Json reasons = Json::array();
+    bool unavailable = false;
+};
+std::shared_ptr<Routing> prepare_routing(const control::ProjectState& state,const render::Plan& plan,bool hidden) {
+    if (state.stage.data().outputs.size() > max_outputs) throw render::Error("Native output inventory exceeds bounded control capacity");
+    auto result = std::make_shared<Routing>();auto stage = state.stage.data();
+    for (auto& [id,output] : stage.outputs) {static_cast<void>(id);output.enabled = true;}
+    const std::array caps{runtime::OutputCapability{"windows.window",false,16384,16384},runtime::OutputCapability{"windows.display",true,16384,16384}};
+    auto bindings = runtime::bind_outputs(StageSnapshot{std::move(stage),state.instances},detected_displays(),caps);
+    for (std::size_t index = 0; index < bindings.size(); ++index) {
+        auto& binding = bindings[index];const auto& original = state.stage.data().outputs.at(binding.desired.id);
+        if (binding.reason.empty()) {
+            const ProjectionPatch* patch = nullptr;std::size_t count = 0;
+            for (const auto& [id,item] : state.stage.data().patches) {static_cast<void>(id);if (item.output == original.id) {patch = &item;++count;}}
+            if (count != 1 || !state.stage.data().layouts.empty() || patch->calibration != quad_calibration(patch->calibration.reference_width,patch->calibration.reference_height) ||
+                state.stage.data().surfaces.at(patch->surface).geometry != unit_quad()) binding.reason = "projection_mapping_unavailable";
+            else {
+                const auto surface = std::find_if(plan.surfaces.begin(),plan.surfaces.end(),[&](const auto& item){return item.id == patch->surface;});
+                if (surface == plan.surfaces.end()) binding.reason = "surface_content_unavailable";
+                else {
+                    OutputWindow output{original.id,original.name,original.desired.width,original.desired.height,surface->node,hidden,
+                        {original.enabled,original.blackout,original.freeze}};
+                    if (binding.display) output.desktop_position = std::array{binding.display->x,binding.display->y};
+                    result->windows.push_back(std::move(output));result->indices.push_back(index);
+                }
+            }
+        }
+        result->reasons.push_back({{"id",original.id.str()},{"reason",binding.reason},{"configuredAdapter",original.adapter},{"configuredEndpoint",original.endpoint}});
+    }
+    result->unavailable = result->windows.empty() && !bindings.empty();return result;
+}
 Json static_state(const control::ProjectState& state) {
     auto value = control::wire::encode_project(state);
     // Display names are metadata, never GPU resource identity. Normalize only
@@ -66,7 +101,6 @@ struct NativeProgram::Impl {
     std::shared_ptr<const control::ProjectState> initial;
     std::uint64_t initial_revision;
     Json baseline;
-    const Json initial_stage;
     std::thread worker;
     std::promise<void> exited;
     std::future<void> completion = exited.get_future();
@@ -78,20 +112,21 @@ struct NativeProgram::Impl {
     Phase phase = Phase::idle;
     std::unique_ptr<PreparedGeneration> candidate;
     std::unique_ptr<PreparedGraph> graph_candidate;
-    bool graph_in_use = false;
+    std::unique_ptr<PreparedWindows> window_candidate;
+    bool graph_in_use = false, windows_in_use = false, scene_in_use = false;
+    std::shared_ptr<Routing> active_routing, prepared_routing;
     std::shared_ptr<const render::Plan> prepared_plan;
     std::shared_ptr<const render::Plan> active_layout;
     GraphLimits active_limits{};
-    std::vector<std::uint32_t> prepared_output_nodes;
     std::uint64_t ready_generation = 0, failed_generation = 0, desired_generation = 1;
-    std::uint64_t prepared_generations = 0, discarded_generations = 0, graph_generations = 0;
+    std::uint64_t prepared_generations = 0, discarded_generations = 0, graph_generations = 0, window_generations = 0;
     std::string preparation_error;
-    struct Status {bool failed = false, finished = false, source_unavailable = false;RenderedFrame frame{};std::uint64_t scene_generation = 1;std::string error, preparation_reason;};
+    struct Status {bool failed = false, finished = false, source_unavailable = false, target_unavailable = false;RenderedFrame frame{};std::uint64_t scene_generation = 1;std::string error;};
     Status status;
     std::uint64_t checked_revision = UINT64_MAX, observed_frame = 0;
     bool failure_reported = false;
     explicit Impl(protocol::ControlService& source,ProgramOptions settings)
-        : service(source),options(std::move(settings)),initial(service.snapshot()),initial_revision(service.revision()),baseline(static_state(*initial)),initial_stage(baseline["stage"]) {
+        : service(source),options(std::move(settings)),initial(service.snapshot()),initial_revision(service.revision()),baseline(static_state(*initial)) {
         if (!options.report.empty() && !options.frame_limit) throw render::Error("Offline native report requires a bounded frame run");
         service.begin_renderer(1);
         worker = std::thread([this] {
@@ -114,37 +149,9 @@ struct NativeProgram::Impl {
     void run() {
         if (initial->stage.data().outputs.size() > max_outputs) throw render::Error("Native output inventory exceeds bounded control capacity");
         auto plan = render::compile(*initial,initial_revision,patterns(*initial));
-        auto stage = initial->stage.data();
-        // Explicitly prewarm configured disabled targets, retaining their actual
-        // authored enable intent below, so enable never creates a deadline resource.
-        for (auto& [id,output] : stage.outputs) {static_cast<void>(id);output.enabled = true;}
-        const std::array caps{runtime::OutputCapability{"windows.window",false,16384,16384},runtime::OutputCapability{"windows.display",true,16384,16384}};
-        const auto displays = detected_displays();
-        auto bindings = runtime::bind_outputs(StageSnapshot{std::move(stage),initial->instances},displays,caps);
-        std::vector<OutputWindow> windows;std::vector<std::size_t> indices;std::vector<Id> window_surfaces;
-        Json reasons = Json::array();
-        for (std::size_t index = 0; index < bindings.size(); ++index) {
-            auto& binding = bindings[index];const auto& original = initial->stage.data().outputs.at(binding.desired.id);
-            if (binding.reason.empty()) {
-                const ProjectionPatch* patch = nullptr;std::size_t count = 0;
-                for (const auto& [id,item] : initial->stage.data().patches) {static_cast<void>(id);if (item.output == original.id) {patch = &item;++count;}}
-                if (count != 1 || !initial->stage.data().layouts.empty() || patch->calibration != quad_calibration(patch->calibration.reference_width,patch->calibration.reference_height) ||
-                    initial->stage.data().surfaces.at(patch->surface).geometry != unit_quad()) binding.reason = "projection_mapping_unavailable";
-                else {
-                    const auto surface = std::find_if(plan->surfaces.begin(),plan->surfaces.end(),[&](const auto& item){return item.id == patch->surface;});
-                    if (surface == plan->surfaces.end()) binding.reason = "surface_content_unavailable";
-                    else {
-                        OutputWindow output{original.id,original.name,original.desired.width,original.desired.height,surface->node,options.hidden,
-                            {original.enabled,original.blackout,original.freeze}};
-                        if (binding.display) output.desktop_position = std::array{binding.display->x,binding.display->y};
-                        windows.push_back(std::move(output));indices.push_back(index);window_surfaces.push_back(patch->surface);
-                    }
-                }
-            }
-            reasons.push_back({{"id",original.id.str()},{"reason",binding.reason},{"configuredAdapter",original.adapter},{"configuredEndpoint",original.endpoint}});
-        }
+        active_routing = prepare_routing(*initial,*plan,options.hidden);
         auto device = std::make_shared<PreparationDevice>();
-        CompositionRenderer renderer{plan,windows,device};
+        CompositionRenderer renderer{plan,active_routing->windows,device};
         active_layout = plan;active_limits = renderer.graph_limits();
         // One candidate can be working, ready, copying or retired. No next
         // allocation starts until retired ownership is disposed on preparation.
@@ -152,39 +159,44 @@ struct NativeProgram::Impl {
             std::uint64_t attempted = 1;
             while (!stop.stop_requested()) {
                 Request work;std::unique_ptr<PreparedGeneration> dispose;std::unique_ptr<PreparedGraph> dispose_graph;
+                std::unique_ptr<PreparedWindows> dispose_windows;std::shared_ptr<Routing> routing,dispose_routing;
                 std::shared_ptr<const render::Plan> layout;GraphLimits limits{};
                 {
                     std::lock_guard lock{input_mutex};
                     if (phase == Phase::retired) {
-                        dispose = std::move(candidate);dispose_graph = std::move(graph_candidate);prepared_plan.reset();prepared_output_nodes.clear();phase = Phase::idle;
+                        dispose = std::move(candidate);dispose_graph = std::move(graph_candidate);dispose_windows = std::move(window_candidate);
+                        prepared_plan.reset();dispose_routing = std::move(prepared_routing);phase = Phase::idle;
                     }
-                    if (phase == Phase::idle && request.generation > attempted) {work = request;attempted = work.generation;layout = active_layout;limits = active_limits;}
+                    if (phase == Phase::idle && request.generation > attempted) {work = request;attempted = work.generation;layout = active_layout;limits = active_limits;routing = active_routing;}
                 }
                 dispose.reset(); // Includes native source refs/old CPU plans, off the render owner.
                 dispose_graph.reset();
+                dispose_windows.reset();dispose_routing.reset();
                 if (!work.state) {std::this_thread::sleep_for(std::chrono::milliseconds{2});continue;}
                 try {
-                    if (work.state->stage.data().outputs.size() > max_outputs || static_state(*work.state)["stage"] != initial_stage)
-                        throw render::Error("Output/stage changes require graph/window resource preparation");
                     auto next_plan = render::compile(*work.state,work.revision,patterns(*work.state,work.generation,134217728));
                     if (!next_plan->issues.empty()) throw render::Error("Configured source frames/encoding are unavailable");
+                    auto next_routing = prepare_routing(*work.state,*next_plan,options.hidden);
+                    for (const auto& reason : next_routing->reasons) if (reason["reason"] == "projection_mapping_unavailable")
+                        throw render::Error("Nontrivial projection mapping requires prepared mapping resources");
                     {
                         std::lock_guard lock{input_mutex};
                         if (stop.stop_requested() || pending.generation != work.generation) {++discarded_generations;continue;}
                     }
                     std::unique_ptr<PreparedGeneration> next_candidate;std::unique_ptr<PreparedGraph> next_graph;
-                    std::vector<std::uint32_t> output_nodes;output_nodes.reserve(window_surfaces.size());
-                    for (const auto& surface : window_surfaces) {
-                        const auto found = std::find_if(next_plan->surfaces.begin(),next_plan->surfaces.end(),[&](const auto& item){return item.id == surface;});
-                        if (found == next_plan->surfaces.end()) throw render::Error("Existing window surface route is unavailable");
-                        output_nodes.push_back(found->node);
-                    }
-                    if (same_graph_layout(*layout,*next_plan)) next_candidate = prepare_generation(*device,*layout,next_plan,work.generation,limits.active_payload);
+                    std::unique_ptr<PreparedWindows> next_windows;
+                    std::vector<std::uint32_t> output_nodes;output_nodes.reserve(next_routing->windows.size());
+                    for (const auto& window : next_routing->windows) output_nodes.push_back(window.node);
+                    const bool changed_windows = !same_windows(routing->windows,next_routing->windows);
+                    if (changed_windows) {next_windows = prepare_windows(*device,routing->windows,next_routing->windows,work.generation,limits);limits = next_windows->graph_limits();}
+                    if (!changed_windows && same_graph_layout(*layout,*next_plan) &&
+                        std::equal(routing->windows.begin(),routing->windows.end(),next_routing->windows.begin(),[](const auto& a,const auto& b){return a.node == b.node;}))
+                        next_candidate = prepare_generation(*device,*layout,next_plan,work.generation,limits.active_payload);
                     else next_graph = prepare_graph(*device,next_plan,work.generation,limits,output_nodes);
                     std::lock_guard lock{input_mutex};++prepared_generations;
                     if (stop.stop_requested() || pending.generation != work.generation) {++discarded_generations;continue;}
-                    candidate = std::move(next_candidate);graph_candidate = std::move(next_graph);prepared_plan = std::move(next_plan);
-                    prepared_output_nodes = std::move(output_nodes);ready_generation = work.generation;phase = Phase::ready;
+                    candidate = std::move(next_candidate);graph_candidate = std::move(next_graph);window_candidate = std::move(next_windows);prepared_plan = std::move(next_plan);
+                    prepared_routing = std::move(next_routing);ready_generation = work.generation;phase = Phase::ready;
                 } catch (const std::exception& error) {
                     std::lock_guard lock{input_mutex};failed_generation = work.generation;preparation_error = std::string{error.what()}.substr(0,512);
                 }
@@ -193,20 +205,23 @@ struct NativeProgram::Impl {
         {
             std::lock_guard lock{status_mutex};
             status.source_unavailable = !plan->issues.empty();
-            status.preparation_reason = windows.empty() && !bindings.empty() ? "output_targets_unavailable" : "";
+            status.target_unavailable = active_routing->unavailable;
         }
         std::array<OutputControls,64> controls{};
-        for (std::size_t i = 0; i < windows.size(); ++i) controls[i] = windows[i].controls;
+        for (std::size_t i = 0; i < active_routing->windows.size(); ++i) controls[i] = active_routing->windows[i].controls;
         std::uint64_t revision = initial_revision, scene_generation = 1;RenderedFrame frame{};
+        std::uint64_t maximum_owner_work_ns = 0;
         auto next = std::chrono::steady_clock::now();
         while (!stopping.load()) {
+            const auto owner_work_started = std::chrono::steady_clock::now();
             {
                 std::unique_lock lock{input_mutex,std::try_to_lock};
                 if (lock.owns_lock()) {
                     if (phase == Phase::in_use) {
-                        if (graph_in_use) {
-                            auto retired = renderer.retire_graph();
-                            if (retired) {graph_candidate = std::move(retired);phase = Phase::retired;graph_in_use = false;}
+                        if (scene_in_use) {
+                            if (graph_in_use) {auto retired = renderer.retire_graph();if (retired) {graph_candidate = std::move(retired);graph_in_use = false;}}
+                            if (windows_in_use) {auto retired = renderer.retire_windows();if (retired) {window_candidate = std::move(retired);windows_in_use = false;}}
+                            if (!graph_in_use && !windows_in_use) phase = Phase::retired;
                         } else {
                             auto retired = renderer.retire_images();
                             if (retired) {candidate = std::move(retired);phase = Phase::retired;}
@@ -215,30 +230,41 @@ struct NativeProgram::Impl {
                     if (phase == Phase::ready) {
                         if (ready_generation != pending.generation) {
                             ++discarded_generations;
-                            if (graph_candidate) {renderer.cancel_graph(graph_candidate);graph_in_use = true;phase = Phase::in_use;}
+                            if (graph_candidate) {
+                                windows_in_use = window_candidate != nullptr;renderer.cancel_scene(graph_candidate,window_candidate);
+                                scene_in_use = graph_in_use = true;phase = Phase::in_use;
+                            }
                             else phase = Phase::retired;
                         } else {
                             const bool graph = graph_candidate != nullptr;
-                            const bool applied = graph ? renderer.stage_graph(graph_candidate) : renderer.apply_images(candidate);
+                            const bool window_change = window_candidate != nullptr;
+                            if (window_change) {
+                                for (std::size_t i = 0; i < prepared_routing->indices.size(); ++i) controls[i] = pending.outputs[prepared_routing->indices[i]];
+                                window_candidate->controls(std::span{controls.data(),prepared_routing->indices.size()});
+                            }
+                            const bool applied = graph ? renderer.stage_scene(graph_candidate,window_candidate) : renderer.apply_images(candidate);
                             if (applied) {
-                                plan = prepared_plan;scene_generation = ready_generation;phase = Phase::in_use;graph_in_use = graph;
+                                plan = prepared_plan;scene_generation = ready_generation;phase = Phase::in_use;scene_in_use = graph_in_use = graph;windows_in_use = window_change;
                                 if (graph) ++graph_generations;
-                                for (std::size_t i = 0; i < windows.size(); ++i) windows[i].node = prepared_output_nodes[i];
+                                if (window_change) ++window_generations;
+                                active_routing.swap(prepared_routing);
                                 active_layout = plan;active_limits = renderer.graph_limits();
                             }
                         }
                     }
                     if (has_pending && pending.generation == scene_generation && pending.revision >= revision) {
-                        for (std::size_t i = 0; i < indices.size(); ++i) controls[i] = pending.outputs[indices[i]];
+                        for (std::size_t i = 0; i < active_routing->indices.size(); ++i) controls[i] = pending.outputs[active_routing->indices[i]];
                         revision = pending.revision;
-                        renderer.apply_output_controls(revision,std::span{controls.data(),indices.size()});
+                        renderer.apply_output_controls(revision,std::span{controls.data(),active_routing->indices.size()});
                         has_pending = false;
                     }
                 }
             }
             frame = renderer.frame();
+            maximum_owner_work_ns = std::max(maximum_owner_work_ns,static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+                std::chrono::steady_clock::now()-owner_work_started).count()));
             {
-                std::unique_lock lock{status_mutex,std::try_to_lock};if (lock.owns_lock()) {status.frame = frame;status.scene_generation = scene_generation;status.source_unavailable = !plan->issues.empty();}
+                std::unique_lock lock{status_mutex,std::try_to_lock};if (lock.owns_lock()) {status.frame = frame;status.scene_generation = scene_generation;status.source_unavailable = !plan->issues.empty();status.target_unavailable = active_routing->unavailable;}
             }
             if (options.frame_limit && frame.sequence >= options.frame_limit) break;
             next += std::chrono::nanoseconds{16666667};
@@ -246,10 +272,14 @@ struct NativeProgram::Impl {
             std::this_thread::sleep_until(next);
         }
         preparer.request_stop();preparer.join(); // Device preparation ends before bgfx/native teardown.
+        // A bounded run may end halfway through owner binding. Transfer those
+        // handles/windows to the renderer's completion-owned shutdown cleanup.
+        if (phase == Phase::ready && graph_candidate) renderer.cancel_scene(graph_candidate,window_candidate);
         if (!options.report.empty() && frame.sequence >= options.frame_limit) {
             // Program loop has ended. Synchronous validation/readback and JSON/IO
             // are explicitly offline qualification, never a render deadline path.
             Json captures = Json::array();
+            const auto& windows = active_routing->windows;
             for (std::size_t i = 0; i < windows.size(); ++i) {
                 const auto actual = renderer.capture_output_for_test(windows[i].id);
                 const auto base = render::reference(*plan,windows[i].node,true);
@@ -278,17 +308,19 @@ struct NativeProgram::Impl {
                 {"sourceCpuUploadBytes",device->cpu_upload_bytes()},{"sceneGeneration",scene_generation},
                 {"preparedGenerations",prepared_generations},{"discardedGenerations",discarded_generations},
                 {"graphGenerationsApplied",graph_generations},{"internalConstantCpuUploadBytes",renderer.constant_upload_bytes()},
+                {"windowGenerationsApplied",window_generations},
+                {"maximumObservedOwnerWorkNanoseconds",std::to_string(maximum_owner_work_ns)},
                 {"sourceGpuCopySubmissions",renderer.image_handoff_state().gpu_copy_submissions},
                 {"sourceCopiedPayloadBytes",renderer.image_handoff_state().copied_payload_bytes},
                 {"lastPreparationError",preparation_error},
-                {"deviceId",gpu[1]},{"luidHigh",gpu[2]},{"luidLow",gpu[3]},{"configuredOutputs",reasons},{"captures",captures},
-                {"scope","Actual engine native render owner, source-image and composition-graph resource handoff on existing windows. Offline final intermediate texture captures after the bounded program loop, not physical scanout or encoded preview. Window replacement and nontrivial patch mapping remain open."}};
+                {"deviceId",gpu[1]},{"luidHigh",gpu[2]},{"luidLow",gpu[3]},{"configuredOutputs",active_routing->reasons},{"captures",captures},
+                {"scope","Actual engine native owner, source-image, composition-graph and output-window resource handoffs. Offline final intermediate captures, not physical scanout, encoded preview or sustained deadline qualification. Nontrivial patch mapping remains open."}};
             report["sourceIssues"] = Json::array();
             for (const auto& issue : plan->issues) report["sourceIssues"].push_back({{"instance",issue.source.first.str()},{"port",issue.source.second.str()},{"reason",issue.reason}});
             std::ofstream output{std::filesystem::path{std::u8string{options.report.begin(),options.report.end()}},std::ios::binary};output << report.dump(2) << '\n';
             if (!output.good()) throw render::Error("Could not retain offline native program report");
         }
-        std::lock_guard lock{status_mutex};status.frame = frame;status.scene_generation = scene_generation;status.source_unavailable = !plan->issues.empty();status.finished = true;
+        std::lock_guard lock{status_mutex};status.frame = frame;status.scene_generation = scene_generation;status.source_unavailable = !plan->issues.empty();status.target_unavailable = active_routing->unavailable;status.finished = true;
     }
     bool poll() {
         if (service.revision() != checked_revision) {
@@ -312,7 +344,7 @@ struct NativeProgram::Impl {
         if (observed.failed) {
             if (!failure_reported) {service.renderer_failed(1,"native_render_owner_failed");std::cerr << "Native program failed: " << observed.error << '\n';failure_reported = true;}
         } else if (observed.frame.sequence > observed_frame) {
-            std::string reason = observed.source_unavailable ? "source_frames_unavailable" : observed.preparation_reason;
+            std::string reason = observed.source_unavailable ? "source_frames_unavailable" : observed.target_unavailable ? "output_targets_unavailable" : "";
             if (observed.scene_generation != desired_generation) {
                 std::lock_guard lock{input_mutex};reason = failed_generation == desired_generation ? "render_state_requires_preparation" : "render_state_preparing";
             }

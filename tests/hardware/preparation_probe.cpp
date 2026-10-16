@@ -2,6 +2,7 @@
 #include "adapters/windows/composition_renderer.hpp"
 #include "adapters/windows/preparation_device.hpp"
 #include "adapters/windows/prepared_graph.hpp"
+#include "adapters/windows/prepared_windows.hpp"
 #include <mapgyver/build_info.hpp>
 #include <nlohmann/json.hpp>
 #include <atomic>
@@ -232,6 +233,99 @@ nlohmann::json graph_handoff(const std::shared_ptr<windows::PreparationDevice>& 
         {"graphsApplied",2},{"partiallyBoundGraphCancelled",true},{"backgroundRetirement",true},{"captures",captures},
         {"maxChannelError",maximum},{"tolerance",2},{"scope","Real background graph textures, incremental owner bindings, canvas resize, added source/layer/changed node index, fixed native window rerouting, GPU completion and cancelled-bank cleanup. Not window replacement, mapping or deadline budgets."}};
 }
+nlohmann::json window_handoff(const std::shared_ptr<windows::PreparationDevice>& device,const std::shared_ptr<const render::Plan>& initial) {
+    const Id a{"window-a"},b{"window-b"},c{"window-c"};
+    std::vector<windows::OutputWindow> active{{a,"Initial",128,64,initial->preview,true,{}}};
+    windows::CompositionRenderer renderer{initial,active,device};
+    std::uint64_t frames = 0, preparing = 0, retirement = 0, max_frame_ns = 0;std::int64_t ticks = -1;unsigned maximum = 0, captures = 0;
+    const auto frame = [&](std::uint64_t revision) {
+        const auto start = std::chrono::steady_clock::now();const auto value = renderer.frame();
+        max_frame_ns = std::max(max_frame_ns,static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now()-start).count()));
+        check(value.sequence == ++frames && value.revision == revision && value.show_time.ticks >= ticks,"Window swap regressed frame/revision/clock");ticks = value.show_time.ticks;
+    };
+    const auto capture = [&](const Id& id,const std::shared_ptr<const render::Plan>& source,std::uint32_t width,std::uint32_t height,bool black) {
+        const auto actual = renderer.capture_output_for_test(id), expected = render::reference(*source,source->preview,true);
+        const auto& node = source->nodes[source->preview];check(actual.size() == static_cast<std::size_t>(width)*height*4,"Window handoff capture size differs");
+        for (std::uint32_t y = 0; y < height; ++y) for (std::uint32_t x = 0; x < width; ++x) {
+            const auto sx = (static_cast<std::uint64_t>(x)*2+1)*node.width/(static_cast<std::uint64_t>(width)*2);
+            const auto sy = (static_cast<std::uint64_t>(y)*2+1)*node.height/(static_cast<std::uint64_t>(height)*2);
+            for (std::size_t channel = 0; channel < 4; ++channel) {
+                const auto reference = black ? (channel == 3 ? 255 : 0) : expected[static_cast<std::size_t>((sy*node.width+sx)*4)+channel];
+                maximum = std::max(maximum,static_cast<unsigned>(std::abs(static_cast<int>(actual[(static_cast<std::size_t>(y)*width+x)*4+channel])-reference)));
+            }
+        }
+        if (maximum > 2) std::cerr << "Window capture " << captures << " id=" << id.str() << " size=" << width << 'x' << height << " max=" << maximum << " black=" << black << '\n';
+        check(maximum <= 2,"Window replacement/frozen carry differs from fixed colour reference");++captures;
+    };
+    const auto retire = [&](std::uint64_t revision) {
+        std::unique_ptr<windows::PreparedGraph> graph;std::unique_ptr<windows::PreparedWindows> windows;
+        const auto deadline = std::chrono::steady_clock::now()+std::chrono::seconds{3};
+        while (!graph || !windows) {
+            if (!graph) graph = renderer.retire_graph();if (!windows) windows = renderer.retire_windows();
+            if (graph && windows) break;frame(revision);++retirement;
+            check(std::chrono::steady_clock::now() < deadline,"Window/graph retirement timed out");
+        }
+        auto cleanup = std::async(std::launch::async,[graph=std::move(graph),windows=std::move(windows)]() mutable {graph.reset();windows.reset();});
+        check(cleanup.wait_for(std::chrono::seconds{2}) == std::future_status::ready,"Background window disposal timed out");cleanup.get();
+    };
+    const auto apply = [&](std::shared_ptr<const render::Plan> plan,std::vector<windows::OutputWindow> desired,std::uint64_t old_revision) {
+        const auto limits = renderer.graph_limits();
+        auto job = std::async(std::launch::async,[&,plan,desired,limits] {
+            auto windows = windows::prepare_windows(*device,active,desired,plan->revision,limits);
+            std::vector<std::uint32_t> routes;for (const auto& output : desired) routes.push_back(output.node);
+            auto graph = windows::prepare_graph(*device,plan,plan->revision,windows->graph_limits(),std::move(routes));
+            return std::pair{std::move(graph),std::move(windows)};
+        });
+        const auto deadline = std::chrono::steady_clock::now()+std::chrono::seconds{3};
+        while (job.wait_for(std::chrono::milliseconds{0}) != std::future_status::ready) {frame(old_revision);++preparing;check(std::chrono::steady_clock::now() < deadline,"Window preparation timed out");}
+        auto [graph,windows] = job.get();
+        while (!renderer.stage_scene(graph,windows)) {frame(old_revision);++preparing;check(std::chrono::steady_clock::now() < deadline,"Window owner staging timed out");}
+        check(!graph && !windows,"Applied scene ownership did not transfer");active = std::move(desired);frame(plan->revision);
+    };
+    frame(0);
+    auto second = std::make_shared<render::Plan>(*initial);second->revision = 2;
+    apply(second,{{a,"Resized frozen",97,53,second->preview,true,{true,false,true}},
+        {b,"Added",64,32,second->preview,true,{}},{c,"Also added",32,32,second->preview,true,{}}},0);
+    check(renderer.held_frame(a) < frames,"Resized frozen output lost held software-frame identity");
+    capture(a,initial,97,53,false);capture(b,second,64,32,false);capture(c,second,32,32,false);retire(2);
+    auto third = std::make_shared<render::Plan>(*initial);third->revision = 3;
+    for (auto& node : third->nodes) if (node.image) node.image = render::pattern(node.image->resource,3,node.width,node.height,"alpha");
+    apply(third,{{b,"Disabled resized frozen",87,43,third->preview,true,{false,false,true}},
+        {c,"Retained blackout",32,32,third->preview,true,{true,true,false}}},2);
+    capture(b,third,87,43,true);capture(c,third,32,32,true);retire(3);
+    renderer.output_controls(b,{true,false,true});renderer.output_controls(c,{true,false,false});frame(3);
+    // B carried its already sampled 64x32 display texture into 87x43.
+    // The gradient fixture has exact pairs at that scale; use a reference canvas
+    // representing that actual old held texture before the final nearest scale.
+    auto held = std::make_shared<render::Plan>(*initial);held->nodes[held->preview].width = 64;held->nodes[held->preview].height = 32;
+    capture(b,held,87,43,false);capture(c,third,32,32,false);
+    bool removed = false;try {renderer.output_controls(a,{});} catch (const render::Error&) {removed = true;}
+    check(removed,"Removed native output remained addressable");
+    auto fourth = std::make_shared<render::Plan>(*third);fourth->revision = 4;
+    auto desired = active;desired.push_back({Id{"cancel-window"},"Cancelled",41,29,fourth->preview,true,{}});
+    const auto limits = renderer.graph_limits();
+    auto job = std::async(std::launch::async,[&] {
+        auto windows = windows::prepare_windows(*device,active,desired,4,limits);std::vector<std::uint32_t> routes(desired.size(),fourth->preview);
+        auto graph = windows::prepare_graph(*device,fourth,4,windows->graph_limits(),std::move(routes));return std::pair{std::move(graph),std::move(windows)};
+    });
+    check(job.wait_for(std::chrono::seconds{3}) == std::future_status::ready,"Cancelled window preparation timed out");
+    auto [graph,windows] = job.get();check(!renderer.stage_scene(graph,windows),"Window staging completed without realization frames");frame(3);
+    renderer.cancel_scene(graph,windows);retire(3);capture(c,third,32,32,false);
+    const auto shutdown_limits = renderer.graph_limits();
+    auto shutdown_job = std::async(std::launch::async,[&] {
+        auto pending_windows = windows::prepare_windows(*device,active,desired,5,shutdown_limits);
+        auto pending_graph = windows::prepare_graph(*device,fourth,5,pending_windows->graph_limits(),std::vector<std::uint32_t>(desired.size(),fourth->preview));
+        return std::pair{std::move(pending_graph),std::move(pending_windows)};
+    });
+    check(shutdown_job.wait_for(std::chrono::seconds{3}) == std::future_status::ready,"Shutdown window preparation timed out");
+    auto [shutdown_graph,shutdown_windows] = shutdown_job.get();
+    check(!renderer.stage_scene(shutdown_graph,shutdown_windows),"Shutdown window staging unexpectedly complete");frame(3);
+    renderer.cancel_scene(shutdown_graph,shutdown_windows); // Destructor drains the actual pending fence and owns SDL cleanup.
+    return {{"framesSubmitted",frames},{"oldFramesDuringPreparation",preparing},{"retirementFrames",retirement},
+        {"windowCounts",{1,3,2}},{"partiallyCreatedWindowCancelled",true},{"removedOutputRejected",removed},{"shutdownWithPendingWindows",true},
+        {"captures",captures},{"maxChannelError",maximum},{"tolerance",2},{"maximumObservedFrameCallNanoseconds",std::to_string(max_frame_ns)},
+        {"scope","Real hidden SDL/bgfx windows: add/resize/remove/reuse, frozen display carry, blackout/enable, source/graph atomic swap and partial-window cancellation. DXGI stays on owner. Intermediate captures, not physical scanout or sustained deadlines."}};
+}
 nlohmann::json run() {
     auto device = std::make_shared<windows::PreparationDevice>();
     const auto gradient = render::pattern(Id{"prepared"},1,128,64,"gradient");
@@ -301,6 +395,7 @@ nlohmann::json run() {
     const auto& gpu = device->identity();const auto threading = device->threading();
     auto live = handoff(device,plan,gradient,bars);
     auto graphs = graph_handoff(device,plan);
+    auto windows = window_handoff(device,plan);
     {
         // Leave a real copy unretired: shutdown must retain its candidate and
         // explicitly drain completion before native ownership is disposed.
@@ -353,6 +448,7 @@ nlohmann::json run() {
     return {{"schemaVersion",1},{"evidenceClass","native-hardware-owned-D3D11-device-concurrent-image-preparation"},{"liveImageHandoff",std::move(live)},
         {"borrowedRenderTarget",std::move(borrowed)},
         {"graphHandoff",std::move(graphs)},
+        {"windowHandoff",std::move(windows)},
         {"vendorId",gpu.VendorId},{"deviceId",gpu.DeviceId},{"luidHigh",static_cast<std::uint32_t>(gpu.AdapterLuid.HighPart)},{"luidLow",gpu.AdapterLuid.LowPart},
         {"deviceCreationFlags",device->native()->GetCreationFlags()},{"driverConcurrentCreates",threading.DriverConcurrentCreates != FALSE},
         {"driverCommandLists",threading.DriverCommandLists != FALSE},{"framesSubmitted",frames},{"backgroundImageGenerations",completed.load()},
@@ -363,7 +459,7 @@ nlohmann::json run() {
         {"invalidRequestsRejected",rejections},{"postCompositorShutdownPreparation",true},
         {"activeOutputMaxChannelError",maximum},{"activeOutputTolerance",2},{"backgroundImageBitwiseFloatReadback",true},
         {"validationCpuReadbackBytes",readback_bytes+128*64*4},{"validationGpuCopySubmissions",2},
-        {"scope","Actual owned hardware device and immutable image CPU uploads concurrent with native composition frames, plus fixed-layout live image handoff below. Immediate context/bgfx remain on their render owner. Synchronous readbacks only offline. No engine control integration, graph/window handoff, deadline budget, physical scanout or device-loss qualification."}};
+        {"scope","Actual owned hardware device and immutable image uploads concurrent with composition frames, live image/graph/window handoffs below. Immediate context/bgfx/DXGI/SDL remain on their owner. Readbacks only offline. No engine integration in this probe, sustained deadline budget, physical scanout or device-loss qualification."}};
 }
 }
 int main(int argc,char** argv) {

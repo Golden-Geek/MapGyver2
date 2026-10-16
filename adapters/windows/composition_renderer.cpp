@@ -2,6 +2,7 @@
 #include "composition_renderer.hpp"
 #include "preparation_device.hpp"
 #include "prepared_graph.hpp"
+#include "prepared_windows.hpp"
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
 #include <SDL3/SDL.h>
@@ -16,6 +17,7 @@
 #include <algorithm>
 #include <cstring>
 #include <set>
+#include <utility>
 
 namespace mapgyver::windows {
 namespace {
@@ -64,13 +66,7 @@ std::vector<std::uint8_t> readback(ID3D11Device* device,ID3D11DeviceContext* con
 }
 }
 struct CompositionRenderer::Impl : GraphResources {
-    struct Output {
-        OutputWindow configured;
-        SDL_Window* window = nullptr;
-        bgfx::FrameBufferHandle swapchain = BGFX_INVALID_HANDLE;
-        Texture held, presented;
-        std::uint64_t held_frame = 0;
-    };
+    using Output = NativeOutput;
     Callbacks callbacks;
     SDL_Window* window = nullptr;
     bool initialized = false;
@@ -80,12 +76,13 @@ struct CompositionRenderer::Impl : GraphResources {
     ComPtr<ID3D11Query> image_completion;
     std::unique_ptr<PreparedGeneration> image_copy;
     std::unique_ptr<PreparedGraph> old_graph;
+    std::unique_ptr<PreparedWindows> old_windows;
     ImageHandoffState image_state{1,0,0};
     Texture* qualification_target = nullptr;
     std::array<std::uint16_t,2> qualification_size{};
     DXGI_ADAPTER_DESC1 identity{};
     bgfx::ProgramHandle composite = BGFX_INVALID_HANDLE, encode = BGFX_INVALID_HANDLE;
-    bgfx::UniformHandle sampler = BGFX_INVALID_HANDLE, encoding = BGFX_INVALID_HANDLE;
+    bgfx::UniformHandle sampler = BGFX_INVALID_HANDLE, encoding = BGFX_INVALID_HANDLE, resample = BGFX_INVALID_HANDLE;
     bgfx::VertexBufferHandle vertices = BGFX_INVALID_HANDLE;
     bgfx::TextureHandle transparent = BGFX_INVALID_HANDLE;
     using Input = GraphInput;
@@ -103,7 +100,7 @@ struct CompositionRenderer::Impl : GraphResources {
         outputs.reserve(windows.size());
         for (auto& configured : windows) {
             check(ids.insert(configured.id).second,"Native output window identities must be unique");
-            outputs.push_back(Output{std::move(configured),nullptr,BGFX_INVALID_HANDLE,{},{},0});
+            outputs.push_back(Output{std::move(configured)});
         }
     }
     void check_owner() const {check(std::this_thread::get_id() == owner,"Native compositor must use its GPU owner thread");}
@@ -112,8 +109,90 @@ struct CompositionRenderer::Impl : GraphResources {
         const auto found = std::find_if(outputs.begin(),outputs.end(),[&](const auto& item){return item.configured.id == id;});
         check(found != outputs.end(),"Native output identity is not prepared");return *found;
     }
+    void create_window(Output& output) {
+        const auto& config = output.configured;
+        output.window = SDL_CreateWindow(config.name.c_str(),static_cast<int>(config.width),static_cast<int>(config.height),
+            SDL_WINDOW_HIDDEN|(config.desktop_position ? SDL_WINDOW_BORDERLESS : 0));
+        check(output.window != nullptr,SDL_GetError());
+        if (config.desktop_position) {
+            check(SDL_SetWindowPosition(output.window,(*config.desktop_position)[0],(*config.desktop_position)[1]),SDL_GetError());
+            auto* handle = SDL_GetPointerProperty(SDL_GetWindowProperties(output.window),SDL_PROP_WINDOW_WIN32_HWND_POINTER,nullptr);
+            RECT rectangle{};check(handle && GetWindowRect(static_cast<HWND>(handle),&rectangle) != FALSE,"Native display rectangle query failed");
+            check(rectangle.left == (*config.desktop_position)[0] && rectangle.top == (*config.desktop_position)[1] &&
+                rectangle.right-rectangle.left == static_cast<LONG>(config.width) && rectangle.bottom-rectangle.top == static_cast<LONG>(config.height),
+                "Native display window pixel rectangle differs from explicit target binding");
+        }
+    }
+    static void destroy_output_handles(Output& output) {
+        if (bgfx::isValid(output.swapchain)) {bgfx::destroy(output.swapchain);output.swapchain = BGFX_INVALID_HANDLE;}
+        for (auto* texture : {&output.held,&output.presented}) {
+            if (bgfx::isValid(texture->framebuffer)) {bgfx::destroy(texture->framebuffer);texture->framebuffer = BGFX_INVALID_HANDLE;}
+            if (bgfx::isValid(texture->texture)) {bgfx::destroy(texture->texture);texture->texture = BGFX_INVALID_HANDLE;}
+        }
+    }
+    bool bind_windows(PreparedWindows& candidate) {
+        if (candidate.last_step_frame == sequence) return false;candidate.last_step_frame = sequence;
+        while (candidate.cursor < candidate.outputs.size() && candidate.reuse[candidate.cursor] != SIZE_MAX) ++candidate.cursor;
+        if (candidate.cursor == candidate.outputs.size()) return true;
+        auto& output = candidate.outputs[candidate.cursor];
+        if (candidate.step == 0) create_window(output);
+        else if (candidate.step == 1) {
+            auto* handle = SDL_GetPointerProperty(SDL_GetWindowProperties(output.window),SDL_PROP_WINDOW_WIN32_HWND_POINTER,nullptr);
+            check(handle != nullptr,"Prepared output HWND unavailable");
+            output.swapchain = bgfx::createFrameBuffer(handle,static_cast<std::uint16_t>(output.configured.width),static_cast<std::uint16_t>(output.configured.height));
+            check(bgfx::isValid(output.swapchain),"Prepared output swapchain handle failed");
+        } else {
+            auto& texture = candidate.step < 4 ? output.held : output.presented;
+            if (candidate.step%2 == 0) {
+                texture.texture = bgfx::createTexture2D(1,1,false,1,bgfx::TextureFormat::RGBA8,BGFX_TEXTURE_RT|sampling);
+                check(bgfx::isValid(texture.texture),"Prepared output placeholder failed");
+            } else {
+                const auto pointer = reinterpret_cast<std::uintptr_t>(texture.native.Get());
+                check(bgfx::overrideInternal2D(texture.texture,pointer,static_cast<std::uint16_t>(output.configured.width),
+                    static_cast<std::uint16_t>(output.configured.height)) == pointer,"Prepared output texture import failed");
+                texture.framebuffer = bgfx::createFrameBuffer(1,&texture.texture,false);
+                check(bgfx::isValid(texture.framebuffer),"Prepared output framebuffer handle failed");
+            }
+        }
+        if (++candidate.step == 6) {candidate.step = 0;++candidate.cursor;}
+        return false; // Realize queued owner/DXGI work with the old scene still active.
+    }
+    void apply_windows(std::unique_ptr<PreparedWindows>& candidate) {
+        for (std::size_t i = 0; i < candidate->outputs.size(); ++i) {
+            auto& next = candidate->outputs[i];const auto reuse = candidate->reuse[i];
+            if (reuse != SIZE_MAX) {
+                check(reuse < outputs.size(),"Prepared window reuse index invalid");auto& prior = outputs[reuse];
+                next.window = std::exchange(prior.window,nullptr);std::swap(next.swapchain,prior.swapchain);
+                std::swap(next.held,prior.held);std::swap(next.presented,prior.presented);std::swap(next.held_frame,prior.held_frame);
+                next.show_pending = !next.configured.hidden && next.configured.controls.enabled && !prior.configured.controls.enabled;
+                if (!next.configured.hidden && !next.configured.controls.enabled) check(SDL_HideWindow(next.window),SDL_GetError());
+            } else {
+                const auto prior = std::find_if(outputs.begin(),outputs.end(),[&](const auto& old){return old.configured.id == next.configured.id;});
+                if (prior != outputs.end() && next.configured.controls.freeze && prior->held_frame) {
+                    next.freeze_source = prior->held.texture;next.held_frame = prior->held_frame;
+                    next.freeze_source_size = {prior->configured.width,prior->configured.height};
+                }
+                next.show_pending = !next.configured.hidden && next.configured.controls.enabled;
+            }
+        }
+        outputs.swap(candidate->outputs);candidate->cursor = 0;candidate->step = 0;candidate->retiring = true;
+        candidate->last_step_frame = UINT64_MAX;candidate->hide_pending = true;old_windows = std::move(candidate);
+    }
     ~Impl() {
         if (initialized) {
+            if (old_windows) {
+                if (!old_windows->fence_submitted) {context->End(old_windows->completion.Get());old_windows->fence_submitted = true;}
+                context->Flush();const auto deadline = std::chrono::steady_clock::now()+std::chrono::seconds{2};
+                for (;;) {
+                    BOOL done = FALSE;const auto result = context->GetData(old_windows->completion.Get(),&done,sizeof(done),D3D11_ASYNC_GETDATA_DONOTFLUSH);
+                    if (result == S_OK && done) break;
+                    if (FAILED(result) || std::chrono::steady_clock::now() >= deadline) {
+                        std::fputs("Fatal: window shutdown completion failed/timed out\n",stderr);std::_Exit(1);
+                    }
+                    std::this_thread::yield();
+                }
+                for (auto& output : old_windows->outputs) destroy_output_handles(output);
+            }
             if (old_graph) {
                 context->Flush();const auto deadline = std::chrono::steady_clock::now()+std::chrono::seconds{2};
                 for (;;) {
@@ -148,7 +227,7 @@ struct CompositionRenderer::Impl : GraphResources {
                 for (auto* t : {&output.held,&output.presented}) {
                     if (bgfx::isValid(t->framebuffer)) bgfx::destroy(t->framebuffer);
                     if (bgfx::isValid(t->texture)) bgfx::destroy(t->texture);
-                    t->native.Reset();
+                    if (!t->borrowed) t->native.Reset();
                 }
             }
             for (const auto& t : targets) {if (bgfx::isValid(t.framebuffer)) bgfx::destroy(t.framebuffer);if (bgfx::isValid(t.texture)) bgfx::destroy(t.texture);}
@@ -158,6 +237,7 @@ struct CompositionRenderer::Impl : GraphResources {
             if (bgfx::isValid(encode)) bgfx::destroy(encode);
             if (bgfx::isValid(sampler)) bgfx::destroy(sampler);
             if (bgfx::isValid(encoding)) bgfx::destroy(encoding);
+            if (bgfx::isValid(resample)) bgfx::destroy(resample);
             if (bgfx::isValid(vertices)) bgfx::destroy(vertices);
             if (bgfx::isValid(transparent)) bgfx::destroy(transparent);
             // The size/format override creates a bgfx-owned resource. Drop our
@@ -173,6 +253,7 @@ struct CompositionRenderer::Impl : GraphResources {
             image_copy.reset();
             old_graph.reset();
         }
+        if (old_windows) {for (auto& output : old_windows->outputs) if (output.window) SDL_DestroyWindow(output.window);old_windows.reset();}
         for (auto& output : outputs) if (output.window) SDL_DestroyWindow(output.window);
         if (window) SDL_DestroyWindow(window);
         SDL_Quit();
@@ -255,7 +336,8 @@ struct CompositionRenderer::Impl : GraphResources {
         for (const auto& node : plan->nodes) check(node.width <= caps->limits.maxTextureSize && node.height <= caps->limits.maxTextureSize && node.width <= UINT16_MAX && node.height <= UINT16_MAX,"Native compositor exceeds actual texture dimension capacity");
         composite = program(shaders::composite,sizeof(shaders::composite)); encode = program(shaders::encode,sizeof(shaders::encode));
         sampler = bgfx::createUniform("s_image",bgfx::UniformType::Sampler);encoding = bgfx::createUniform("u_encoding",bgfx::UniformType::Vec4);
-        check(bgfx::isValid(sampler) && bgfx::isValid(encoding),"Native compositor uniform creation failed");
+        resample = bgfx::createUniform("u_resample",bgfx::UniformType::Vec4);
+        check(bgfx::isValid(sampler) && bgfx::isValid(encoding) && bgfx::isValid(resample),"Native compositor uniform creation failed");
         struct Vertex {float x,y,z,u,v;}; constexpr std::array triangle{Vertex{-1,-1,0,0,1},Vertex{3,-1,0,2,1},Vertex{-1,3,0,0,-1}};
         bgfx::VertexLayout layout; layout.begin(bgfx::RendererType::Direct3D11).add(bgfx::Attrib::Position,3,bgfx::AttribType::Float).add(bgfx::Attrib::TexCoord0,2,bgfx::AttribType::Float).end();
         vertices = bgfx::createVertexBuffer(bgfx::copy(triangle.data(),sizeof(triangle)),layout);check(bgfx::isValid(vertices),"Native compositor geometry allocation failed");
@@ -306,7 +388,11 @@ struct CompositionRenderer::Impl : GraphResources {
             check(bgfx::isValid(output.swapchain),"Native output swapchain allocation failed");
         }
         bgfx::frame();bgfx::frame(); start = std::chrono::steady_clock::now();
-        for (const auto& output : outputs) if (!output.configured.hidden && output.configured.controls.enabled) check(SDL_ShowWindow(output.window),SDL_GetError());
+        for (auto& output : outputs) output.show_pending = !output.configured.hidden && output.configured.controls.enabled;
+    }
+    void sampling_size(std::uint32_t source_width,std::uint32_t source_height,std::uint32_t width,std::uint32_t height) {
+        const std::array<float,4> size{static_cast<float>(source_width),static_cast<float>(source_height),static_cast<float>(width),static_cast<float>(height)};
+        bgfx::setUniform(resample,size.data());
     }
     RenderedFrame frame() {
         check_owner();
@@ -318,6 +404,7 @@ struct CompositionRenderer::Impl : GraphResources {
             bgfx::setViewRect(view,0,0,static_cast<std::uint16_t>(node.width),static_cast<std::uint16_t>(node.height));
             bgfx::setViewClear(view,BGFX_CLEAR_COLOR,0);bgfx::touch(view);
             for (const auto input : node.layers) {
+                sampling_size(plan->nodes[input].width,plan->nodes[input].height,node.width,node.height);
                 bgfx::setVertexBuffer(0,vertices);bgfx::setTexture(0,sampler,inputs[input]);
                 bgfx::setState(BGFX_STATE_WRITE_RGB|BGFX_STATE_WRITE_A|BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE,BGFX_STATE_BLEND_INV_SRC_ALPHA));
                 bgfx::submit(view,composite);++draws;
@@ -327,6 +414,7 @@ struct CompositionRenderer::Impl : GraphResources {
             const auto index = exported_nodes[output];const auto& node = plan->nodes[index];const auto view = static_cast<bgfx::ViewId>(render_views+output);
             bgfx::setViewFrameBuffer(view,exports[output].framebuffer);bgfx::setViewRect(view,0,0,static_cast<std::uint16_t>(node.width),static_cast<std::uint16_t>(node.height));
             bgfx::setViewClear(view,BGFX_CLEAR_COLOR,0);const std::array<float,4> parameters{node.encoding.transfer == render::Transfer::srgb ? 1.F : 0.F,node.encoding.alpha == render::Alpha::premultiplied ? 1.F : 0.F,0,0};
+            sampling_size(node.width,node.height,node.width,node.height);
             bgfx::setUniform(encoding,parameters.data());bgfx::setVertexBuffer(0,vertices);bgfx::setTexture(0,sampler,inputs[index]);bgfx::setState(BGFX_STATE_WRITE_RGB|BGFX_STATE_WRITE_A);bgfx::submit(view,encode);++draws;
         }
         for (std::size_t index = 0; index < outputs.size(); ++index) {
@@ -337,17 +425,24 @@ struct CompositionRenderer::Impl : GraphResources {
                 bgfx::setViewFrameBuffer(id,framebuffer);bgfx::setViewRect(id,0,0,static_cast<std::uint16_t>(config.width),static_cast<std::uint16_t>(config.height));
                 bgfx::setViewClear(id,BGFX_CLEAR_COLOR,0x000000ff);bgfx::touch(id);return id;
             };
-            const auto draw = [&](bgfx::ViewId id,bgfx::TextureHandle texture,bgfx::ProgramHandle program) {
+            const auto draw = [&](bgfx::ViewId id,bgfx::TextureHandle texture,bgfx::ProgramHandle program,std::uint32_t width,std::uint32_t height) {
+                sampling_size(width,height,config.width,config.height);
                 bgfx::setVertexBuffer(0,vertices);bgfx::setTexture(0,sampler,texture);bgfx::setState(BGFX_STATE_WRITE_RGB|BGFX_STATE_WRITE_A);bgfx::submit(id,program);++draws;
             };
-            if (config.controls.enabled && !config.controls.freeze) {
+            bool carried = false;
+            if (bgfx::isValid(output.freeze_source)) {
+                if (config.controls.freeze) {draw(view(0,output.held.framebuffer),output.freeze_source,composite,output.freeze_source_size[0],output.freeze_source_size[1]);carried = true;}
+                else output.held_frame = 0;
+                output.freeze_source = BGFX_INVALID_HANDLE;
+            }
+            if (!carried && config.controls.enabled && !config.controls.freeze) {
                 const auto id = view(0,output.held.framebuffer);
                 constexpr std::array<float,4> display_encoding{1,0,1,0};
-                bgfx::setUniform(encoding,display_encoding.data());draw(id,inputs[config.node],encode);output.held_frame = sequence+1;
-            } else if (!output.held_frame) static_cast<void>(view(0,output.held.framebuffer));
+                bgfx::setUniform(encoding,display_encoding.data());draw(id,inputs[config.node],encode,plan->nodes[config.node].width,plan->nodes[config.node].height);output.held_frame = sequence+1;
+            } else if (!carried && !output.held_frame) static_cast<void>(view(0,output.held.framebuffer));
             const auto presented = view(1,output.presented.framebuffer);
-            if (config.controls.enabled && !config.controls.blackout && output.held_frame) draw(presented,output.held.texture,composite);
-            draw(view(2,output.swapchain),output.presented.texture,composite);
+            if (config.controls.enabled && !config.controls.blackout && output.held_frame) draw(presented,output.held.texture,composite,config.width,config.height);
+            draw(view(2,output.swapchain),output.presented.texture,composite,config.width,config.height);
         }
         if (qualification_target) {
             const auto view = static_cast<bgfx::ViewId>(render_views+exported_nodes.size()+outputs.size()*3);
@@ -355,10 +450,19 @@ struct CompositionRenderer::Impl : GraphResources {
             bgfx::setViewRect(view,0,0,qualification_size[0],qualification_size[1]);bgfx::setViewClear(view,BGFX_CLEAR_COLOR,0);
             const auto& node = plan->nodes[plan->preview];const std::array<float,4> parameters{
                 node.encoding.transfer == render::Transfer::srgb ? 1.F : 0.F,node.encoding.alpha == render::Alpha::premultiplied ? 1.F : 0.F,0,0};
+            sampling_size(node.width,node.height,qualification_size[0],qualification_size[1]);
             bgfx::setUniform(encoding,parameters.data());bgfx::setVertexBuffer(0,vertices);bgfx::setTexture(0,sampler,inputs[plan->preview]);
             bgfx::setState(BGFX_STATE_WRITE_RGB|BGFX_STATE_WRITE_A);bgfx::submit(view,encode);++draws;
         }
         bgfx::frame();
+        if (old_windows && !old_windows->fence_submitted) {
+            context->End(old_windows->completion.Get());context->Flush();old_windows->fence_submitted = true;
+        }
+        for (auto& output : outputs) if (output.show_pending) {check(SDL_ShowWindow(output.window),SDL_GetError());output.show_pending = false;}
+        if (old_windows && old_windows->hide_pending) {
+            for (auto& output : old_windows->outputs) if (output.window && !output.configured.hidden) check(SDL_HideWindow(output.window),SDL_GetError());
+            old_windows->hide_pending = false;
+        }
         const auto ticks = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now()-start).count();
         return {++sequence,applied_revision,{ticks,{1,1000000000}}};
     }
@@ -372,7 +476,8 @@ std::uint64_t CompositionRenderer::submitted_draws() const noexcept {return impl
 void CompositionRenderer::output_controls(const domain::Id& id,OutputControls controls) {
     auto& output = impl_->output(id);
     if (!output.configured.hidden && controls.enabled != output.configured.controls.enabled)
-        check(controls.enabled ? SDL_ShowWindow(output.window) : SDL_HideWindow(output.window),SDL_GetError());
+        if (controls.enabled) output.show_pending = true;
+        else {check(SDL_HideWindow(output.window),SDL_GetError());output.show_pending = false;}
     output.configured.controls = controls;
 }
 std::uint64_t CompositionRenderer::held_frame(const domain::Id& id) const {return impl_->output(id).held_frame;}
@@ -394,7 +499,7 @@ std::vector<std::uint8_t> CompositionRenderer::capture_output_for_test(const dom
 }
 bool CompositionRenderer::apply_images(std::unique_ptr<PreparedGeneration>& candidate) {
     impl_->check_owner();
-    if (impl_->image_copy || impl_->old_graph) return false;
+    if (impl_->image_copy || impl_->old_graph || impl_->old_windows) return false;
     check(candidate && candidate->generation > impl_->image_state.generation && candidate->plan &&
         candidate->plan->revision >= impl_->applied_revision && candidate->images.size() == impl_->images.size() && !candidate->retired_plan,
         "Native image candidate generation/revision/count is stale or invalid");
@@ -445,10 +550,19 @@ GraphLimits CompositionRenderer::graph_limits() const {
         impl_->targets.size()+impl_->exports.size()+impl_->outputs.size()*3,impl_->outputs.size(),impl_->owned_payload_bytes,output_payload};
 }
 bool CompositionRenderer::stage_graph(std::unique_ptr<PreparedGraph>& candidate) {
-    impl_->check_owner();if (impl_->old_graph || impl_->image_copy) return false;
+    std::unique_ptr<PreparedWindows> no_windows;return stage_scene(candidate,no_windows);
+}
+bool CompositionRenderer::stage_scene(std::unique_ptr<PreparedGraph>& candidate,std::unique_ptr<PreparedWindows>& windows) {
+    impl_->check_owner();if (impl_->old_graph || impl_->old_windows || impl_->image_copy) return false;
+    const auto desired_windows = windows ? windows->outputs.size() : impl_->outputs.size();
     check(candidate && candidate->generation > impl_->image_state.generation && candidate->resources.plan &&
-        candidate->resources.plan->revision >= impl_->applied_revision && candidate->output_nodes.size() == impl_->outputs.size() &&
+        candidate->resources.plan->revision >= impl_->applied_revision && candidate->output_nodes.size() == desired_windows &&
         candidate->owner_device.Get() == impl_->device.Get() && !candidate->retiring,"Prepared graph generation/revision/routes/device invalid");
+    if (windows) {
+        check(windows->generation == candidate->generation && windows->owner_device.Get() == impl_->device.Get() && !windows->retiring,
+            "Prepared window generation/device invalid");
+        if (!impl_->bind_windows(*windows)) return false;
+    }
     if (candidate->last_step_frame == impl_->sequence) return false;
     candidate->last_step_frame = impl_->sequence;
     if (candidate->cursor < candidate->binding_count) {
@@ -477,6 +591,7 @@ bool CompositionRenderer::stage_graph(std::unique_ptr<PreparedGraph>& candidate)
     const auto revision = next.plan->revision;
     const auto previous_views = impl_->render_views+impl_->exported_nodes.size()+impl_->outputs.size()*3;
     impl_->context->End(candidate->completion.Get());impl_->context->Flush(); // Covers last reads of the old graph.
+    if (windows) impl_->apply_windows(windows);
     static_cast<GraphResources&>(*impl_).swap(next);
     const auto current_views = impl_->render_views+impl_->exported_nodes.size()+impl_->outputs.size()*3;
     for (auto view = current_views; view < previous_views; ++view) bgfx::resetView(static_cast<bgfx::ViewId>(view));
@@ -486,10 +601,18 @@ bool CompositionRenderer::stage_graph(std::unique_ptr<PreparedGraph>& candidate)
     impl_->old_graph = std::move(candidate);return true;
 }
 void CompositionRenderer::cancel_graph(std::unique_ptr<PreparedGraph>& candidate) {
+    std::unique_ptr<PreparedWindows> no_windows;cancel_scene(candidate,no_windows);
+}
+void CompositionRenderer::cancel_scene(std::unique_ptr<PreparedGraph>& candidate,std::unique_ptr<PreparedWindows>& windows) {
     impl_->check_owner();check(candidate && candidate->owner_device.Get() == impl_->device.Get() && !impl_->old_graph && !impl_->image_copy,
         "Graph cancellation ownership/device is busy/invalid");
+    check(!impl_->old_windows && (!windows || windows->owner_device.Get() == impl_->device.Get()),"Window cancellation ownership/device invalid");
     impl_->context->End(candidate->completion.Get());impl_->context->Flush();
     candidate->retiring = true;candidate->cursor = 0;candidate->last_step_frame = UINT64_MAX;impl_->old_graph = std::move(candidate);
+    if (windows) {
+        impl_->context->End(windows->completion.Get());impl_->context->Flush();windows->fence_submitted = true;
+        windows->retiring = true;windows->cursor = 0;windows->step = 0;windows->last_step_frame = UINT64_MAX;impl_->old_windows = std::move(windows);
+    }
 }
 std::unique_ptr<PreparedGraph> CompositionRenderer::retire_graph() {
     impl_->check_owner();if (!impl_->old_graph) return {};
@@ -509,6 +632,24 @@ std::unique_ptr<PreparedGraph> CompositionRenderer::retire_graph() {
     }
     if (old.destroyed_frame != UINT64_MAX && impl_->sequence < old.destroyed_frame) return {};
     return std::move(impl_->old_graph);
+}
+std::unique_ptr<PreparedWindows> CompositionRenderer::retire_windows() {
+    impl_->check_owner();if (!impl_->old_windows) return {};auto& old = *impl_->old_windows;
+    if (!old.fence_submitted) return {};
+    if (!old.completion_observed) {
+        BOOL done = FALSE;const auto result = impl_->context->GetData(old.completion.Get(),&done,sizeof(done),D3D11_ASYNC_GETDATA_DONOTFLUSH);
+        require(result,"Old window completion failed");if (result != S_OK || !done) return {};old.completion_observed = true;
+    }
+    if (old.last_step_frame == impl_->sequence) return {};old.last_step_frame = impl_->sequence;
+    while (old.cursor < old.outputs.size() && !old.outputs[old.cursor].window) ++old.cursor;
+    if (old.cursor == old.outputs.size()) return std::move(impl_->old_windows);
+    auto& output = old.outputs[old.cursor];
+    if (old.step == 0) {
+        Impl::destroy_output_handles(output);old.destroyed_frame = impl_->sequence+1;old.step = 1;
+    } else if (impl_->sequence >= old.destroyed_frame) {
+        SDL_DestroyWindow(output.window);output.window = nullptr;old.step = 0;++old.cursor;
+    }
+    return {};
 }
 std::vector<std::uint8_t> CompositionRenderer::qualify_borrowed_target(PreparedTarget target) {
     impl_->check_owner();

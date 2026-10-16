@@ -42,7 +42,12 @@ graph = report['graphHandoff']
 assert graph['graphsApplied'] == 2 and graph['oldSceneFramesDuringStaging'] > 0 and graph['retirementFrames'] > 0
 assert graph['partiallyBoundGraphCancelled'] and graph['backgroundRetirement'] and graph['captures'] == 6
 assert graph['maxChannelError'] <= graph['tolerance'] == 2
+windows = report['windowHandoff']
+assert windows['captures'] == 8 and windows['maxChannelError'] <= windows['tolerance'] == 2
+assert windows['partiallyCreatedWindowCancelled'] and windows['removedOutputRejected']
+assert windows['windowCounts'] == [1, 3, 2] and windows['oldFramesDuringPreparation'] > 0 and windows['retirementFrames'] > 0
+assert windows['shutdownWithPendingWindows']
 report['command'] = command
 report['probeSha256'] = hashlib.sha256(args.probe.read_bytes()).hexdigest()
 args.report.write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
-print('Passed concurrent preparation, two live image handoffs, completion/retirement and six live-state goldens')
+print('Passed background image/graph/window preparation, live handoffs, completion/retirement and fixed-tolerance GPU goldens')
