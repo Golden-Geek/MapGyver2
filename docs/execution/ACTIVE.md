@@ -275,6 +275,16 @@ Preceding quad-mapping CI 38890132043 at
 Debug/Release, Linux/macOS, plan and quality-gate. It finished before the visual-
 rules publication; hosted compilation remains separate from local GPU evidence.
 
+Current visual-rules code is `abaa2014136f1f9235a179daa5ba179d1e66f4b4`.
+Clean Debug/Release wrappers each pass 24/24, dirty=false, and all native checks;
+`docs/progress/M04-visual-rules-local.json` retains commands/hashes/schema/types
+and parsed results. Each configuration passes thirty mapping/visual captures at
+maximum 1/255, seventeen main engine phases through revision 22, and source
+recovery. Publish code/evidence, then implement M05.C01 asset/image import and
+the remaining M04.C04 end-to-end workflow. The C03 backend rules are implemented;
+M04 qualification, preview, complete editor, animated media and M01 physical/
+deadline/recovery gates remain open. No milestone tag or release authorization.
+
 - python tools/ci/check.py --preset windows-local --configuration Debug --skip-bootstrap
 - python tools/ci/check.py --preset windows-local --configuration Release --skip-bootstrap
 - python tools/validate_plan.py
