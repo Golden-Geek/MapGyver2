@@ -11,8 +11,9 @@ preparation decodes the declared transfer function before premultiplication.
 Compositing uses back-to-front premultiplied over. Exports unpremultiply, encode
 the named canvas transfer function and optionally premultiply its encoded RGB.
 Nearest sampling uses pixel centres. Quad projection mapping and shared UV charts
-are compiled below. Masks, crop/fit/fill, blend modes other than over, HDR and
-media decoding remain subsequent work.
+are compiled below. Crop/fit/fill, rectangle/ellipse masks, opacity and
+over/add/screen blends are implemented. HDR output, mesh warps and media decoding
+remain subsequent work.
 
 Plans bound node/layer counts, dimensions, prepared-image bytes, compatible
 RGBA16F target slots and total texture payload. Lifetime intervals prevent a
@@ -32,7 +33,7 @@ that function. The adapter provides offline qualification and the engine's
 independent native owner. [Native window controls](../runtime/README.md)
 prepare independent swapchains and bounded linear mapped/held/presented textures.
 Image/graph/window handoffs and four-corner mapping are implemented; encoded
-preview and the remaining mapping rules stay open. This implementation
+preview, mesh warps and qualification gates stay open. This implementation
 does not accept the renderer or complete M04.
 
 `compile_mappings()` resolves stable-ID calibration boundaries into normalized
@@ -102,9 +103,9 @@ completion, retirement on a preparation thread, rejected old/foreign/oversized
 candidates and six fixed-tolerance freeze/unfreeze/blackout goldens. The engine
 now connects this API to authored source edits through bounded preparation/
 retirement mailboxes; see [native qualification](../runtime/README.md).
-Composition-graph resource banks now support canvas-size and topology changes on
-existing windows. Window replacement, mapping and sustained deadline/recovery
-qualification remain open.
+Composition-graph resource banks support canvas-size and topology changes, with
+separate prepared-window replacement and quad mapping. Sustained deadline,
+physical-output and device-recovery qualification remain open.
 
 The downstream bgfx overlay in `ports/bgfx` supports a prepared D3D11 target
 through a realized 1x1 placeholder and `overrideInternal2D` before attachment.
@@ -116,3 +117,24 @@ is staged in the graph-bank path. Background native allocation, incremental owne
 binding, frame-boundary swap and completion-based retirement preserve old frames
 during preparation. The GPU probe resizes a canvas, adds a source/layer with a new
 root node index, verifies freeze/unfreeze and cancels a partially bound graph.
+
+Surface content settings crop composition UV and fit/fill the cropped chart
+region to the logical surface aspect, measured from mean opposite local edges.
+Fitting centres surface UV before chart mapping; uncovered fit pixels are black
+on the physical output. Each patch masks original surface UV with a rectangle or
+ellipse, independently of crop/fit. Hard rectangle edges are half-open. Feather
+is a normalized inward fraction of mask bounds; inversion complements coverage.
+Surface and patch opacity multiply all associated components together.
+
+Composition layers and projector patches support linear over, add and screen,
+all with over alpha. Foreground RGB clips to SDR 0..1 when consumed; add can
+produce brighter intermediates before the next consumer/export. Named exports
+retain their declared transfer/alpha encoding; physical outputs encode opaque
+sRGB after composition over black. Layer opacity zero culls that visual branch.
+Per-composition layer count is additionally bounded by the finite half-float
+accumulation range. No HDR-output or multiply-mode support is claimed.
+
+Optional authored settings resolve to explicit defaults when loading earlier v1
+documents; previous required/unknown-field checks stay strict. The same registry
+supplies UI/OSC/remote writes, validation and undo. See
+[ADR-023](../../docs/adr/ADR-023-visual-settings-wire-extension.md).

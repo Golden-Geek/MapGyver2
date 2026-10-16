@@ -245,6 +245,36 @@ preceding Windows CI was allowed to finish green before this push. Masks,
 crop/fit/fill and additional blend rules are
 still required C03 work; no milestone or physical-output completion.
 
+M04.C03 visual rules working slice: typed optional layer/surface/patch settings
+now provide crop/fit/fill, opacity, rectangle/ellipse masks with feather/inversion,
+and linear over/add/screen blends. ADR-023 records narrowly registered legacy v1
+defaults; all earlier required/unknown-field checks remain strict. Generated
+schema/TypeScript and OSC ranges match. Chart-aware fit uses the charted region,
+not the whole canvas. Portable tests pass legacy restoration, atomic invalid
+edits, undo, persistence, fit/crop, mask coverage and blend equations. Initial
+Debug GPU checks pass eighteen new visual captures plus twelve mapping captures,
+maximum 1/255 at fixed 2/255. The extended engine run passes seventeen phases/
+900 frames through applied revision 22, registry visual writes/undo with source
+instances/placements/calibration unchanged, and granted OSC visual/source writes.
+One fixture used /library/compositions instead of registered /show/compositions;
+the service correctly rejected it and the fixture now verifies registered paths.
+Full current Debug/Release wrappers and native regressions are next, followed by
+tested commits, clean-source evidence and publication. M04 and M01 qualification
+remain open; preview, media imports/playback and complete editor workflows remain.
+
+The current visual-rules slice now passes Debug/Release wrappers 24/24 and all
+native regressions. Each configuration passes eighteen visual and twelve mapping
+captures at maximum 1/255, seventeen main phases/900 frames through applied
+revision 22 (eleven graph/two window generations), and loaded-source recovery.
+Next: commit, retain clean-source evidence and publish. Then address the remaining
+M04 end-to-end workflow and independent M05 asset/image/media import work, while
+keeping all prerequisite qualification gates open. No completion tag.
+
+Preceding quad-mapping CI 38890132043 at
+`32889739fea0e94c0eb16f8a182acca2e38d2a39` is fully green on Windows
+Debug/Release, Linux/macOS, plan and quality-gate. It finished before the visual-
+rules publication; hosted compilation remains separate from local GPU evidence.
+
 - python tools/ci/check.py --preset windows-local --configuration Debug --skip-bootstrap
 - python tools/ci/check.py --preset windows-local --configuration Release --skip-bootstrap
 - python tools/validate_plan.py

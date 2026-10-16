@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include <mapgyver/render/plan.hpp>
+#include <mapgyver/control/wire.hpp>
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -75,6 +76,11 @@ void mappings() {
     check(render::reference_output(*plan,f.output,8,8) == render::reference_output(*original,f.output,8,8),"Continuous chart seam changed content or introduced a gap");
     check(render::reference_output(*plan,f.output,9,9) == render::reference_output(*original,f.output,9,9),"A pixel-centre seam blended translucent content twice");
     check(render::reference_output(*plan,output2,8,8) != render::reference_output(*plan,f.output,8,8),"One surface across outputs ignored its chart");
+    auto fitted_stage = controller.snapshot()->stage.data();fitted_stage.surfaces.at(f.surface).content = SurfaceContent{{0,0},{1,1},ContentFit::fit,1};
+    control::ProjectController fitted{*controller.snapshot()};static_cast<void>(fitted.transact(0,{control::ReplaceStage{fitted_stage}}));
+    const auto fitted_plan = render::compile(*fitted.snapshot(),1,f.images);
+    const auto& fitted_map = std::find_if(fitted_plan->output_mappings.begin(),fitted_plan->output_mappings.end(),[&](const auto& map){return map.id == output2;})->patches[0];
+    check(!render::mapped_pixel(fitted_map,0,4,8,8,8,8) && render::mapped_pixel(fitted_map,2,4,8,8,8,8),"Fit used the whole canvas aspect instead of the charted surface region");
     check(f.state.stage.data().patches.begin()->second.calibration == calibration,"Compilation rewrote authored calibration");
     auto reordered = controller.snapshot()->stage.data();
     for (auto& [id,patch] : reordered.patches) {static_cast<void>(id);std::reverse(patch.calibration.vertices.begin(),patch.calibration.vertices.end());std::reverse(patch.calibration.triangles.begin(),patch.calibration.triangles.end());}
@@ -95,6 +101,73 @@ void mappings() {
     const auto bad_surface = render::compile(*controller.snapshot(),6,f.images);
     check(std::any_of(bad_surface->output_mappings.begin(),bad_surface->output_mappings.end(),[](const auto& map){return map.reason == "surface_geometry_quad_unavailable";}),"Overlapping surface faces were silently replaced by a full quad");
 }
+void visual_rules() {
+    auto f = fixture();auto legacy = control::wire::encode_project(f.state);
+    for (auto& [id,surface] : legacy["stage"]["surfaces"].items()) {static_cast<void>(id);surface.erase("content");}
+    for (auto& [id,patch] : legacy["stage"]["patches"].items()) {static_cast<void>(id);patch.erase("visual");}
+    for (auto& [id,c] : legacy["definitions"]["compositions"].items()) {static_cast<void>(id);for (auto& layer : c["layers"]) layer.erase("visual");}
+    check(control::wire::encode_project(control::wire::decode_project(legacy)) == control::wire::encode_project(f.state),"Legacy visual defaults changed authored state");
+    auto malformed = legacy;malformed["stage"]["surfaces"].begin().value()["contnet"] = nullptr;
+    bool rejected = false;try {static_cast<void>(control::wire::decode_project(malformed));} catch (const control::wire::Error&) {rejected = true;}
+    check(rejected,"Legacy defaults silently accepted an unknown field");
+    malformed = legacy;malformed["stage"]["surfaces"].begin().value().erase("geometry");rejected = false;
+    try {static_cast<void>(control::wire::decode_project(malformed));} catch (const control::wire::Error&) {rejected = true;}
+    check(rejected,"Legacy defaults weakened required geometry fields");
+    control::ProjectController controller{f.state};auto definitions = f.state.instances.definitions().data();
+    for (auto& [id,c] : definitions.compositions) {static_cast<void>(id);for (auto& [port,canvas] : c.canvases) {static_cast<void>(port);canvas.width = 8;canvas.height = 4;}}
+    static_cast<void>(controller.transact(0,{control::ReplaceDefinitions{definitions}}));
+    const auto original = controller.snapshot();const auto surface_path = "/stage/surfaces/"+f.surface.str()+"/content";
+    const auto patch_id = original->stage.data().patches.begin()->first;
+    const auto patch_path = "/stage/patches/"+patch_id.str()+"/visual";
+    auto write = [&](const std::vector<control::ParameterWrite>& values) {
+        return control::ParameterRegistry{controller}.write(controller,controller.revision(),values);
+    };
+    write({{surface_path+"/fit",ContentFit::fit}});
+    auto plan = render::compile(*controller.snapshot(),controller.revision(),f.images);const auto& fit = plan->output_mappings[0].patches[0];
+    check(!render::mapped_pixel(fit,0,0,8,8,8,4) && render::mapped_pixel(fit,0,2,8,8,8,4) == std::array<std::uint32_t,2>{0,0},"Fit failed centred letterboxing on the logical aspect");
+    write({{surface_path+"/fit",ContentFit::fill}});
+    plan = render::compile(*controller.snapshot(),controller.revision(),f.images);const auto& fill = plan->output_mappings[0].patches[0];
+    check(render::mapped_pixel(fill,0,0,8,8,8,4) == std::array<std::uint32_t,2>{2,0} &&
+        render::mapped_pixel(fill,7,7,8,8,8,4) == std::array<std::uint32_t,2>{5,3},"Fill failed centred source cropping");
+    write({{surface_path+"/fit",ContentFit::stretch},{surface_path+"/cropMinimum",Vec2{.25,.25}},{surface_path+"/cropMaximum",Vec2{.75,.75}},
+        {surface_path+"/opacity",.5},{patch_path+"/opacity",.8},{patch_path+"/mask/shape",MaskShape::rectangle},
+        {patch_path+"/mask/minimum",Vec2{.25,.25}},{patch_path+"/mask/maximum",Vec2{.75,.75}}});
+    plan = render::compile(*controller.snapshot(),controller.revision(),f.images);const auto& rectangle = plan->output_mappings[0].patches[0];
+    check(render::mapped_pixel(rectangle,0,0,8,8,8,4) == std::array<std::uint32_t,2>{2,1},"Normalized crop was not applied after fitting");
+    check(render::patch_coverage(rectangle,0,0,8,8) == 0 && std::abs(render::patch_coverage(rectangle,4,4,8,8)-.4F) < 1e-6F,"Rectangle/opacity coverage changed premultiplied scaling");
+    write({{patch_path+"/mask/inverted",true}});plan = render::compile(*controller.snapshot(),controller.revision(),f.images);
+    const auto& inverted = plan->output_mappings[0].patches[0];
+    check(std::abs(render::patch_coverage(inverted,0,0,8,8)-.4F) < 1e-6F && render::patch_coverage(inverted,4,4,8,8) == 0,"Mask inversion changed only its interior");
+    write({{patch_path+"/mask/inverted",false},{patch_path+"/mask/shape",MaskShape::ellipse},{patch_path+"/mask/minimum",Vec2{0,0}},
+        {patch_path+"/mask/maximum",Vec2{1,1}},{patch_path+"/mask/feather",.25},{patch_path+"/blend",BlendMode::screen}});
+    plan = render::compile(*controller.snapshot(),controller.revision(),f.images);const auto& ellipse = plan->output_mappings[0].patches[0];
+    check(render::patch_coverage(ellipse,0,0,8,8) == 0 && std::abs(render::patch_coverage(ellipse,4,4,8,8)-.4F) < 1e-6F &&
+        render::patch_coverage(ellipse,1,3,8,8) > .28F && render::patch_coverage(ellipse,1,3,8,8) < .30F,"Ellipse feather did not produce analytic inward coverage");
+    check(controller.snapshot()->stage.data().patches.at(patch_id).calibration == original->stage.data().patches.at(patch_id).calibration,"Visual edits rewrote physical calibration");
+    const auto encoded = control::wire::encode_project(*controller.snapshot());
+    check(control::wire::encode_project(control::wire::decode_project(encoded)) == encoded,"Visual fields did not survive logical persistence");
+    const auto before = controller.snapshot();const auto revision = controller.revision();
+    rejected = false;try {write({{surface_path+"/opacity",.25},{surface_path+"/cropMinimum",Vec2{.9,.9}}});} catch (const ModelError&) {rejected = true;}
+    check(rejected && controller.snapshot() == before && controller.revision() == revision,"Invalid crop partially applied its opacity transaction");
+    static_cast<void>(controller.undo(revision));check(controller.snapshot()->stage.data().patches.at(patch_id).visual->mask.shape == MaskShape::rectangle,"Visual settings bypassed shared undo");
+    const auto stable = controller.snapshot();const auto stable_revision = controller.revision();
+    auto invalid_definitions = stable->instances.definitions().data();invalid_definitions.compositions.begin()->second.layers[0].visual = LayerVisual{1.1,BlendMode::over};
+    rejected = false;try {static_cast<void>(controller.transact(stable_revision,{control::ReplaceDefinitions{invalid_definitions}}));} catch (const ModelError&) {rejected = true;}
+    check(rejected && controller.snapshot() == stable && controller.revision() == stable_revision,"Structural layer edits bypassed visual validation");
+    auto invalid_stage = stable->stage.data();invalid_stage.patches.at(patch_id).visual->mask.feather = .75;
+    rejected = false;try {static_cast<void>(controller.transact(stable_revision,{control::ReplaceStage{invalid_stage}}));} catch (const ModelError&) {rejected = true;}
+    check(rejected && controller.snapshot() == stable && controller.revision() == stable_revision,"Structural patch edits bypassed mask validation");
+    auto inactive = stable->instances.definitions().data();inactive.compositions.begin()->second.layers[0].visual = LayerVisual{0,BlendMode::over};
+    static_cast<void>(controller.transact(stable_revision,{control::ReplaceDefinitions{inactive}}));
+    const auto culled = render::compile(*controller.snapshot(),controller.revision(),{});
+    check(culled->nodes.size() == 1 && culled->issues.empty() && culled->image_upload_bytes == 0 &&
+        controller.snapshot()->instances.instances() == stable->instances.instances(),"Zero opacity failed to cull unavailable visual work or changed source ownership");
+    const render::Pixel a{.2F,.1F,0,.5F},b{.1F,.2F,.3F,.5F};
+    const auto over = render::blend(a,b,BlendMode::over),add = render::blend(a,b,BlendMode::add),screen = render::blend(a,b,BlendMode::screen);
+    check(std::abs(over.r-.25F) < 1e-6F && std::abs(add.r-.3F) < 1e-6F && std::abs(screen.r-.28F) < 1e-6F &&
+        over.a == .75F && add.a == .75F && screen.a == .75F,"Blend RGB/associated alpha equations changed");
+    check(render::blend(a,b,BlendMode::over,0) == b && render::blend(a,b,BlendMode::over,1) == over,"Opacity endpoints changed background or blend mode");
 }
-int main() {try {solve();mappings();std::cout << "Projective mapping, shared charts, colour and stable calibration contracts passed\n";return 0;}
+}
+int main() {try {solve();mappings();visual_rules();std::cout << "Projective mapping, visual rules, legacy defaults and shared control contracts passed\n";return 0;}
     catch (const std::exception& error) {std::cerr << error.what() << '\n';return 1;}}

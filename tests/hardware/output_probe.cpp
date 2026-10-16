@@ -130,11 +130,38 @@ nlohmann::json mapping_cases() {
     changed.layouts.at(layout).charts = {quad_chart(surface,{0,0},{.5,1}),quad_chart(second,{.5,0},{1,1}),quad_chart(third,{2.0/3,0},{1,1})};
     static_cast<void>(controller.transact(4,{control::ReplaceStage{changed}}));
     apply(render::compile(*controller.snapshot(),5,images(4)),4);capture("shared-boundary-pixel-centre");
+    auto mapping_captures = captures;captures = nlohmann::json::array();
+    const auto styled = [&](domain::Stage next,const char* phase,std::uint64_t generation) {
+        static_cast<void>(controller.transact(controller.revision(),{control::ReplaceStage{std::move(next)}}));
+        apply(render::compile(*controller.snapshot(),controller.revision(),images(generation)),generation);capture(phase);
+    };
+    changed = controller.snapshot()->stage.data();changed.surfaces.at(surface).content = SurfaceContent{{0,0},{1,1},ContentFit::fit,.7};
+    for (auto& vertex : changed.surfaces.at(surface).geometry.vertices) vertex.local.x *= 2;
+    styled(changed,"centred-fit-letterbox-opacity",5);
+    changed = controller.snapshot()->stage.data();changed.surfaces.at(surface).content = SurfaceContent{{.125,.25},{.875,.75},ContentFit::fill,1};
+    styled(changed,"centred-fill-cropped-source",6);
+    changed = controller.snapshot()->stage.data();changed.surfaces.at(surface).content = SurfaceContent{{0,0},{1,1},ContentFit::stretch,.65};
+    changed.patches.at(first_patch_id).visual = PatchVisual{.8,BlendMode::over,{MaskShape::rectangle,{.15,.15},{.85,.85},.1,false}};
+    styled(changed,"rectangle-feather-premultiplied-opacity",7);
+    changed = controller.snapshot()->stage.data();changed.patches.at(first_patch_id).visual = PatchVisual{.75,BlendMode::screen,{MaskShape::ellipse,{.1,.1},{.9,.9},.15,true}};
+    changed.patches.at(Id{"mapped-patch-1"}).calibration = quad_calibration(128,64);
+    styled(changed,"inverted-ellipse-feather-screen-overlap",8);
+    changed = controller.snapshot()->stage.data();changed.patches.at(Id{"mapped-patch-1"}).visual = PatchVisual{.7,BlendMode::add,{MaskShape::rectangle,{.2,.2},{.8,.8},0,true}};
+    styled(changed,"inverted-hard-rectangle-add-overlap",9);
+    auto definitions = controller.snapshot()->instances.definitions().data();
+    for (auto& [id,composition] : definitions.compositions) {
+        static_cast<void>(id);auto copy = composition.layers.front();composition.layers.front().visual = LayerVisual{.4,BlendMode::over};
+        copy.id = Id{"screen-layer"};copy.visual = LayerVisual{.6,BlendMode::screen};composition.layers.push_back(copy);
+        copy.id = Id{"add-layer"};copy.visual = LayerVisual{.25,BlendMode::add};composition.layers.push_back(copy);
+    }
+    static_cast<void>(controller.transact(controller.revision(),{control::ReplaceDefinitions{std::move(definitions)}}));
+    apply(render::compile(*controller.snapshot(),controller.revision(),images(10)),10);capture("composition-layer-opacity-screen-add");
     const auto identity = renderer.adapter_identity();
     return {{"evidenceClass","native-hardware-GPU-hidden-projective-mapping"},{"surfaces",3},{"windows",3},{"patchCounts",{5,5,5,4}},{"compositionNodes",plan->nodes.size()},
-        {"framesSubmitted",frames},{"oldFramesDuringPreparation",staging_frames},{"retirementFrames",retirement_frames},{"captures",captures},
+        {"framesSubmitted",frames},{"oldFramesDuringPreparation",staging_frames},{"retirementFrames",retirement_frames},{"captures",mapping_captures},
+        {"visualCaptures",captures},{"visualPhases",6},{"compositionLayerCount",plan->nodes[plan->preview].layers.size()},
         {"vendorId",identity[0]},{"deviceId",identity[1]},{"luidHigh",identity[2]},{"luidLow",identity[3]},{"sourceCpuUploadBytes",device->cpu_upload_bytes()},
-        {"scope","One shared composition over three charted surface regions, one surface across outputs, several surfaces on one output, perspective quad coverage and overlapping linear-light premultiplied patches. Real background graph handoff and native completion. Intermediate texture captures, not physical scanout, mesh warps, masks, crop/fit/fill or sustained deadline qualification."}};
+        {"scope","Shared composition regions and many-to-many projector patches, perspective coverage, half-open seams, centred crop/fit/fill, rectangle/ellipse masks with inversion/feather, opacity and over/add/screen patch/layer blends. Real graph handoff/completion. Intermediate captures, not physical scanout, mesh warps, HDR output or sustained deadlines."}};
 }
 nlohmann::json run() {
     nlohmann::json displays = nlohmann::json::array();

@@ -93,15 +93,44 @@ PatchMapping prepare(const domain::ProjectionPatch& patch,const domain::Stage& s
         pixels[i] = {found->projector_pixels.x/patch.calibration.reference_width,found->projector_pixels.y/patch.calibration.reference_height};uv[i] = found->surface_uv;
         require(uv[i].x >= 0 && uv[i].x <= 1 && uv[i].y >= 0 && uv[i].y <= 1,"projection_surface_uv_unavailable");
     }
-    const auto chart_matrix = chart(stage,patch.surface);
-    const auto matrix = multiply(chart_matrix,homography(pixels,uv));
-    PatchMapping result{patch.id,source->node};
-    double scale = 0;for (const auto value : matrix) scale = std::max(scale,std::abs(value));
-    require(std::isfinite(scale) && scale > 0,"Homography is not finite");
-    for (std::size_t r = 0; r < 3; ++r) for (std::size_t c = 0; c < 3; ++c) {
-        result.rows[r][c] = static_cast<float>(matrix[r*3+c]/scale);
-        require(std::isfinite(result.rows[r][c]),"Homography exceeds native float capacity");
+    const auto chart_matrix = chart(stage,patch.surface),surface_matrix = homography(pixels,uv);
+    const auto content = stage.surfaces.at(patch.surface).content.value_or(domain::SurfaceContent{});
+    const auto visual = patch.visual.value_or(domain::PatchVisual{});
+    const auto& source_node = plan.nodes.at(source->node);
+    const auto crop_width = content.crop_maximum.x-content.crop_minimum.x,crop_height = content.crop_maximum.y-content.crop_minimum.y;
+    double sx = 1,sy = 1;
+    if (content.fit != domain::ContentFit::stretch) {
+        std::array<Vec2,4> local{};
+        for (std::size_t i = 0; i < 4; ++i) local[i] = std::find_if(geometry.vertices.begin(),geometry.vertices.end(),[&](const auto& vertex){return vertex.uv == unit[i];})->local;
+        const auto distance = [](Vec2 a,Vec2 b){return std::hypot(a.x-b.x,a.y-b.y);};
+        const auto surface_aspect = (distance(local[0],local[1])+distance(local[3],local[2]))/(distance(local[0],local[3])+distance(local[1],local[2]));
+        std::array<Vec2,4> charted{};
+        for (std::size_t i = 0; i < 4; ++i) {const auto point = transform(chart_matrix,unit[i]);charted[i] = {point.x*source_node.width*crop_width,point.y*source_node.height*crop_height};}
+        const auto chart_aspect = (distance(charted[0],charted[1])+distance(charted[3],charted[2]))/(distance(charted[0],charted[3])+distance(charted[1],charted[2]));
+        const auto ratio = chart_aspect/surface_aspect;
+        require(std::isfinite(ratio) && ratio > 0,"surface_content_aspect_unavailable");
+        sx = content.fit == domain::ContentFit::fit ? std::max(1.0,1/ratio) : std::min(1.0,1/ratio);
+        sy = content.fit == domain::ContentFit::fit ? std::max(1.0,ratio) : std::min(1.0,ratio);
     }
+    const Matrix3 fitting{sx,0,(1-sx)*.5,0,sy,(1-sy)*.5,0,0,1};
+    const auto content_matrix = multiply(fitting,surface_matrix);
+    const auto matrix = multiply(chart_matrix,content_matrix);
+    PatchMapping result{patch.id,source->node};
+    const auto canonical = [](const Matrix3& value,auto& rows) {
+        double scale = 0;for (const auto item : value) scale = std::max(scale,std::abs(item));
+        require(std::isfinite(scale) && scale > 0,"Homography is not finite");
+        for (std::size_t r = 0; r < 3; ++r) for (std::size_t c = 0; c < 3; ++c) {
+            rows[r][c] = static_cast<float>(value[r*3+c]/scale);require(std::isfinite(rows[r][c]),"Homography exceeds native float capacity");
+        }
+    };
+    canonical(matrix,result.rows);canonical(surface_matrix,result.surface_rows);canonical(content_matrix,result.content_rows);
+    result.crop = {static_cast<float>(content.crop_minimum.x),static_cast<float>(content.crop_minimum.y),static_cast<float>(crop_width),static_cast<float>(crop_height)};
+    require(result.crop[2] > 0 && result.crop[3] > 0,"surface_crop_precision_unavailable");
+    result.mask_bounds = {static_cast<float>(visual.mask.minimum.x),static_cast<float>(visual.mask.minimum.y),
+        static_cast<float>(visual.mask.maximum.x-visual.mask.minimum.x),static_cast<float>(visual.mask.maximum.y-visual.mask.minimum.y)};
+    require(result.mask_bounds[2] > 0 && result.mask_bounds[3] > 0,"mask_precision_unavailable");
+    result.visual = {static_cast<float>(content.opacity*visual.opacity),static_cast<float>(visual.mask.shape),static_cast<float>(visual.mask.feather),visual.mask.inverted ? 1.F : 0.F};
+    result.blend = visual.blend;
     const double winding = cross(pixels[0],pixels[1],pixels[2]) > 0 ? 1 : -1;
     for (std::size_t i = 0; i < 4; ++i) {
         const auto a = pixels[i], b = pixels[(i+1)%4];
@@ -117,7 +146,8 @@ PatchMapping prepare(const domain::ProjectionPatch& patch,const domain::Stage& s
         const auto w = result.rows[2][0]*static_cast<float>(point.x)+result.rows[2][1]*static_cast<float>(point.y)+result.rows[2][2];
         require(std::isfinite(w) && w != 0 && (previous_w == 0 || std::signbit(w) == std::signbit(previous_w)),"projection_precision_unavailable");previous_w = w;
     }
-    result.identity = pixels == unit && uv == unit && chart_matrix == Matrix3{1,0,0,0,1,0,0,0,1};
+    result.identity = pixels == unit && uv == unit && chart_matrix == Matrix3{1,0,0,0,1,0,0,0,1} && sx == 1 && sy == 1 &&
+        content.crop_minimum == Vec2{0,0} && content.crop_maximum == Vec2{1,1};
     return result;
 }
 }
@@ -154,10 +184,28 @@ std::optional<std::array<std::uint32_t,2>> mapped_pixel(const PatchMapping& patc
         if (coverage < 0 || (coverage == 0 && edge[3] == 0)) return {};
     }
     const auto dot = [&](const auto& row){return row[0]*px+row[1]*py+row[2];};
+    const auto content_w = dot(patch.content_rows[2]);if (!std::isfinite(content_w) || content_w == 0) return {};
+    const auto cx = dot(patch.content_rows[0])/content_w,cy = dot(patch.content_rows[1])/content_w;
+    if (!(cx >= 0 && cx < 1 && cy >= 0 && cy < 1)) return {};
     const auto w = dot(patch.rows[2]);if (!std::isfinite(w) || w == 0) return {};
-    const auto u = dot(patch.rows[0])/w, v = dot(patch.rows[1])/w;
+    auto u = dot(patch.rows[0])/w, v = dot(patch.rows[1])/w;
     if (!(u >= 0 && u < 1 && v >= 0 && v < 1)) return {};
+    u = patch.crop[0]+u*patch.crop[2];v = patch.crop[1]+v*patch.crop[3];
     return std::array{std::min(source_width-1,static_cast<std::uint32_t>(u*static_cast<float>(source_width))),
         std::min(source_height-1,static_cast<std::uint32_t>(v*static_cast<float>(source_height)))};
+}
+float patch_coverage(const PatchMapping& patch,std::uint32_t x,std::uint32_t y,std::uint32_t width,std::uint32_t height) {
+    if (patch.visual[1] == 0) return patch.visual[0];
+    const auto px = (static_cast<float>(x)+.5F)/static_cast<float>(width),py = (static_cast<float>(y)+.5F)/static_cast<float>(height);
+    const auto dot = [&](const auto& row){return row[0]*px+row[1]*py+row[2];};const auto w = dot(patch.surface_rows[2]);
+    if (!std::isfinite(w) || w == 0) return 0;
+    const auto qx = (dot(patch.surface_rows[0])/w-patch.mask_bounds[0])/patch.mask_bounds[2];
+    const auto qy = (dot(patch.surface_rows[1])/w-patch.mask_bounds[1])/patch.mask_bounds[3];
+    const auto distance = patch.visual[1] == 1 ? std::min({qx,1-qx,qy,1-qy}) :
+        (1-std::sqrt((qx*2-1)*(qx*2-1)+(qy*2-1)*(qy*2-1)))*.5F;
+    float coverage = patch.visual[2] > 0 ? std::clamp(distance/patch.visual[2],0.F,1.F) :
+        (patch.visual[1] == 1 ? (qx >= 0 && qx < 1 && qy >= 0 && qy < 1 ? 1.F : 0.F) : (distance >= 0 ? 1.F : 0.F));
+    if (patch.visual[3] > 0) coverage = 1-coverage;
+    return coverage*patch.visual[0];
 }
 }

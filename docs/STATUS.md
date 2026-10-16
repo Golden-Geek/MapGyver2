@@ -31,7 +31,7 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
   and packaged Svelte shell now have native socket/Chromium tests. A native owner
   now supplies applied revision/frame/show time for prepared static scenes and
   live output controls and fixed-layout source image changes. Encoded preview,
-  remaining mapping rules, complete editor
+  complete editor
   workflows and durable saving remain open. CI 38838422770 is green on Windows/Linux/macOS, including the
   bounded socket saturation fix and actual browser tests. Its one failed macOS
   dependency download passed on a terminal failed-job retry.
@@ -51,8 +51,9 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
   preparation now has an explicitly owned thread-safe D3D11 device and actual
   background-allocation GPU checks. A fixed-layout renderer image handoff has
   native completion/retirement checks and engine integration; window handoff has
-  clean Debug/Release adapter and engine/undo evidence. Mesh geometry, masks,
-  crop/fit/fill, additional blend rules,
+  clean Debug/Release adapter and engine/undo evidence. Crop/fit/fill,
+  rectangle/ellipse masks, opacity and over/add/screen layer/patch blends are now
+  implemented with typed registry, legacy defaults and GPU checks. Mesh geometry,
   preview and hardware
   qualification remain open.
 - Open product decisions: current NDI licensing/distribution path and exact reference hardware/workload budgets.

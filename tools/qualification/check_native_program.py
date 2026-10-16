@@ -254,7 +254,29 @@ try:
         client.call('undo', revision=17)
         mapping_recovered = until(lambda: observed(client, 18, ''))
         phases.append({'name': 'unsupported_mapping_retains_scene_and_authored_calibration_then_undo', 'pending': held_mapping['renderer'], 'recovered': mapping_recovered['renderer']})
-        final_revision = 20
+        visual_project = mapping_recovered['data']['project'];visual_surface = next(iter(visual_project['stage']['surfaces']))
+        visual_patch = next(iter(visual_project['stage']['patches']))
+        visual_composition = next(iter(visual_project['definitions']['compositions']))
+        visual_layer = visual_project['definitions']['compositions'][visual_composition]['layers'][0]['id']
+        surface_visual = f'/stage/surfaces/{visual_surface}/content';patch_visual = f'/stage/patches/{visual_patch}/visual'
+        layer_visual = f'/show/compositions/{visual_composition}/layers/{visual_layer}/visual'
+        visual_values = [(surface_visual+'/fit','contentFit','fill'),(surface_visual+'/cropMinimum','Vec2',{'x':.125,'y':.125}),
+            (surface_visual+'/cropMaximum','Vec2',{'x':.875,'y':.875}),(patch_visual+'/mask/shape','maskShape','ellipse'),
+            (patch_visual+'/mask/feather','real',.1),(patch_visual+'/opacity','real',.8),(patch_visual+'/blend','blendMode','screen'),
+            (layer_visual+'/opacity','real',.75),(layer_visual+'/blend','blendMode','add')]
+        registered = {item['address'] for item in mapping_recovered['data']['registry']['parameters']}
+        assert all(address in registered for address,kind,value in visual_values)
+        client.call('parameters', {'writes':[{'schemaVersion':1,'write':{'address':address,'value':{'type':kind,'value':value}}}
+            for address,kind,value in visual_values]}, 18)
+        visual_applied = until(lambda: observed(client, 19, ''))
+        assert visual_applied['data']['project']['sources'] == visual_project['sources']
+        assert visual_applied['data']['project']['placements'] == visual_project['placements']
+        assert visual_applied['data']['project']['stage']['patches'][visual_patch]['calibration'] == visual_project['stage']['patches'][visual_patch]['calibration']
+        client.call('undo', revision=19)
+        visual_restored = until(lambda: observed(client, 20, ''))
+        assert visual_restored['data']['project']['stage'] == visual_project['stage']
+        phases.append({'name':'registry_crop_mask_layer_patch_blends_and_undo','applied':visual_applied['renderer'],'restored':visual_restored['renderer']})
+        final_revision = 22
     owner = client.snapshot()
     client.call('transferEdit', {'expectedOwnershipGeneration': owner['ownershipGeneration'], 'targetSession': ready['oscquery']['oscSessionId']})
     def osc_string(value):
@@ -262,10 +284,14 @@ try:
     messages = [osc_string(path)+osc_string(',T' if value else ',F') for path, value in
         [(paths[0]+'/freeze', not args.hot_images), (paths[1]+'/blackout', True), (paths[2]+'/enabled', False)]]
     if args.hot_images: messages.append(osc_string(locator)+osc_string(',s')+osc_string('alpha'))
+    if args.hot_images:
+        messages.extend([osc_string(patch_visual+'/opacity')+osc_string(',d')+struct.pack('>d',.75),
+            osc_string(patch_visual+'/mask/shape')+osc_string(',s')+osc_string('rectangle'),
+            osc_string(patch_visual+'/blend')+osc_string(',s')+osc_string('screen')])
     bundle = b'#bundle\0'+struct.pack('>Q', 1)+b''.join(struct.pack('>I', len(message))+message for message in messages)
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as osc: osc.sendto(bundle, ('127.0.0.1', ready['oscquery']['oscPort']))
     if args.hot_images:
-        osc_source = until(lambda: observed(client, 19, ''))
+        osc_source = until(lambda: observed(client, 21, ''))
         phases.append({'name': 'granted_OSC_atomic_source_and_output_handoff', 'renderer': osc_source['renderer']})
         # Hold only after the new alpha pixels were submitted; the final golden
         # can then compare that held image against the final compiled source.
@@ -280,7 +306,7 @@ try:
     assert native['framesSubmitted'] == 900 and native['appliedRevision'] == final_revision and len(native['captures']) == 3
     if args.hot_images:
         assert native['sceneGeneration'] >= 7 and native['sourceGpuCopySubmissions'] >= 3
-        assert native['graphGenerationsApplied'] >= 8 and native['internalConstantCpuUploadBytes'] == 16
+        assert native['graphGenerationsApplied'] >= 10 and native['internalConstantCpuUploadBytes'] == 16
         assert native['windowGenerationsApplied'] == 2
         assert native['preparedGenerations'] >= native['sourceGpuCopySubmissions']+native['graphGenerationsApplied']
         assert native['sourceCopiedPayloadBytes'] == native['sourceGpuCopySubmissions']*131072

@@ -7,9 +7,10 @@ namespace mapgyver::control {
 using LayerSource = std::variant<AssetPort,InputPort>;
 using ParameterValue = std::variant<bool,std::uint64_t,double,std::string,Id,std::optional<Id>,Rational,
     MediaTime,Vec2,StreamKind,LayoutMode,WarpMode,LayerSource,InstancePort,
-    std::vector<Id>,std::vector<Triangle>,std::vector<Seam>>;
+    std::vector<Id>,std::vector<Triangle>,std::vector<Seam>,ContentFit,BlendMode,MaskShape>;
 enum class ParameterType { boolean, unsigned_integer, real, text, reference, optional_reference, rational,
-    media_time, point2, stream_kind, layout_mode, warp_mode, layer_source, instance_port, id_list, triangles, seams };
+    media_time, point2, stream_kind, layout_mode, warp_mode, layer_source, instance_port, id_list, triangles, seams,
+    content_fit, blend_mode, mask_shape };
 enum class Access { read_only, read_write, trigger };
 enum class Persistence { authored, resume_checkpoint, transient };
 struct NumericRange { double minimum, maximum; };

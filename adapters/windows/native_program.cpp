@@ -307,7 +307,7 @@ struct NativeProgram::Impl {
                 {"sourceCopiedPayloadBytes",renderer.image_handoff_state().copied_payload_bytes},
                 {"lastPreparationError",preparation_error},
                 {"deviceId",gpu[1]},{"luidHigh",gpu[2]},{"luidLow",gpu[3]},{"configuredOutputs",active_routing->reasons},{"captures",captures},
-                {"scope","Actual engine native owner, source-image/graph/window handoffs and projective quad mapping with shared composition UV charts. Offline final intermediate captures, not physical scanout, encoded preview or sustained deadlines. Mesh warps, masks, crop/fit/fill and additional blend modes remain open."}};
+                {"scope","Actual engine native owner, source-image/graph/window handoffs, projective quad/shared-chart mapping, crop/fit/fill, masks, opacity and over/add/screen blends. Offline final intermediate captures, not physical scanout, encoded preview, HDR output or sustained deadlines. Mesh warps and remaining media/editor/recovery qualification stay open."}};
             report["sourceIssues"] = Json::array();
             for (const auto& issue : plan->issues) report["sourceIssues"].push_back({{"instance",issue.source.first.str()},{"port",issue.source.second.str()},{"reason",issue.reason}});
             std::ofstream output{std::filesystem::path{std::u8string{options.report.begin(),options.report.end()}},std::ios::binary};output << report.dump(2) << '\n';

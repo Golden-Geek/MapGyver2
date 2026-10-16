@@ -25,6 +25,12 @@ using Microsoft::WRL::ComPtr;
 void check(bool value,const char* message) {if (!value) throw render::Error(message);}
 void require(HRESULT result,const char* message) {if (FAILED(result)) throw render::Error(message);}
 constexpr std::uint64_t sampling = BGFX_SAMPLER_MIN_POINT|BGFX_SAMPLER_MAG_POINT|BGFX_SAMPLER_MIP_POINT|BGFX_SAMPLER_U_CLAMP|BGFX_SAMPLER_V_CLAMP;
+std::uint64_t visual_state(domain::BlendMode mode) {
+    constexpr auto write = BGFX_STATE_WRITE_RGB|BGFX_STATE_WRITE_A;
+    if (mode == domain::BlendMode::add) return write|BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_ONE,BGFX_STATE_BLEND_ONE,BGFX_STATE_BLEND_ONE,BGFX_STATE_BLEND_INV_SRC_ALPHA);
+    if (mode == domain::BlendMode::screen) return write|BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_ONE,BGFX_STATE_BLEND_INV_SRC_COLOR,BGFX_STATE_BLEND_ONE,BGFX_STATE_BLEND_INV_SRC_ALPHA);
+    return write|BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE,BGFX_STATE_BLEND_INV_SRC_ALPHA);
+}
 struct Callbacks : bgfx::CallbackI {
     std::array<char,65536> trace{}; std::size_t used = 0;
     void fatal(const char*,std::uint16_t,bgfx::Fatal::Enum,const char* message) override {
@@ -84,6 +90,8 @@ struct CompositionRenderer::Impl : GraphResources {
     bgfx::ProgramHandle composite = BGFX_INVALID_HANDLE, encode = BGFX_INVALID_HANDLE, mapping = BGFX_INVALID_HANDLE;
     bgfx::UniformHandle sampler = BGFX_INVALID_HANDLE, encoding = BGFX_INVALID_HANDLE, resample = BGFX_INVALID_HANDLE;
     bgfx::UniformHandle mapping_rows = BGFX_INVALID_HANDLE, mapping_edges = BGFX_INVALID_HANDLE, mapping_identity = BGFX_INVALID_HANDLE;
+    bgfx::UniformHandle layer_visual = BGFX_INVALID_HANDLE, surface_rows = BGFX_INVALID_HANDLE, crop = BGFX_INVALID_HANDLE,
+        mask_bounds = BGFX_INVALID_HANDLE, patch_visual = BGFX_INVALID_HANDLE, content_rows = BGFX_INVALID_HANDLE;
     bgfx::VertexBufferHandle vertices = BGFX_INVALID_HANDLE;
     bgfx::TextureHandle transparent = BGFX_INVALID_HANDLE;
     using Input = GraphInput;
@@ -244,6 +252,7 @@ struct CompositionRenderer::Impl : GraphResources {
             if (bgfx::isValid(mapping_rows)) bgfx::destroy(mapping_rows);
             if (bgfx::isValid(mapping_edges)) bgfx::destroy(mapping_edges);
             if (bgfx::isValid(mapping_identity)) bgfx::destroy(mapping_identity);
+            for (const auto handle : {layer_visual,surface_rows,crop,mask_bounds,patch_visual,content_rows}) if (bgfx::isValid(handle)) bgfx::destroy(handle);
             if (bgfx::isValid(vertices)) bgfx::destroy(vertices);
             if (bgfx::isValid(transparent)) bgfx::destroy(transparent);
             // The size/format override creates a bgfx-owned resource. Drop our
@@ -342,7 +351,11 @@ struct CompositionRenderer::Impl : GraphResources {
             "Native startup image import exceeds bounded transient payload capacity");
         check(image_ids.size()+plan->targets.size()+exported_nodes.size()+outputs.size()*3+1 <= caps->limits.maxTextures,
               "Native compositor exceeds actual texture handle capacity");
-        for (const auto& node : plan->nodes) check(node.width <= caps->limits.maxTextureSize && node.height <= caps->limits.maxTextureSize && node.width <= UINT16_MAX && node.height <= UINT16_MAX,"Native compositor exceeds actual texture dimension capacity");
+        for (const auto& node : plan->nodes) {
+            check(node.width <= caps->limits.maxTextureSize && node.height <= caps->limits.maxTextureSize && node.width <= UINT16_MAX && node.height <= UINT16_MAX,"Native compositor exceeds actual texture dimension capacity");
+            check(node.layer_visuals.empty() || node.layer_visuals.size() == node.layers.size(),"Native layer visual count differs from graph");
+            for (const auto& visual : node.layer_visuals) domain::validate_visual(visual,node.source.first);
+        }
         composite = program(shaders::composite,sizeof(shaders::composite)); encode = program(shaders::encode,sizeof(shaders::encode));
         mapping = program(shaders::mapping,sizeof(shaders::mapping));
         sampler = bgfx::createUniform("s_image",bgfx::UniformType::Sampler);encoding = bgfx::createUniform("u_encoding",bgfx::UniformType::Vec4);
@@ -350,8 +363,15 @@ struct CompositionRenderer::Impl : GraphResources {
         mapping_rows = bgfx::createUniform("u_mappingRows",bgfx::UniformType::Vec4,3);
         mapping_edges = bgfx::createUniform("u_mappingEdges",bgfx::UniformType::Vec4,4);
         mapping_identity = bgfx::createUniform("u_mappingIdentity",bgfx::UniformType::Vec4);
+        layer_visual = bgfx::createUniform("u_layerVisual",bgfx::UniformType::Vec4);
+        surface_rows = bgfx::createUniform("u_surfaceRows",bgfx::UniformType::Vec4,3);
+        crop = bgfx::createUniform("u_crop",bgfx::UniformType::Vec4);
+        mask_bounds = bgfx::createUniform("u_maskBounds",bgfx::UniformType::Vec4);
+        patch_visual = bgfx::createUniform("u_patchVisual",bgfx::UniformType::Vec4);
+        content_rows = bgfx::createUniform("u_contentRows",bgfx::UniformType::Vec4,3);
         check(bgfx::isValid(sampler) && bgfx::isValid(encoding) && bgfx::isValid(resample),"Native compositor uniform creation failed");
         check(bgfx::isValid(mapping_rows) && bgfx::isValid(mapping_edges) && bgfx::isValid(mapping_identity),"Native mapping uniform creation failed");
+        for (const auto handle : {layer_visual,surface_rows,crop,mask_bounds,patch_visual,content_rows}) check(bgfx::isValid(handle),"Native visual uniform creation failed");
         struct Vertex {float x,y,z,u,v;}; constexpr std::array triangle{Vertex{-1,-1,0,0,1},Vertex{3,-1,0,2,1},Vertex{-1,3,0,0,-1}};
         bgfx::VertexLayout layout; layout.begin(bgfx::RendererType::Direct3D11).add(bgfx::Attrib::Position,3,bgfx::AttribType::Float).add(bgfx::Attrib::TexCoord0,2,bgfx::AttribType::Float).end();
         vertices = bgfx::createVertexBuffer(bgfx::copy(triangle.data(),sizeof(triangle)),layout);check(bgfx::isValid(vertices),"Native compositor geometry allocation failed");
@@ -418,10 +438,12 @@ struct CompositionRenderer::Impl : GraphResources {
             bgfx::setViewMode(view,bgfx::ViewMode::Sequential);bgfx::setViewFrameBuffer(view,targets[*node.target].framebuffer);
             bgfx::setViewRect(view,0,0,static_cast<std::uint16_t>(node.width),static_cast<std::uint16_t>(node.height));
             bgfx::setViewClear(view,BGFX_CLEAR_COLOR,0);bgfx::touch(view);
-            for (const auto input : node.layers) {
+            for (std::size_t layer = 0; layer < node.layers.size(); ++layer) {
+                const auto input = node.layers[layer];const auto visual = node.layer_visuals.empty() ? domain::LayerVisual{} : node.layer_visuals.at(layer);
+                const std::array<float,4> parameters{static_cast<float>(visual.opacity),0,0,0};bgfx::setUniform(layer_visual,parameters.data());
                 sampling_size(plan->nodes[input].width,plan->nodes[input].height,node.width,node.height);
                 bgfx::setVertexBuffer(0,vertices);bgfx::setTexture(0,sampler,inputs[input]);
-                bgfx::setState(BGFX_STATE_WRITE_RGB|BGFX_STATE_WRITE_A|BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE,BGFX_STATE_BLEND_INV_SRC_ALPHA));
+                bgfx::setState(visual_state(visual.blend));
                 bgfx::submit(view,composite);++draws;
             }
         }
@@ -442,6 +464,7 @@ struct CompositionRenderer::Impl : GraphResources {
             };
             const auto draw = [&](bgfx::ViewId id,bgfx::TextureHandle texture,bgfx::ProgramHandle program,std::uint32_t width,std::uint32_t height) {
                 sampling_size(width,height,config.width,config.height);
+                constexpr std::array<float,4> defaults{1,0,0,0};bgfx::setUniform(layer_visual,defaults.data());
                 bgfx::setVertexBuffer(0,vertices);bgfx::setTexture(0,sampler,texture);bgfx::setState(BGFX_STATE_WRITE_RGB|BGFX_STATE_WRITE_A);bgfx::submit(id,program);++draws;
             };
             bool carried = false;
@@ -452,19 +475,23 @@ struct CompositionRenderer::Impl : GraphResources {
             }
             if (!carried && config.controls.enabled && !config.controls.freeze) {
                 const auto mapped_view = view(0,output.mapped.framebuffer);
-                bgfx::setViewMode(mapped_view,bgfx::ViewMode::Sequential);bgfx::setViewClear(mapped_view,BGFX_CLEAR_COLOR,0);
+                bgfx::setViewMode(mapped_view,bgfx::ViewMode::Sequential);bgfx::setViewClear(mapped_view,BGFX_CLEAR_COLOR,0x000000ff);
                 const auto configured = std::find_if(plan->output_mappings.begin(),plan->output_mappings.end(),[&](const auto& item){return item.id == config.id;});
                 if (configured == plan->output_mappings.end()) {
                     sampling_size(plan->nodes[config.node].width,plan->nodes[config.node].height,config.width,config.height);
+                    constexpr std::array<float,4> defaults{1,0,0,0};bgfx::setUniform(layer_visual,defaults.data());
                     bgfx::setVertexBuffer(0,vertices);bgfx::setTexture(0,sampler,inputs[config.node]);
                     bgfx::setState(BGFX_STATE_WRITE_RGB|BGFX_STATE_WRITE_A);bgfx::submit(mapped_view,composite);++draws;
                 } else {
                     for (const auto& patch : configured->patches) {
                         const auto& source = plan->nodes[patch.node];sampling_size(source.width,source.height,config.width,config.height);
                         bgfx::setUniform(mapping_rows,patch.rows.data(),3);bgfx::setUniform(mapping_edges,patch.edges.data(),4);
+                        bgfx::setUniform(surface_rows,patch.surface_rows.data(),3);bgfx::setUniform(crop,patch.crop.data());
+                        bgfx::setUniform(content_rows,patch.content_rows.data(),3);
+                        bgfx::setUniform(mask_bounds,patch.mask_bounds.data());bgfx::setUniform(patch_visual,patch.visual.data());
                         const std::array<float,4> identity_parameters{patch.identity ? 1.F : 0.F,0,0,0};bgfx::setUniform(mapping_identity,identity_parameters.data());
                         bgfx::setVertexBuffer(0,vertices);bgfx::setTexture(0,sampler,inputs[patch.node]);
-                        bgfx::setState(BGFX_STATE_WRITE_RGB|BGFX_STATE_WRITE_A|BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE,BGFX_STATE_BLEND_INV_SRC_ALPHA));
+                        bgfx::setState(visual_state(patch.blend));
                         bgfx::submit(mapped_view,mapping);++draws;
                     }
                 }

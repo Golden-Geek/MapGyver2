@@ -712,6 +712,16 @@
               "type": "object"
             }
           ]
+        },
+        "visual": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LayerVisual"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -720,6 +730,27 @@
         "kind",
         "source",
         "sharedGroup"
+      ],
+      "type": "object"
+    },
+    "LayerVisual": {
+      "additionalProperties": false,
+      "properties": {
+        "blend": {
+          "enum": [
+            "over",
+            "add",
+            "screen"
+          ],
+          "type": "string"
+        },
+        "opacity": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "opacity",
+        "blend"
       ],
       "type": "object"
     },
@@ -778,6 +809,39 @@
         "id",
         "surfaceUv",
         "compositionUv"
+      ],
+      "type": "object"
+    },
+    "Mask": {
+      "additionalProperties": false,
+      "properties": {
+        "feather": {
+          "type": "number"
+        },
+        "inverted": {
+          "type": "boolean"
+        },
+        "maximum": {
+          "$ref": "#/$defs/Vec2"
+        },
+        "minimum": {
+          "$ref": "#/$defs/Vec2"
+        },
+        "shape": {
+          "enum": [
+            "none",
+            "rectangle",
+            "ellipse"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "shape",
+        "minimum",
+        "maximum",
+        "feather",
+        "inverted"
       ],
       "type": "object"
     },
@@ -1225,6 +1289,69 @@
                     "value"
                   ],
                   "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "contentFit"
+                    },
+                    "value": {
+                      "enum": [
+                        "stretch",
+                        "fit",
+                        "fill"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "blendMode"
+                    },
+                    "value": {
+                      "enum": [
+                        "over",
+                        "add",
+                        "screen"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "maskShape"
+                    },
+                    "value": {
+                      "enum": [
+                        "none",
+                        "rectangle",
+                        "ellipse"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "type": "object"
                 }
               ]
             },
@@ -1280,7 +1407,10 @@
             "InstancePort",
             "idList",
             "triangles",
-            "seams"
+            "seams",
+            "contentFit",
+            "blendMode",
+            "maskShape"
           ],
           "type": "string"
         },
@@ -1625,6 +1755,69 @@
                     "$ref": "#/$defs/Seam"
                   },
                   "type": "array"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "contentFit"
+                },
+                "value": {
+                  "enum": [
+                    "stretch",
+                    "fit",
+                    "fill"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "blendMode"
+                },
+                "value": {
+                  "enum": [
+                    "over",
+                    "add",
+                    "screen"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "maskShape"
+                },
+                "value": {
+                  "enum": [
+                    "none",
+                    "rectangle",
+                    "ellipse"
+                  ],
+                  "type": "string"
                 }
               },
               "required": [
@@ -2004,6 +2197,69 @@
                 "value"
               ],
               "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "contentFit"
+                },
+                "value": {
+                  "enum": [
+                    "stretch",
+                    "fit",
+                    "fill"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "blendMode"
+                },
+                "value": {
+                  "enum": [
+                    "over",
+                    "add",
+                    "screen"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "const": "maskShape"
+                },
+                "value": {
+                  "enum": [
+                    "none",
+                    "rectangle",
+                    "ellipse"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "type": "object"
             }
           ]
         }
@@ -2011,6 +2267,31 @@
       "required": [
         "address",
         "value"
+      ],
+      "type": "object"
+    },
+    "PatchVisual": {
+      "additionalProperties": false,
+      "properties": {
+        "blend": {
+          "enum": [
+            "over",
+            "add",
+            "screen"
+          ],
+          "type": "string"
+        },
+        "mask": {
+          "$ref": "#/$defs/Mask"
+        },
+        "opacity": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "opacity",
+        "blend",
+        "mask"
       ],
       "type": "object"
     },
@@ -2144,6 +2425,16 @@
         "surface": {
           "pattern": "^[a-zA-Z0-9_-]{1,64}$",
           "type": "string"
+        },
+        "visual": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PatchVisual"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -2439,6 +2730,16 @@
     "Surface": {
       "additionalProperties": false,
       "properties": {
+        "content": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SurfaceContent"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "contentPlacement": {
           "anyOf": [
             {
@@ -2493,6 +2794,35 @@
         "surface",
         "vertices",
         "triangles"
+      ],
+      "type": "object"
+    },
+    "SurfaceContent": {
+      "additionalProperties": false,
+      "properties": {
+        "cropMaximum": {
+          "$ref": "#/$defs/Vec2"
+        },
+        "cropMinimum": {
+          "$ref": "#/$defs/Vec2"
+        },
+        "fit": {
+          "enum": [
+            "stretch",
+            "fit",
+            "fill"
+          ],
+          "type": "string"
+        },
+        "opacity": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "cropMinimum",
+        "cropMaximum",
+        "fit",
+        "opacity"
       ],
       "type": "object"
     },

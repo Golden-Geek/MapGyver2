@@ -34,7 +34,7 @@ bool same_graph_layout(const render::Plan& first,const render::Plan& second) {
     for (std::size_t i = 0; i < first.surfaces.size(); ++i) if (first.surfaces[i].id != second.surfaces[i].id || first.surfaces[i].node != second.surfaces[i].node) return false;
     for (std::size_t i = 0; i < first.nodes.size(); ++i) {
         const auto& a = first.nodes[i];const auto& b = second.nodes[i];
-        if (a.source != b.source || a.width != b.width || a.height != b.height || a.target != b.target || a.layers != b.layers ||
+        if (a.source != b.source || a.width != b.width || a.height != b.height || a.target != b.target || a.layers != b.layers || a.layer_visuals != b.layer_visuals ||
             static_cast<bool>(a.image) != static_cast<bool>(b.image) || (a.image && a.image->resource != b.image->resource)) return false;
     }
     return true;
@@ -60,6 +60,8 @@ std::unique_ptr<PreparedGraph> prepare_graph(const PreparationDevice& device,std
         const auto& node = value.nodes[i];
         check(node.width && node.height && node.width <= limits.dimension && node.height <= limits.dimension,"Prepared graph node dimensions exceed actual capacity");
         check(node.layers.size() <= render::Limits{}.layers-layer_count,"Prepared graph layer capacity exceeded");layer_count += node.layers.size();
+        check(node.layer_visuals.empty() || node.layer_visuals.size() == node.layers.size(),"Prepared layer visual count differs from graph");
+        for (const auto& visual : node.layer_visuals) domain::validate_visual(visual,node.source.first);
         draw_count += node.layers.size();for (const auto child : node.layers) check(child < i,"Prepared graph dependency order invalid");
         if (node.target) {
             check(*node.target < value.targets.size() && !node.image,"Prepared graph node target is invalid");

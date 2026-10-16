@@ -27,6 +27,7 @@ struct Node {
     std::shared_ptr<const Image> image;
     std::vector<std::uint32_t> layers; // back-to-front, resolved video branches only
     std::optional<std::uint32_t> target;
+    std::vector<domain::LayerVisual> layer_visuals{};
 };
 struct Target {std::uint32_t width, height;}; // native internal RGBA16F
 struct Surface {Id id; std::uint32_t node;};
@@ -56,6 +57,9 @@ class Error : public std::runtime_error {public: using std::runtime_error::runti
 [[nodiscard]] std::shared_ptr<const Image> pattern(Id resource,std::uint64_t generation,std::uint32_t width,
     std::uint32_t height,std::string_view name,std::uint64_t byte_limit = 268435456);
 [[nodiscard]] Pixel over(Pixel foreground,Pixel background) noexcept;
+// SDR foreground RGB is clamped to 0..1 when consumed. Add may
+// accumulate brighter intermediates; exports/consumers use the same SDR rule.
+[[nodiscard]] Pixel blend(Pixel foreground,Pixel background,domain::BlendMode mode,float opacity = 1) noexcept;
 // Display reference composites linear premultiplied content over black, then
 // encodes opaque sRGB. Named canvas exports retain their declared alpha/transfer.
 [[nodiscard]] std::vector<std::uint8_t> reference(const Plan& plan,std::uint32_t node,bool display = false);

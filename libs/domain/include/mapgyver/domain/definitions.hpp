@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
+#include <mapgyver/domain/visual.hpp>
 #include <compare>
 #include <cstdint>
 #include <map>
@@ -75,6 +76,7 @@ struct Layer {
     // Explicit sharing within one composition instance. Equal groups must refer
     // to the same asset; separate instantiations still own separate live scopes.
     std::optional<Id> shared_group;
+    std::optional<LayerVisual> visual{};
     bool operator==(const Layer&) const = default;
 };
 struct Canvas {

@@ -33,7 +33,7 @@ template<class T> std::vector<Id> order_of(const std::vector<T>& values) {
 }
 ParameterType type_of(const ParameterValue& value) {
     // Types and alternatives deliberately share this exhaustive order.
-    static_assert(std::variant_size_v<ParameterValue> == static_cast<std::size_t>(ParameterType::seams)+1);
+    static_assert(std::variant_size_v<ParameterValue> == static_cast<std::size_t>(ParameterType::mask_shape)+1);
     return static_cast<ParameterType>(value.index());
 }
 template<class T, std::size_t Index = 0> constexpr std::size_t command_index() {
@@ -137,6 +137,10 @@ ParameterRegistry::ParameterRegistry(const ProjectController& controller, Regist
             field(layer.id,"kind",path,layer.kind,ParameterValue{StreamKind::video},"","Layer stream kind",[select](Edit& edit,const auto& value){select(edit).kind = value;});
             field(layer.id,"source",path,layer.source,std::nullopt,"","Typed asset-port or composition-input binding",[select](Edit& edit,const auto& value){select(edit).source = value;});
             field(layer.id,"sharedGroup",path,layer.shared_group,ParameterValue{std::optional<Id>{}},"","Explicit parent-local sharing group",[select](Edit& edit,const auto& value){select(edit).shared_group = value;});
+            const auto visual = layer.visual.value_or(LayerVisual{});
+            const auto visual_select = [select](Edit& edit)->auto& {auto& value = select(edit).visual;if (!value) value.emplace();return *value;};
+            field(layer.id,"opacity",path+"/visual",visual.opacity,ParameterValue{1.0},"ratio","Linear premultiplied layer opacity",[visual_select](Edit& edit,auto value){visual_select(edit).opacity = value;},Persistence::authored,NumericRange{0,1});
+            field(layer.id,"blend",path+"/visual",visual.blend,ParameterValue{BlendMode::over},"","Linear layer blend rule",[visual_select](Edit& edit,auto value){visual_select(edit).blend = value;});
         }
         for (const auto& [port,canvas] : composition.canvases) {
             const auto path = base+"/canvases/"+port.str();
@@ -182,6 +186,12 @@ ParameterRegistry::ParameterRegistry(const ProjectController& controller, Regist
     for (const auto& [id,surface] : stage.surfaces) {
         const auto base = "/stage/surfaces/"+id.str();
         readonly(id,"contentPlacement",base,surface.content_placement,"Surface ownership lease; use assign-surface-content action");
+        const auto content = surface.content.value_or(SurfaceContent{});
+        const auto content_select = [id](Edit& edit)->auto& {edit.stage_dirty = true;auto& value = edit.stage.surfaces.at(id).content;if (!value) value.emplace();return *value;};
+        field(id,"cropMinimum",base+"/content",content.crop_minimum,ParameterValue{Vec2{0,0}},"normalized-uv","Composition crop minimum",[content_select](Edit& edit,auto value){content_select(edit).crop_minimum = value;});
+        field(id,"cropMaximum",base+"/content",content.crop_maximum,ParameterValue{Vec2{1,1}},"normalized-uv","Composition crop maximum",[content_select](Edit& edit,auto value){content_select(edit).crop_maximum = value;});
+        field(id,"fit",base+"/content",content.fit,ParameterValue{ContentFit::stretch},"","Fit cropped content to the logical surface aspect",[content_select](Edit& edit,auto value){content_select(edit).fit = value;});
+        field(id,"opacity",base+"/content",content.opacity,ParameterValue{1.0},"ratio","Surface content opacity",[content_select](Edit& edit,auto value){content_select(edit).opacity = value;},Persistence::authored,NumericRange{0,1});
         const auto geometry = [id](Edit& edit)->auto& {edit.stage_dirty = true; return edit.stage.surfaces.at(id).geometry;};
         field(id,"triangles",base+"/geometry",surface.geometry.triangles,std::nullopt,"","Stable point-ID topology",[geometry](Edit& edit,const auto& value){geometry(edit).triangles = value;});
         for (const auto& point : surface.geometry.vertices) {
@@ -236,6 +246,17 @@ ParameterRegistry::ParameterRegistry(const ProjectController& controller, Regist
         const auto select = [id](Edit& edit)->auto& {edit.stage_dirty = true; return edit.stage.patches.at(id);};
         field(id,"surface",base,patch.surface,std::nullopt,"","Projected surface",[select](Edit& edit,const auto& value){select(edit).surface = value;});
         field(id,"output",base,patch.output,std::nullopt,"","Physical output target",[select](Edit& edit,const auto& value){select(edit).output = value;});
+        const auto visual = patch.visual.value_or(PatchVisual{});
+        const auto visual_select = [select](Edit& edit)->auto& {auto& value = select(edit).visual;if (!value) value.emplace();return *value;};
+        const auto visual_path = base+"/visual";
+        field(id,"opacity",visual_path,visual.opacity,ParameterValue{1.0},"ratio","Patch opacity",[visual_select](Edit& edit,auto value){visual_select(edit).opacity = value;},Persistence::authored,NumericRange{0,1});
+        field(id,"blend",visual_path,visual.blend,ParameterValue{BlendMode::over},"","Linear patch blend rule",[visual_select](Edit& edit,auto value){visual_select(edit).blend = value;});
+        const auto mask_path = visual_path+"/mask";
+        field(id,"shape",mask_path,visual.mask.shape,ParameterValue{MaskShape::none},"","Surface-UV mask shape",[visual_select](Edit& edit,auto value){visual_select(edit).mask.shape = value;});
+        field(id,"minimum",mask_path,visual.mask.minimum,ParameterValue{Vec2{0,0}},"normalized-uv","Mask minimum",[visual_select](Edit& edit,auto value){visual_select(edit).mask.minimum = value;});
+        field(id,"maximum",mask_path,visual.mask.maximum,ParameterValue{Vec2{1,1}},"normalized-uv","Mask maximum",[visual_select](Edit& edit,auto value){visual_select(edit).mask.maximum = value;});
+        field(id,"feather",mask_path,visual.mask.feather,ParameterValue{0.0},"ratio","Inward mask feather",[visual_select](Edit& edit,auto value){visual_select(edit).mask.feather = value;},Persistence::authored,NumericRange{0,.5});
+        field(id,"inverted",mask_path,visual.mask.inverted,ParameterValue{false},"","Invert mask coverage",[visual_select](Edit& edit,auto value){visual_select(edit).mask.inverted = value;});
         const auto path = base+"/calibration";
         field(id,"mode",path,patch.calibration.mode,ParameterValue{WarpMode::homography},"","Homography or mesh calibration",[select](Edit& edit,auto value){select(edit).calibration.mode = value;});
         field(id,"referenceWidth",path,static_cast<std::uint64_t>(patch.calibration.reference_width),ParameterValue{std::uint64_t{1920}},"pixels","Calibration reference width; never follows desired output mode automatically",[select](Edit& edit,auto value){select(edit).calibration.reference_width = static_cast<std::uint32_t>(value);},Persistence::authored,uint_range);

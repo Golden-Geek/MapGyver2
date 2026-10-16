@@ -4,10 +4,6 @@
 #include <array>
 
 namespace mapgyver::domain {
-struct Vec2 {
-    double x = 0, y = 0;
-    bool operator==(const Vec2&) const = default;
-};
 struct Triangle {
     std::array<Id,3> vertices;
     bool operator==(const Triangle&) const = default;
@@ -30,6 +26,7 @@ struct Surface {
     // explicitly consume one composition instance/port; direct media is invalid.
     std::optional<Id> content_placement;
     SurfaceGeometry geometry;
+    std::optional<SurfaceContent> content{};
     bool operator==(const Surface&) const = default;
 };
 struct SurfaceEdge {
@@ -102,6 +99,7 @@ struct ProjectionPatch {
     std::string name;
     Id surface, output;
     Calibration calibration;
+    std::optional<PatchVisual> visual{};
     bool operator==(const ProjectionPatch&) const = default;
 };
 struct Stage {

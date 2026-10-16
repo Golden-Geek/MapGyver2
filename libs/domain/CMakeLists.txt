@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-add_library(mapgyver_domain STATIC src/definitions.cpp src/instances.cpp src/stage.cpp)
+add_library(mapgyver_domain STATIC src/definitions.cpp src/instances.cpp src/stage.cpp src/visual.cpp)
 target_include_directories(mapgyver_domain PUBLIC include)
 if(MSVC)
   target_compile_options(mapgyver_domain PRIVATE /W4 /WX /permissive- /utf-8)

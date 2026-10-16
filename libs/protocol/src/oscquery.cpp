@@ -59,6 +59,9 @@ Json attributes(const ParameterDescriptor& descriptor) {
     if (descriptor.type == ParameterType::stream_kind) result["RANGE"] = Json::array({{{"VALS",{"video","audio","number","boolean","text","trigger"}}}});
     if (descriptor.type == ParameterType::layout_mode) result["RANGE"] = Json::array({{{"VALS",{"independent","continuous"}}}});
     if (descriptor.type == ParameterType::warp_mode) result["RANGE"] = Json::array({{{"VALS",{"homography","mesh"}}}});
+    if (descriptor.type == ParameterType::content_fit) result["RANGE"] = Json::array({{{"VALS",{"stretch","fit","fill"}}}});
+    if (descriptor.type == ParameterType::blend_mode) result["RANGE"] = Json::array({{{"VALS",{"over","add","screen"}}}});
+    if (descriptor.type == ParameterType::mask_shape) result["RANGE"] = Json::array({{{"VALS",{"none","rectangle","ellipse"}}}});
     return result;
 }
 std::optional<std::string> unescape(std::string_view value) {

@@ -27,23 +27,36 @@ template<class T> auto fields();
 template<class T, auto... Members> struct Object {
     const char* name;
     std::array<const char*,sizeof...(Members)> names;
+    std::array<bool,sizeof...(Members)> default_if_missing{};
     template<auto Member> using MemberType = std::remove_cvref_t<decltype(std::declval<T>().*Member)>;
     Json encode(const T& value) const {
         Json result = Json::object(); std::size_t index = 0;
         ((result[names[index++]] = Codec<MemberType<Members>>::encode(value.*Members)),...);
         return result;
     }
+    template<auto Member> MemberType<Member> read(const Json& value,std::size_t index) const {
+        const auto found = value.find(names[index]);if (found != value.end()) return Codec<MemberType<Member>>::decode(*found);
+        require(default_if_missing[index],"Required object field is missing");
+        if constexpr (std::is_default_constructible_v<MemberType<Member>>) return {};
+        else throw Error(ErrorCode::malformed,"Required object field is missing");
+    }
     T decode(const Json& value) const {
-        keys(value,names); std::size_t index = 0;
-        return T{Codec<MemberType<Members>>::decode(value.at(names[index++]))...};
+        require(value.is_object(),"Expected an object");
+        for (auto it = value.begin(); it != value.end(); ++it) {
+            bool known = false;for (const auto* field : names) if (it.key() == field) {known = true;break;}
+            require(known,"Object has unknown fields");
+        }
+        std::size_t index = 0;return T{read<Members>(value,index++)...};
     }
     Json shape(SchemaContext& context) const {
         Json properties = Json::object(); std::size_t index = 0;
         ((properties[names[index++]] = Codec<MemberType<Members>>::shape(context)),...);
-        return {{"type","object"},{"additionalProperties",false},{"required",names},{"properties",std::move(properties)}};
+        Json required = Json::array();for (std::size_t i = 0; i < names.size(); ++i) if (!default_if_missing[i]) required.push_back(names[i]);
+        return {{"type","object"},{"additionalProperties",false},{"required",std::move(required)},{"properties",std::move(properties)}};
     }
 };
-template<class T, auto... Members> Object<T,Members...> object(const char* name, std::array<const char*,sizeof...(Members)> names) {return {name,names};}
+template<class T, auto... Members> Object<T,Members...> object(const char* name, std::array<const char*,sizeof...(Members)> names,
+    std::array<bool,sizeof...(Members)> defaults = {}) {return {name,names,defaults};}
 template<class T, class Enable> struct Codec {
     static const char* name() {return fields<T>().name;}
     static Json encode(const T& value) {return fields<T>().encode(value);}
@@ -148,6 +161,9 @@ template<class T> struct Codec<T,std::enable_if_t<std::is_enum_v<T>>> {
         if constexpr (std::is_same_v<T,StreamKind>) return "streamKind";
         else if constexpr (std::is_same_v<T,LayoutMode>) return "layoutMode";
         else if constexpr (std::is_same_v<T,WarpMode>) return "warpMode";
+        else if constexpr (std::is_same_v<T,ContentFit>) return "contentFit";
+        else if constexpr (std::is_same_v<T,BlendMode>) return "blendMode";
+        else if constexpr (std::is_same_v<T,MaskShape>) return "maskShape";
         else return "enum";
     }
     static Json encode(T value) {for (const auto& [item,text] : enum_values<T>()) if (item == value) return text; throw Error(ErrorCode::malformed,"Unknown enum value");}
@@ -157,6 +173,9 @@ template<class T> struct Codec<T,std::enable_if_t<std::is_enum_v<T>>> {
 template<> auto enum_values<StreamKind>() {return std::array{std::pair{StreamKind::video,"video"},std::pair{StreamKind::audio,"audio"},std::pair{StreamKind::number,"number"},std::pair{StreamKind::boolean,"boolean"},std::pair{StreamKind::text,"text"},std::pair{StreamKind::trigger,"trigger"}};}
 template<> auto enum_values<LayoutMode>() {return std::array{std::pair{LayoutMode::independent,"independent"},std::pair{LayoutMode::continuous,"continuous"}};}
 template<> auto enum_values<WarpMode>() {return std::array{std::pair{WarpMode::homography,"homography"},std::pair{WarpMode::mesh,"mesh"}};}
+template<> auto enum_values<ContentFit>() {return std::array{std::pair{ContentFit::stretch,"stretch"},std::pair{ContentFit::fit,"fit"},std::pair{ContentFit::fill,"fill"}};}
+template<> auto enum_values<BlendMode>() {return std::array{std::pair{BlendMode::over,"over"},std::pair{BlendMode::add,"add"},std::pair{BlendMode::screen,"screen"}};}
+template<> auto enum_values<MaskShape>() {return std::array{std::pair{MaskShape::none,"none"},std::pair{MaskShape::rectangle,"rectangle"},std::pair{MaskShape::ellipse,"ellipse"}};}
 template<> auto enum_values<Access>() {return std::array{std::pair{Access::read_only,"readOnly"},std::pair{Access::read_write,"readWrite"},std::pair{Access::trigger,"trigger"}};}
 template<> auto enum_values<Persistence>() {return std::array{std::pair{Persistence::authored,"authored"},std::pair{Persistence::resume_checkpoint,"resumeCheckpoint"},std::pair{Persistence::transient,"transient"}};}
 template<class... T> struct Codec<std::variant<T...>> {
@@ -186,7 +205,8 @@ template<> auto enum_values<ParameterType>() {
         std::pair{ParameterType::optional_reference,Codec<std::optional<Id>>::name()},std::pair{ParameterType::rational,"Rational"},std::pair{ParameterType::media_time,"MediaTime"},
         std::pair{ParameterType::point2,"Vec2"},std::pair{ParameterType::stream_kind,Codec<StreamKind>::name()},std::pair{ParameterType::layout_mode,Codec<LayoutMode>::name()},
         std::pair{ParameterType::warp_mode,Codec<WarpMode>::name()},std::pair{ParameterType::layer_source,Codec<LayerSource>::name()},std::pair{ParameterType::instance_port,"InstancePort"},
-        std::pair{ParameterType::id_list,Codec<std::vector<Id>>::name()},std::pair{ParameterType::triangles,Codec<std::vector<Triangle>>::name()},std::pair{ParameterType::seams,Codec<std::vector<Seam>>::name()}};
+        std::pair{ParameterType::id_list,Codec<std::vector<Id>>::name()},std::pair{ParameterType::triangles,Codec<std::vector<Triangle>>::name()},std::pair{ParameterType::seams,Codec<std::vector<Seam>>::name()},
+        std::pair{ParameterType::content_fit,Codec<ContentFit>::name()},std::pair{ParameterType::blend_mode,Codec<BlendMode>::name()},std::pair{ParameterType::mask_shape,Codec<MaskShape>::name()}};
 }
 // Every field list supplies encoding, strict decoding and schema generation.
 template<> auto fields<Port>() {return object<Port,&Port::id,&Port::name,&Port::kind>("Port",{"id","name","kind"});}
@@ -195,7 +215,11 @@ template<> auto fields<CompositionSource>() {return object<CompositionSource,&Co
 template<> auto fields<Asset>() {return object<Asset,&Asset::id,&Asset::name,&Asset::source>("Asset",{"id","name","source"});}
 template<> auto fields<AssetPort>() {return object<AssetPort,&AssetPort::asset,&AssetPort::port>("AssetPort",{"asset","port"});}
 template<> auto fields<InputPort>() {return object<InputPort,&InputPort::port>("InputPort",{"port"});}
-template<> auto fields<Layer>() {return object<Layer,&Layer::id,&Layer::name,&Layer::kind,&Layer::source,&Layer::shared_group>("Layer",{"id","name","kind","source","sharedGroup"});}
+template<> auto fields<LayerVisual>() {return object<LayerVisual,&LayerVisual::opacity,&LayerVisual::blend>("LayerVisual",{"opacity","blend"});}
+template<> auto fields<SurfaceContent>() {return object<SurfaceContent,&SurfaceContent::crop_minimum,&SurfaceContent::crop_maximum,&SurfaceContent::fit,&SurfaceContent::opacity>("SurfaceContent",{"cropMinimum","cropMaximum","fit","opacity"});}
+template<> auto fields<Mask>() {return object<Mask,&Mask::shape,&Mask::minimum,&Mask::maximum,&Mask::feather,&Mask::inverted>("Mask",{"shape","minimum","maximum","feather","inverted"});}
+template<> auto fields<PatchVisual>() {return object<PatchVisual,&PatchVisual::opacity,&PatchVisual::blend,&PatchVisual::mask>("PatchVisual",{"opacity","blend","mask"});}
+template<> auto fields<Layer>() {return object<Layer,&Layer::id,&Layer::name,&Layer::kind,&Layer::source,&Layer::shared_group,&Layer::visual>("Layer",{"id","name","kind","source","sharedGroup","visual"},{false,false,false,false,false,true});}
 template<> auto fields<Canvas>() {return object<Canvas,&Canvas::width,&Canvas::height,&Canvas::pixel_format,&Canvas::colour_space,&Canvas::alpha>("Canvas",{"width","height","pixelFormat","colourSpace","alpha"});}
 template<> auto fields<Composition>() {return object<Composition,&Composition::id,&Composition::name,&Composition::inputs,&Composition::outputs,&Composition::layers,&Composition::canvases>("Composition",{"id","name","inputs","outputs","layers","canvases"});}
 template<> auto fields<Definitions>() {return object<Definitions,&Definitions::assets,&Definitions::compositions>("Definitions",{"assets","compositions"});}
@@ -209,7 +233,7 @@ template<> auto fields<Vec2>() {return object<Vec2,&Vec2::x,&Vec2::y>("Vec2",{"x
 template<> auto fields<Triangle>() {return object<Triangle,&Triangle::vertices>("Triangle",{"vertices"});}
 template<> auto fields<SurfaceVertex>() {return object<SurfaceVertex,&SurfaceVertex::id,&SurfaceVertex::local,&SurfaceVertex::uv>("SurfaceVertex",{"id","local","uv"});}
 template<> auto fields<SurfaceGeometry>() {return object<SurfaceGeometry,&SurfaceGeometry::vertices,&SurfaceGeometry::triangles>("SurfaceGeometry",{"vertices","triangles"});}
-template<> auto fields<Surface>() {return object<Surface,&Surface::id,&Surface::name,&Surface::content_placement,&Surface::geometry>("Surface",{"id","name","contentPlacement","geometry"});}
+template<> auto fields<Surface>() {return object<Surface,&Surface::id,&Surface::name,&Surface::content_placement,&Surface::geometry,&Surface::content>("Surface",{"id","name","contentPlacement","geometry","content"},{false,false,false,false,true});}
 template<> auto fields<SurfaceEdge>() {return object<SurfaceEdge,&SurfaceEdge::surface,&SurfaceEdge::first,&SurfaceEdge::second>("SurfaceEdge",{"surface","first","second"});}
 template<> auto fields<Seam>() {return object<Seam,&Seam::first,&Seam::second,&Seam::reversed>("Seam",{"first","second","reversed"});}
 template<> auto fields<SurfaceGroup>() {return object<SurfaceGroup,&SurfaceGroup::id,&SurfaceGroup::name,&SurfaceGroup::surfaces,&SurfaceGroup::seams>("SurfaceGroup",{"id","name","surfaces","seams"});}
@@ -220,7 +244,7 @@ template<> auto fields<DesiredOutputMode>() {return object<DesiredOutputMode,&De
 template<> auto fields<OutputTarget>() {return object<OutputTarget,&OutputTarget::id,&OutputTarget::name,&OutputTarget::adapter,&OutputTarget::endpoint,&OutputTarget::desired,&OutputTarget::enabled,&OutputTarget::blackout,&OutputTarget::freeze>("OutputTarget",{"id","name","adapter","endpoint","desired","enabled","blackout","freeze"});}
 template<> auto fields<WarpVertex>() {return object<WarpVertex,&WarpVertex::id,&WarpVertex::surface_uv,&WarpVertex::projector_pixels>("WarpVertex",{"id","surfaceUv","projectorPixels"});}
 template<> auto fields<Calibration>() {return object<Calibration,&Calibration::mode,&Calibration::reference_width,&Calibration::reference_height,&Calibration::vertices,&Calibration::triangles,&Calibration::boundary>("Calibration",{"mode","referenceWidth","referenceHeight","vertices","triangles","boundary"});}
-template<> auto fields<ProjectionPatch>() {return object<ProjectionPatch,&ProjectionPatch::id,&ProjectionPatch::name,&ProjectionPatch::surface,&ProjectionPatch::output,&ProjectionPatch::calibration>("ProjectionPatch",{"id","name","surface","output","calibration"});}
+template<> auto fields<ProjectionPatch>() {return object<ProjectionPatch,&ProjectionPatch::id,&ProjectionPatch::name,&ProjectionPatch::surface,&ProjectionPatch::output,&ProjectionPatch::calibration,&ProjectionPatch::visual>("ProjectionPatch",{"id","name","surface","output","calibration","visual"},{false,false,false,false,false,true});}
 template<> auto fields<Stage>() {return object<Stage,&Stage::surfaces,&Stage::groups,&Stage::layouts,&Stage::outputs,&Stage::patches>("Stage",{"surfaces","groups","layouts","outputs","patches"});}
 template<> auto fields<ReplaceDefinitions>() {return object<ReplaceDefinitions,&ReplaceDefinitions::value>("ReplaceDefinitions",{"value"});}
 template<> auto fields<ReplaceStage>() {return object<ReplaceStage,&ReplaceStage::value>("ReplaceStage",{"value"});}

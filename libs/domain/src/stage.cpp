@@ -95,6 +95,7 @@ void validate(const Stage& stage, const InstancePool& instances, StageLimits lim
     for (const auto& [id,surface] : stage.surfaces) {
         require(id == surface.id,ErrorCode::invalid_definition,"Surface identity differs from map key",{id,surface.id});
         validate_display_name(surface.name,id);
+        if (surface.content) validate_visual(*surface.content,id);
         capacity(surface.geometry.vertices.size(),surface.geometry.triangles.size());
         static_cast<void>(mesh(surface.geometry.vertices,surface.geometry.triangles,id,
             [](const SurfaceVertex& p){return p.local;},[](const SurfaceVertex& p){return p.uv;}));
@@ -148,6 +149,7 @@ void validate(const Stage& stage, const InstancePool& instances, StageLimits lim
     for (const auto& [id,patch] : stage.patches) {
         require(id == patch.id,ErrorCode::invalid_definition,"Patch identity differs from map key",{id,patch.id});
         validate_display_name(patch.name,id);
+        if (patch.visual) validate_visual(*patch.visual,id);
         static_cast<void>(find(stage.surfaces,patch.surface)); static_cast<void>(find(stage.outputs,patch.output));
         const auto& calibration = patch.calibration;
         require(calibration.reference_width > 0 && calibration.reference_height > 0,ErrorCode::invalid_geometry,"Calibration reference mode must be retained and positive",{id});

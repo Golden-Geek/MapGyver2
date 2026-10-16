@@ -27,10 +27,11 @@ Encoding encoding(const domain::Canvas& canvas) {
 const domain::Port& port(const domain::InstancePool& pool,const PortKey& key) {
     return pool.definitions().output({pool.instance(key.first).asset,key.second});
 }
-std::vector<PortKey> children(const domain::InstancePool& pool,const PortKey& key) {
+struct Branch {PortKey key;domain::LayerVisual visual;};
+std::vector<Branch> children(const domain::InstancePool& pool,const PortKey& key) {
     const auto& instance = pool.instance(key.first);
     const auto& asset = pool.definitions().asset(instance.asset);
-    std::vector<PortKey> result;
+    std::vector<Branch> result;
     if (const auto* nested = std::get_if<domain::CompositionSource>(&asset.source)) {
         const auto& composition = pool.definitions().composition(nested->composition);
         const auto canvas = composition.canvases.find(key.second);
@@ -38,10 +39,11 @@ std::vector<PortKey> children(const domain::InstancePool& pool,const PortKey& ke
         try {static_cast<void>(encoding(canvas->second));} catch (const Error&) {return result;}
         for (const auto& layer : composition.layers) {
             if (layer.kind != domain::StreamKind::video) continue;
+            const auto visual = layer.visual.value_or(domain::LayerVisual{});if (visual.opacity == 0) continue;
             const auto* input = std::get_if<domain::InputPort>(&layer.source);
             const auto& bindings = input ? instance.inputs : instance.layers;
             const auto found = bindings.find(input ? input->port : layer.id);
-            if (found != bindings.end()) result.emplace_back(found->second.instance,found->second.port);
+            if (found != bindings.end()) result.push_back({{found->second.instance,found->second.port},visual});
         }
     }
     return result;
@@ -69,7 +71,7 @@ std::shared_ptr<const Plan> compile(const control::ProjectState& project,std::ui
     auto plan = std::make_shared<Plan>(Plan{revision,{},{},{},0,{}});
     std::map<PortKey,std::uint32_t> indices;
     std::set<PortKey> visiting;
-    struct Visit {PortKey key; std::vector<PortKey> children; std::size_t next = 0;};
+    struct Visit {PortKey key; std::vector<Branch> children; std::size_t next = 0;};
     std::size_t edges = 0;
     std::map<std::pair<Id,std::uint64_t>,const Image*> resources;
     for (const auto& start : roots) {
@@ -80,7 +82,7 @@ std::shared_ptr<const Plan> compile(const control::ProjectState& project,std::ui
             require(stack.size()+indices.size() <= limits.nodes,"Active render graph exceeds node capacity");
             auto& current = stack.back();
             if (current.next < current.children.size()) {
-                const auto child = current.children[current.next++];
+                const auto child = current.children[current.next++].key;
                 if (indices.contains(child)) continue;
                 require(visiting.insert(child).second,"Live render graph contains a cycle");
                 stack.push_back({child,children(pool,child)}); continue;
@@ -99,10 +101,11 @@ std::shared_ptr<const Plan> compile(const control::ProjectState& project,std::ui
                     try {node.encoding = encoding(found->second);}
                     catch (const Error& error) {plan->issues.push_back({current.key,error.what()});}
                     for (const auto& child : current.children) {
-                        const auto input = indices.at(child);
-                        if (plan->nodes[input].image || !plan->nodes[input].layers.empty()) node.layers.push_back(input);
+                        const auto input = indices.at(child.key);
+                        if (plan->nodes[input].image || !plan->nodes[input].layers.empty()) {node.layers.push_back(input);node.layer_visuals.push_back(child.visual);}
                     }
                     require(node.layers.size() <= limits.layers-edges,"Active render graph exceeds layer capacity"); edges += node.layers.size();
+                    require(node.layers.size() <= 65504,"Composition exceeds finite half-float SDR accumulation capacity");
                 }
             } else {
                 const auto found = images.find(current.key);
@@ -202,6 +205,12 @@ std::shared_ptr<const Image> pattern(Id id,std::uint64_t generation,std::uint32_
     return rgba8(std::move(id),generation,width,height,data,{},limit);
 }
 Pixel over(Pixel a,Pixel b) noexcept {return {a.r+b.r*(1-a.a),a.g+b.g*(1-a.a),a.b+b.b*(1-a.a),a.a+b.a*(1-a.a)};}
+Pixel blend(Pixel a,Pixel b,domain::BlendMode mode,float opacity) noexcept {
+    a.r = std::clamp(a.r,0.F,1.F)*opacity;a.g = std::clamp(a.g,0.F,1.F)*opacity;a.b = std::clamp(a.b,0.F,1.F)*opacity;a.a *= opacity;
+    if (mode == domain::BlendMode::add) return {a.r+b.r,a.g+b.g,a.b+b.b,a.a+b.a*(1-a.a)};
+    if (mode == domain::BlendMode::screen) return {a.r+b.r*(1-a.r),a.g+b.g*(1-a.g),a.b+b.b*(1-a.b),a.a+b.a*(1-a.a)};
+    return over(a,b);
+}
 namespace {
 std::vector<Pixel> reference_linear(const Plan& plan,std::uint32_t result) {
     require(result < plan.nodes.size(),"Reference output node is missing");
@@ -215,12 +224,13 @@ std::vector<Pixel> reference_linear(const Plan& plan,std::uint32_t result) {
     for (std::size_t index = 0; index <= result; ++index) {
         const auto& node = plan.nodes[index]; if (!node.target) continue;
         auto& output = targets.at(*node.target); std::fill(output.begin(),output.end(),Pixel{});
-        for (const auto input : node.layers) {
+        for (std::size_t layer = 0; layer < node.layers.size(); ++layer) {
+            const auto input = node.layers[layer];const auto visual = node.layer_visuals.empty() ? domain::LayerVisual{} : node.layer_visuals.at(layer);
             const auto& child = plan.nodes[input];
             for (std::uint32_t y = 0; y < node.height; ++y) for (std::uint32_t x = 0; x < node.width; ++x) {
                 const auto sx = static_cast<std::uint32_t>((static_cast<std::uint64_t>(x)*2+1)*child.width/(static_cast<std::uint64_t>(node.width)*2));
                 const auto sy = static_cast<std::uint32_t>((static_cast<std::uint64_t>(y)*2+1)*child.height/(static_cast<std::uint64_t>(node.height)*2));
-                auto& p = output[static_cast<std::size_t>(y)*node.width+x]; p = over(pixel(input,sx,sy),p);
+                auto& p = output[static_cast<std::size_t>(y)*node.width+x]; p = blend(pixel(input,sx,sy),p,visual.blend,static_cast<float>(visual.opacity));
             }
         }
     }
@@ -252,12 +262,12 @@ std::vector<std::uint8_t> reference_output(const Plan& plan,const Id& output,std
     require(found != plan.output_mappings.end() && found->reason.empty(),"Reference output mapping is unavailable");
     std::map<std::uint32_t,std::vector<Pixel>> sources;
     for (const auto& patch : found->patches) if (!sources.contains(patch.node)) sources.emplace(patch.node,reference_linear(plan,patch.node));
-    std::vector<Pixel> pixels(static_cast<std::size_t>(width)*height);
+    std::vector<Pixel> pixels(static_cast<std::size_t>(width)*height,Pixel{0,0,0,1});
     for (const auto& patch : found->patches) {
         const auto& node = plan.nodes.at(patch.node);const auto& source = sources.at(patch.node);
         for (std::uint32_t y = 0; y < height; ++y) for (std::uint32_t x = 0; x < width; ++x) {
             const auto mapped = mapped_pixel(patch,x,y,width,height,node.width,node.height);if (!mapped) continue;
-            auto& pixel = pixels[static_cast<std::size_t>(y)*width+x];pixel = over(source[static_cast<std::size_t>((*mapped)[1])*node.width+(*mapped)[0]],pixel);
+            auto& pixel = pixels[static_cast<std::size_t>(y)*width+x];pixel = blend(source[static_cast<std::size_t>((*mapped)[1])*node.width+(*mapped)[0]],pixel,patch.blend,patch_coverage(patch,x,y,width,height));
         }
     }
     return encode(pixels,{},true);

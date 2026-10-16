@@ -198,7 +198,7 @@ nlohmann::json graph_handoff(const std::shared_ptr<windows::PreparationDevice>& 
     const auto insert = added->preview;
     added->nodes.insert(added->nodes.begin()+insert,render::Node{{Id{"graph-source"},Id{"picture"}},128,64,{},alpha,{},std::nullopt});
     ++added->preview;for (auto& surface : added->surfaces) if (surface.node >= insert) ++surface.node;
-    added->nodes[added->preview].layers.push_back(insert);added->image_upload_bytes += 128*64*16;
+    added->nodes[added->preview].layers.push_back(insert);added->nodes[added->preview].layer_visuals.push_back({});added->image_upload_bytes += 128*64*16;
     std::shared_ptr<const render::Plan> previous = initial;
     for (const auto& next : {resized,added}) {
         const bool freeze = next->revision == 3;

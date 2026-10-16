@@ -115,6 +115,7 @@ void validate(const Definitions& definitions) {
         }
         std::map<Id,Id> shared_assets;
         for (const auto& layer : composition.layers) {
+            if (layer.visual) validate_visual(*layer.visual,layer.id);
             require(layer_ids.insert(layer.id).second, ErrorCode::duplicate_id, "Duplicate layer identity", {id,layer.id});
             name(layer.name,layer.id);
             if (const auto* source = std::get_if<AssetPort>(&layer.source)) {

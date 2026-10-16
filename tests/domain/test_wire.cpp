@@ -150,7 +150,7 @@ void values_commands_and_descriptors() {
         Vec2{-0.25,2.0},StreamKind::audio,LayoutMode::continuous,WarpMode::mesh,LayerSource{AssetPort{id("asset"),id("port")}},
         InstancePort{id("instance"),id("port")},std::vector<Id>{id("one"),id("two")},
         std::vector<Triangle>{{{id("one"),id("two"),id("three")}}},
-        std::vector<Seam>{{{id("one"),id("a"),id("b")},{id("two"),id("c"),id("d")},true}}};
+        std::vector<Seam>{{{id("one"),id("a"),id("b")},{id("two"),id("c"),id("d")},true}},ContentFit::fit,BlendMode::screen,MaskShape::ellipse};
     check(values.size() == std::variant_size_v<ParameterValue>,"A parameter alternative lacks wire coverage");
     for (const auto& value : values) {
         ParameterWrite write{"/test/value",value}; const auto encoded = wire::encode_write(write);

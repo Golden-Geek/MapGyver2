@@ -18,6 +18,12 @@ struct PatchMapping {
     // Inward coverage equations, with w selecting inclusive top/left edges.
     std::array<std::array<float,4>,4> edges{};
     bool identity = false;
+    std::array<std::array<float,4>,3> surface_rows{};
+    std::array<std::array<float,4>,3> content_rows{}; // Fitted surface UV coverage.
+    std::array<float,4> crop{0,0,1,1}; // Minimum plus extent, applied after fit.
+    std::array<float,4> mask_bounds{0,0,1,1};
+    std::array<float,4> visual{1,0,0,0}; // Opacity, shape, feather, inversion.
+    domain::BlendMode blend = domain::BlendMode::over;
     bool operator==(const PatchMapping&) const = default;
 };
 struct OutputMapping {
@@ -31,4 +37,5 @@ struct Plan;
 // Nonallocating canonical pixel-centre lookup. Outside coverage returns nullopt.
 [[nodiscard]] std::optional<std::array<std::uint32_t,2>> mapped_pixel(const PatchMapping& patch,
     std::uint32_t x,std::uint32_t y,std::uint32_t width,std::uint32_t height,std::uint32_t source_width,std::uint32_t source_height);
+[[nodiscard]] float patch_coverage(const PatchMapping& patch,std::uint32_t x,std::uint32_t y,std::uint32_t width,std::uint32_t height);
 }
