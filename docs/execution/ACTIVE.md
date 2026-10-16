@@ -256,6 +256,28 @@
   code/evidence, inspect source CI, then M03.C02 official OSCQuery/OSC contracts,
   adapter choice/provenance and real network interoperability. Native applied
   frames remain unreported until the render worker is connected; no milestone tag.
+- Native pipe/evidence pushed through a3a8ca94baacb8fe49e890cd9a6252121fa4f87c;
+  CI 38824975794 confirmed live. Portable Linux/macOS and plan have passed;
+  Windows jobs are still running. Previous goal turn was implementation progress.
+- Current M03.C02 portable slice: bounded OSC big-endian/padded codec, nested
+  bundle/timetag preservation and strict numeric/UTF-8/type parsing; immutable
+  registry-backed OSCQuery metadata/tree/value/action mapping and change detection.
+  ADR-019 records reviewed libossia sources and direct-registry choice. No new
+  runtime dependency or network endpoint yet. OSC golden/corruption tests passed;
+  first tree test timed out on an unused invalid iterator across temporary
+  inventories. That test-only mistake is removed; timeout/assertions unchanged.
+  Rebuild/final validation next, then actual HTTP/UDP/WebSocket transport and
+  independent client tests. Do not advertise an unimplemented streaming service.
+- C02 codec/tree/subscription/ingress final Debug/Release wrappers pass 15/15,
+  including existing real pipe tests. Exact subscriptions and all parameter/
+  structural metadata/values route through the authoritative model; standalone
+  projection defaults LISTEN/PATH_CHANGED flags false. Ingress has an explicitly
+  granted editing role and atomic homogeneous bundles; unsupported scheduling and
+  mixed grouping reject. No new socket/runtime dependency exists yet.
+- Prior native source CI 38824975794 is fully green at a3a8ca9: Windows 13
+  contracts/12 pipe phases; Linux/macOS portable 12; plan/quality-gate. Next:
+  commit portable C02, clean-source evidence, then actual Boost.Beast/Asio
+  HTTP/WebSocket/UDP adapter with provenance and independent client qualification.
 
 ## Build/hardware commands
 

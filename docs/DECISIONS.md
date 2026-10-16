@@ -20,6 +20,7 @@
 | ADR-016 | Accepted | Single editing owner plus read-only observers initially. Remote concurrency uses revisions and explicit ownership rather than an early CRDT implementation. |
 | ADR-017 | Accepted | Advanced automatic calibration and distributed execution are post-beta extensions, with stable data/interface boundaries established earlier. |
 | ADR-018 | Accepted | windows-2022 qualifies VS2022/v143 after actual windows-2025 supplied VS2026 without VS2022. Local VS2026/v145 is separate evidence. See docs/adr/ADR-018-ci-toolchain.md. |
+| ADR-019 | Accepted for M03 adapter implementation | Keep ParameterRegistry authoritative for OSC/OSCQuery; use a bounded authored codec/projection and an established HTTP/WebSocket transport. Reviewed libossia generic mutation path would need a custom bridge. Transport/client qualification remains open. See docs/adr/ADR-019-oscquery-adapter.md. |
 
 An accepted default is actionable within the plan; it is not a claim that hardware qualification exists. Change a decision with a short ADR containing trigger, options considered, measured evidence, compatibility and acceptance impact. Do not change the stack simply because another framework is familiar.
 

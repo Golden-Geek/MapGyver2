@@ -39,6 +39,7 @@ public:
     [[nodiscard]] std::optional<Json> notifications(const Id& session,std::uint64_t after_event) const;
     [[nodiscard]] std::shared_ptr<const mapgyver::control::ProjectState> snapshot() const;
     [[nodiscard]] std::uint64_t revision() const;
+    [[nodiscard]] mapgyver::control::ParameterRegistry registry() const;
 private:
     struct State;
     ServiceLimits limits_;

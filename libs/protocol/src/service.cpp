@@ -270,4 +270,5 @@ std::optional<Json> ControlService::notifications(const Id& session,std::uint64_
 }
 std::shared_ptr<const ProjectState> ControlService::snapshot() const {return state_->controller.snapshot();}
 std::uint64_t ControlService::revision() const {return state_->controller.revision();}
+ParameterRegistry ControlService::registry() const {return ParameterRegistry{state_->controller};}
 } // namespace mapgyver::protocol
