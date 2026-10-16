@@ -194,7 +194,7 @@
       "id": "M04",
       "title": "Compositing and first projector output",
       "track": "windows-v1",
-      "status": "planned",
+      "status": "in_progress",
       "depends_on": [
         "M03"
       ],

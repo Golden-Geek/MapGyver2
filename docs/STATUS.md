@@ -8,7 +8,8 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
 - Current milestone: [M01, graphics and sharing feasibility](progress/M01.md),
   in progress. [M02 portable domain work](progress/M02.md) proceeds independently
   while M01 qualification stays open. [M03 control work](progress/M03.md) proceeds
-  independently; M04–M19 remain planned. M02/M03 cannot be
+  independently. [M04 composition work](progress/M04.md) is in progress;
+  M05–M19 remain planned. M02/M03/M04 cannot be
   completed ahead of M01. Completing M00 does not qualify the beta.
 - M01.C01 texture sampling and M01.C02 bidirectional Spout/bgfx interoperability
   have clean native Debug/Release GPU evidence and green hosted builds.
@@ -29,8 +30,13 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
   authorization/discovery remain open. A capability-bound local browser channel
   and packaged Svelte shell now have native socket/Chromium tests. Actual encoded
   preview/native applied frames, complete editor workflows and durable saving
-  remain open. Socket CI found a macOS single-message backpressure fixture failure;
-  the bounded saturation fix awaits its own hosted verification.
+  remain open. CI 38838422770 is green on Windows/Linux/macOS, including the
+  bounded socket saturation fix and actual browser tests. Its one failed macOS
+  dependency download passed on a terminal failed-job retry.
+- M04.C01 immutable active-video plans, compatible bounded target reuse, linear
+  premultiplied compositing and authored offline shaders are implemented. Native
+  offscreen GPU goldens pass locally; engine integration, persistent output
+  windows, geometry/masks, preview and hardware qualification remain open.
 - Open product decisions: current NDI licensing/distribution path and exact reference hardware/workload budgets.
 - Later native targets: Windows ARM64, Linux x64/PipeWire, macOS ARM64/Syphon, Linux ARM64/Raspberry Pi.
 - Separate optional target: 32-bit Linux armhf.

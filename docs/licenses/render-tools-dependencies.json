@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-16T03:00:18.778470+00:00",
+  "baseline": "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391",
+  "scope": "Six additional resolved packages from bgfx host tools feature, used for offline shader compilation. Existing bgfx/SDL/image and Boost/build closure inventories remain applicable. Only shaderc is executed; geometry/texture tools are not application runtimes. This is not the M13 release binary SBOM.",
+  "baseInventories": [
+    "graphics-dependencies.json",
+    "network-dependencies.json"
+  ],
+  "packages": [
+    {
+      "name": "cgltf",
+      "version": "1.15",
+      "portVersion": 0,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": "MIT",
+      "reviewedLicense": "MIT",
+      "reviewNote": "Inspected installed MIT notice.",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/cgltf",
+      "sourceArchiveSha512": [
+        "9474b2ae79ac34015b21e4a20813bfc14ad037636304a28ce91011989202a11568b7f7201bca745701163e2c1077425065782a2aa265d53fe6edeb2e7d0e0b0a"
+      ],
+      "installedNoticeSha256": "f619925f80ef862497aaf8e8155ef218fa6a2190055129523ca3df9119a9ba95"
+    },
+    {
+      "name": "meshoptimizer",
+      "version": "1.3",
+      "portVersion": 0,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": "MIT",
+      "reviewedLicense": "MIT",
+      "reviewNote": "Inspected combined MIT notices including cgltf/fast_obj tool headers.",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/meshoptimizer",
+      "sourceArchiveSha512": [
+        "eef5c17afbdd551c44bc3f55d42099563d1370392f2bcc56e5e1099d37abf7ece439e6bfdee6be3adff3960c1d510956dd1cd5ddf4b1ef7c7625f0671c466ad2"
+      ],
+      "installedNoticeSha256": "d2e2c757f6033bfea19796f6fecf7f76260270df2fe29891870a6e06e0780d4b"
+    },
+    {
+      "name": "spirv-cross",
+      "version": "1.4.363.0",
+      "portVersion": 0,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": null,
+      "reviewedLicense": "Apache-2.0",
+      "reviewNote": "Port omits SPDX field; inspected installed Apache-2.0 notice.",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/spirv-cross",
+      "sourceArchiveSha512": [
+        "10d1888cc430bb2bf39683d68054ab57e92b9474b3ddddbff4dd171a5c5da4dc332dd65b2d10f1a54dbbb1dd2e01d7c7735cbff97cd9512c2995673362c58cec"
+      ],
+      "installedNoticeSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "name": "spirv-tools",
+      "version": "1.4.357.0",
+      "portVersion": 0,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": "Apache-2.0",
+      "reviewedLicense": "Apache-2.0",
+      "reviewNote": "Inspected installed Apache-2.0 notice.",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/spirv-tools",
+      "sourceArchiveSha512": [
+        "e853b7a08d1d1001a45e8d8f7179be7b02d803959d598bd9d097f096b33fd2a380bcecc8c9c1c446941b9df41018271b45d7995f79f8d360e15feb0c32d43f39"
+      ],
+      "installedNoticeSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "name": "spirv-headers",
+      "version": "1.4.357.0",
+      "portVersion": 0,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": null,
+      "reviewedLicense": "MIT AND CC-BY-4.0",
+      "reviewNote": "Port omits SPDX field. Installed notices distinguish Khronos headers/XML, MIT JsonCpp generator and CC-BY-4.0 documentation. Preserve the complete notice.",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/spirv-headers",
+      "sourceArchiveSha512": [
+        "54ef13eb8375dd3f1b4f30814c83fa5c994f4a73a446ceb6741d244fcffa1571b9d61fedc9c68974f65240adae14ec9b91a04575c78ab1c97442e28439ac71b5"
+      ],
+      "installedNoticeSha256": "ea43b1de38a6f90c488800d66dec1ed671e68cda530266bc96951fb5b6307613"
+    },
+    {
+      "name": "glslang",
+      "version": "16.4.0",
+      "portVersion": 0,
+      "architecture": "x64-windows",
+      "portDeclaredLicense": null,
+      "reviewedLicense": "BSD-3-Clause AND BSD-2-Clause AND MIT AND Apache-2.0 AND (GPL-3.0-only WITH Bison-exception-2.2) AND LicenseRef-NVIDIA-glslang-preprocessor",
+      "reviewNote": "Port has null license. Inspected full combined notice: BSD/MIT/Apache core, historical Bison skeleton exception and NVIDIA permissive preprocessor terms. Build-tool closure only; not an application linking exception or proprietary runtime authorization.",
+      "sourcePort": "https://github.com/microsoft/vcpkg/tree/20ceb8adbf0504d4b0d5e4058a32f9d4fc896391/ports/glslang",
+      "sourceArchiveSha512": [
+        "ef01dc652e5e6c4406cadf7de4b225c983fa9e3f0b74716844b8107b8ee87d1b80c1a039c47679302ce2244d4c44718e00b23429482bd1b51a3b29a6059358ca"
+      ],
+      "installedNoticeSha256": "17e70c676e1521ff3e4686f04a2053d93a7e28a33be8de7ec37ab0ff72feb677"
+    }
+  ]
+}

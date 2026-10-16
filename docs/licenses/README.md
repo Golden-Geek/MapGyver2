@@ -70,3 +70,15 @@ not application runtime dependencies. Other resolved licenses are MIT/ISC/BSD-3-
 Node/npm, Chromium and Playwright's FFmpeg download remain development/test inputs,
 never installed with the native application. This source inventory is not the M13
 distributed binary/bundle SBOM or its matching source package.
+
+M04 offline shader compilation enables the pinned bgfx host `tools` feature.
+[Additional render-tool inventory](render-tools-dependencies.json) records six
+resolved packages and source archive/installed notice hashes. Existing graphics
+and network inventories remain applicable. glslang has mixed per-file terms,
+including historical Bison skeleton and permissive NVIDIA preprocessor notices;
+SPIR-V headers distinguish source/generator and CC-BY-4.0 documentation terms.
+Full notices were inspected and remain required with any redistributed tools.
+Only shaderc runs during the build; these tools are not installed app runtimes.
+Authored application shaders use the pinned BSD bgfx shader include, with hashes
+and actual compiler commands retained per build. No application license exception
+or proprietary runtime was introduced. M13 still owns binary provenance/packaging.

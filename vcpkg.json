@@ -7,6 +7,14 @@
     { "name": "boost-beast", "version>=": "1.92.0" }
   ],
   "features": {
+    "renderer": {
+      "description": "Provisional M04 native Windows bgfx composition renderer",
+      "dependencies": [
+        { "name": "bgfx", "version>=": "1.129.8940-496#1", "default-features": false, "platform": "windows" },
+        { "name": "bgfx", "version>=": "1.129.8940-496#1", "default-features": false, "features": ["tools"], "host": true, "platform": "windows" },
+        { "name": "sdl3", "version>=": "3.4.18", "default-features": false, "platform": "windows" }
+      ]
+    },
     "decoder-experiments": {
       "description": "M01 strict native D3D11VA decoding and candidate sampling",
       "dependencies": [

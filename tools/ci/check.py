@@ -19,7 +19,7 @@ from build_ui import npm_command
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--preset", required=True, choices=("windows-local", "windows-ci", "windows-graphics", "windows-bgfx", "windows-spout", "windows-decode", "portable-ci"))
+    parser.add_argument("--preset", required=True, choices=("windows-local", "windows-ci", "windows-render", "windows-graphics", "windows-bgfx", "windows-spout", "windows-decode", "portable-ci"))
     parser.add_argument("--configuration", default="Release", choices=("Debug", "Release"))
     parser.add_argument("--skip-bootstrap", action="store_true", help="Use an already bootstrapped pinned dependency root")
     args = parser.parse_args()
@@ -112,6 +112,8 @@ def main():
         if cached("PM_BUILD_BGFX_EXPERIMENT") == "ON":
             run("frame-set-probe-version", [build / "experiments/graphics" / args.configuration / "mapgyver-frame-set-probe.exe", "--version"])
             run("window-probe-version", [build / "experiments/graphics" / args.configuration / "mapgyver-window-probe.exe", "--version"])
+        if cached("PM_BUILD_RENDERER") == "ON":
+            run("composition-probe-version", [build / "adapters/windows/render" / args.configuration / "mapgyver-composition-probe.exe", "--version"])
         if cached("PM_BUILD_UI") == "ON":
             run("node-version", ["node", "--version"])
             run("npm-version", npm_command("--version"))

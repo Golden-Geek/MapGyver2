@@ -8,7 +8,7 @@
 - Follow docs/backlog.json IDs/dependencies and project build/test wrappers.
   Milestone completion requires its actual evidence, not documentation alone.
 - M00 complete at 93be949919b6aedeccda365087f7b6b1781ce27f; CI 38771335741 green;
-  milestone/m00 points there. M01/M02/M03 are in progress; M04-M19 remain planned.
+  milestone/m00 points there. M01/M02/M03/M04 are in progress; M05-M19 remain planned.
 - M01 is unqualified: missing physical two-output/scanout/hotplug, device/driver
   loss recovery and sustained reference performance evidence. Renderer remains
   provisional; do not tag M01 or complete dependent milestones from API tests.
@@ -55,39 +55,43 @@
 
 ## Current slice status and next work
 
-1. M03.C02 portable codec/projection: implemented/tested/hosted green.
-2. M03.C02 native sockets were pushed at 51772cb. CI 38831905273 is terminal:
-   Windows Debug/Release, Linux and plan passed; macOS socket-stall assertion and
-   quality-gate failed. Other macOS contracts/compilation passed. Replace the
-   assumed one-message pressure with bounded actual saturation (up to 16 x 240 KB),
-   retaining the same deadline/partial-drain assertions and socket-buffer readbacks.
-   Windows passes; the next hosted macOS result is still required.
-3. M03.C03 working slice: OS-generated local capability + reliable browser route,
-   generated model types, packaged Svelte shell, immutable preloaded assets,
-   validated edits/history/placements, observers/reconnect and explicit preview
-   503. Native clients pass authorization/UTF-8/preload/lost-ACK/validation/
-   structural/subscription/malformed/deadline phases. Chromium passes three
-   scenarios including accepted-ACK drop/exact replay and separate Vite full
-   reload. The test found/fixed lost engine endpoint on development reload.
-   Final Debug/Release wrappers (21 contracts) and commit/clean source evidence are
-   next. Encoded preview and native output/HMR/shader qualification remain open;
-   do not claim C03/M03 complete. No Node server is required in production.
-   Shutdown review added actual cancellation-completion draining. Initial drain
-   failed because raw socket close left Beast idle/TCP timers armed; disabling
-   the WS timer and using tcp_stream.close fixes the cause. Both focused native
-   fixture tests now pass, including shutdown with live clients. Final wrappers
-   are rerunning; preserve the five-second drain deadline and owned buffers.
-   Code is now 6daac46016d3d11f01794a26e388e84bce867a4d. Clean Debug/Release
-   21/21 and three Chromium scenarios each pass, plus native 7+8+6+6+12 phases;
-   installed Release static serving works with Node absent from its child PATH.
-   Evidence/screenshot are M03-C03-local.json / M03-C03-ui.png. Commit evidence,
-   push and inspect its own source CI. macOS saturation is still unverified.
-4. M03.C04 current coverage includes actual browser/native create/edit/delete,
-   duplicate replay, revision/owner/readonly/atomic failure and subscriptions.
-   Durable save still needs M12; rendered applied-frame/preview outcomes need
-   runtime integration. Unsupported operations reject with an explicit reason.
-5. Discovery/authenticated remote access, complete editor, encoded preview/rendered application,
-   durable saves and prerequisite qualification remain open. No M01/M02/M03 tag.
+M03.C03 code 6daac46016d3d11f01794a26e388e84bce867a4d and evidence
+6e3ddc951f353bf278dd1c2281650c63176e538c are published. Clean local Debug/Release
+21/21, native pipe/socket phases and three Chromium scenarios each passed.
+Installed Release static assets serve with Node absent from the child PATH.
+CI 38838422770 is fully green, attempt 2, on Windows/Linux/macOS. Its first
+macOS job failed a pinned Boost download before compilation/tests; one terminal
+failed-job retry passed. The bounded macOS socket saturation fix is now verified.
+Encoded preview, native applied frames and durable saves remain open.
+
+M04.C01 current working slice:
+
+1. Implemented: portable immutable active-video graph, dependency-first iterative
+   compilation, scoped instances/shared output deduplication, inactive/unavailable
+   culling with reasons, compatible lifetime target pool and explicit byte limits.
+   Contracts cover 37 shared surfaces, independent scope, reordered old-plan
+   immutability, known sRGB blends and 2,048-deep graph/two-target reuse.
+2. Implemented: provisional Windows bgfx/D3D11 offscreen compositor with actual
+   hardware identity/capacity checks and prepared authored shader binaries.
+   Source uploads cache by resource/generation. Dense pass views support hundreds
+   of independent leaves; empty branches share a transparent constant.
+3. Passed before code commit: windows-render Debug/Release wrappers, 22 contracts;
+   Debug/Release actual GPU eight cases/160 frames/sixteen captures each,
+   tolerance 2/255. Final capacity preflight compiles in both configurations.
+   Release exposed native capture COM references outliving the unloaded D3D11
+   module; release the extra refs before bgfx shutdown while bgfx retains ownership.
+   Both GPU runs now pass with normal process exit. Next retain clean committed-
+   source Debug/Release wrappers and hardware reports at the actual source SHA.
+4. Six additional offline bgfx tool dependencies/notices inspected and inventoried.
+   No application exception/proprietary runtime. Source inventory is not M13 SBOM.
+5. Next: commit tested C01, collect clean-source evidence, push and inspect source
+   CI; then C02 persistent native targets and actual engine output/runtime handoff.
+   C03 quad mapping/masks/color rules and C04 UI-loss/multi-output remain open.
+
+This is static offscreen real-GPU evidence, not the engine's program path. No
+native output-window/browser independence, encoded preview, physical scanout,
+sustained budgets or recovery claim. M01/M03 prerequisites still prevent milestone
+qualification. No M01/M02/M03/M04 tag.
 
 ## Validation and continuation
 
