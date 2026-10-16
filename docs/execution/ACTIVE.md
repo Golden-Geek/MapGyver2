@@ -111,7 +111,7 @@ M04.C01 current working slice:
    and GPL license; committed-source installed Release static/60-frame GPU smoke
    passes with Node absent from child PATH. M04-native-install-local.json retained.
    Published at bdde9d5a4d6839a2d161b53adacfc222ee225f5f; CI 38857240163
-   is in progress (Linux/macOS/plan green; Windows still running at last check).
+   is fully green on Windows Debug/Release, Linux/macOS, plan and quality-gate.
 8. Next: implement actual GPU resource preparation/handoff for new graphs/images,
    sizes, bindings and mapping while the old native scene keeps running. Current
    compatible flags/metadata apply; other edits remain explicitly unapplied.
@@ -127,12 +127,19 @@ M04.C01 current working slice:
    Code e83b8947a8848ebb2f13dbe5f6edd7664733ebd9 now has clean Debug/Release
    23/23 and all GPU/engine regressions, dirty=false, retained in
    M04-preparation-device-local.json. Next implement runtime generation adoption/
-   retirement and graph/window handoff. A first fixed-layout image handoff can
-   prepare immutable sources on the background device, then copy into preallocated
-   mutable sampled textures on the immediate-context owner before drawing. This
-   would avoid per-update bgfx handle/SRV creation, but must report the additional
-   GPU-copy submissions and keep candidates until actual completion. It remains
-   a proposed next experiment, not an implemented/qualified path.
+   retirement and graph/window handoff. A first fixed-layout adapter handoff is
+   now implemented: background immutable sources copy into preallocated mutable
+   sampled textures on the immediate-context owner before drawing. One existing
+   query gives nonblocking completion; caller owns busy candidates and receives
+   retired ownership for background disposal. Copies/bytes are explicit, old/
+   foreign generations and layout/byte limits validate before GPU commands.
+   Debug/Release hardware probes pass two live generations and six freeze/
+   blackout goldens (maximum error 1 at tolerance 2/255). Both wrappers pass
+   23/23 and existing GPU/window/900-frame engine regressions pass. Commit this
+   tested adapter slice and retain clean-source evidence.
+   Next connect bounded preparation/candidate/retirement mailboxes to engine
+   commands while continuing old output; stop/join preparation before bgfx
+   shutdown. Shape-changing graph/window edits and C03 mapping still remain.
    C03 homography/masks/color rules, encoded preview and C04 full scenarios remain.
 
 The engine now has a static-pattern native program path and actual browser-loss

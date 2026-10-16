@@ -5,6 +5,8 @@
 
 namespace mapgyver::windows {
 class PreparationDevice;
+class PreparedGeneration;
+struct ImageHandoffState {std::uint64_t generation, gpu_copy_submissions, copied_payload_bytes;};
 struct RenderedFrame {std::uint64_t sequence, revision; domain::MediaTime show_time;};
 struct OutputControls {bool enabled = true, blackout = false, freeze = false;};
 struct OutputWindow {
@@ -35,6 +37,14 @@ public:
     void apply_output_controls(std::uint64_t revision,std::span<const OutputControls> controls);
     [[nodiscard]] std::uint64_t held_frame(const domain::Id& output) const;
     [[nodiscard]] std::vector<std::uint8_t> capture_output_for_test(const domain::Id& output);
+    // Fixed-layout image generations only. No resources are created here. A
+    // busy copy keeps candidate ownership with the caller (bounded backpressure).
+    [[nodiscard]] bool apply_images(std::unique_ptr<PreparedGeneration>& candidate);
+    // One nonblocking GPU-completion poll. Return retired ownership to preparation
+    // for destruction; do not destroy a large retired plan in the frame callback.
+    [[nodiscard]] std::unique_ptr<PreparedGeneration> retire_images();
+    [[nodiscard]] ImageHandoffState image_handoff_state() const;
+    [[nodiscard]] std::uint64_t resource_payload_bytes() const;
 private:
     struct Impl;
     std::unique_ptr<Impl> impl_;

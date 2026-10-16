@@ -81,6 +81,10 @@ struct CompositionRenderer::Impl {
     std::shared_ptr<PreparationDevice> preparation_device;
     ComPtr<ID3D11Device> device;
     ComPtr<ID3D11DeviceContext> context;
+    ComPtr<ID3D11Query> image_completion;
+    std::unique_ptr<PreparedGeneration> image_copy;
+    ImageHandoffState image_state{1,0,0};
+    std::uint64_t owned_payload_bytes = 0;
     DXGI_ADAPTER_DESC1 identity{};
     bgfx::ProgramHandle composite = BGFX_INVALID_HANDLE, encode = BGFX_INVALID_HANDLE;
     bgfx::UniformHandle sampler = BGFX_INVALID_HANDLE, encoding = BGFX_INVALID_HANDLE;
@@ -117,6 +121,19 @@ struct CompositionRenderer::Impl {
     }
     ~Impl() {
         if (initialized) {
+            if (image_copy) {
+                // Shutdown only, outside program deadlines. Keep candidate/native
+                // owners until the actual copy completes, or OS cleanup on fatal.
+                context->Flush();const auto deadline = std::chrono::steady_clock::now()+std::chrono::seconds{2};
+                for (;;) {
+                    BOOL done = FALSE;const auto result = context->GetData(image_completion.Get(),&done,sizeof(done),D3D11_ASYNC_GETDATA_DONOTFLUSH);
+                    if (result == S_OK && done) break;
+                    if (FAILED(result) || std::chrono::steady_clock::now() >= deadline) {
+                        std::fputs("Fatal: native image copy shutdown completion failed/timed out\n",stderr);std::_Exit(1);
+                    }
+                    std::this_thread::yield();
+                }
+            }
             for (auto& output : outputs) {
                 if (bgfx::isValid(output.swapchain)) bgfx::destroy(output.swapchain);
                 for (auto* t : {&output.held,&output.presented}) {
@@ -139,10 +156,11 @@ struct CompositionRenderer::Impl {
             // bgfx retains ownership through queued destruction/shutdown.
             for (auto& t : targets) t.native.Reset();
             for (auto& t : exports) t.native.Reset();
-            context.Reset(); device.Reset(); bgfx::shutdown();
+            image_completion.Reset();context.Reset(); device.Reset(); bgfx::shutdown();
             // Imported textures are borrowed by bgfx. Keep their native owners
             // through shutdown, including queued use/destruction of their SRVs.
             images.clear();
+            image_copy.reset();
         }
         for (auto& output : outputs) if (output.window) SDL_DestroyWindow(output.window);
         if (window) SDL_DestroyWindow(window);
@@ -184,6 +202,8 @@ struct CompositionRenderer::Impl {
         check(bgfx::getRendererType() == bgfx::RendererType::Direct3D11,"Native compositor selected another renderer");
         device = static_cast<ID3D11Device*>(bgfx::getInternalData()->context);
         check(device.Get() == preparation_device->native(),"Native compositor did not retain the owned preparation device");device->GetImmediateContext(&context);
+        const D3D11_QUERY_DESC completion_description{D3D11_QUERY_EVENT,0};
+        require(device->CreateQuery(&completion_description,&image_completion),"Native image copy completion allocation failed");
         ComPtr<IDXGIDevice> dxgi;require(device.As(&dxgi),"Native compositor DXGI interface missing");ComPtr<IDXGIAdapter> base;require(dxgi->GetAdapter(&base),"Native compositor actual adapter missing");
         ComPtr<IDXGIAdapter1> actual;require(base.As(&actual),"Native compositor adapter identity missing");require(actual->GetDesc1(&identity),"Native compositor adapter description failed");
         check(identity.AdapterLuid.HighPart == desired.AdapterLuid.HighPart && identity.AdapterLuid.LowPart == desired.AdapterLuid.LowPart && !(identity.Flags&DXGI_ADAPTER_FLAG_SOFTWARE),"Native compositor hardware identity differs from requested GPU");
@@ -206,6 +226,7 @@ struct CompositionRenderer::Impl {
             const auto size = static_cast<std::uint64_t>(config.width)*config.height*8;
             check(payload <= 536870912 && size <= 536870912-payload,"Native output textures exceed total payload capacity");payload += size;
         }
+        owned_payload_bytes = payload;
         std::set<std::pair<domain::Id,std::uint64_t>> image_ids;
         std::uint64_t largest_image = 0;
         for (const auto& node : plan->nodes) if (node.image) {
@@ -238,7 +259,7 @@ struct CompositionRenderer::Impl {
                 auto found_image = images.find(key);
                 if (found_image == images.end()) {
                     static_assert(sizeof(render::Pixel) == 16);
-                    auto prepared = preparation_device->prepare(*node.image);
+                    auto prepared = preparation_device->prepare(*node.image,true);
                     const auto texture = bgfx::createTexture2D(static_cast<std::uint16_t>(node.width),static_cast<std::uint16_t>(node.height),false,1,bgfx::TextureFormat::RGBA32F,sampling,
                         nullptr);
                     check(bgfx::isValid(texture),"Native compositor image handle preparation failed");
@@ -350,4 +371,47 @@ std::vector<std::uint8_t> CompositionRenderer::capture_output_for_test(const dom
     auto& output = impl_->output(id);
     return readback(impl_->device.Get(),impl_->context.Get(),output.presented.native.Get());
 }
+bool CompositionRenderer::apply_images(std::unique_ptr<PreparedGeneration>& candidate) {
+    impl_->check_owner();
+    if (impl_->image_copy) return false;
+    check(candidate && candidate->generation > impl_->image_state.generation && candidate->plan &&
+        candidate->plan->revision >= impl_->applied_revision && candidate->images.size() == impl_->images.size() && !candidate->retired_plan,
+        "Native image candidate generation/revision/count is stale or invalid");
+    // Validate the entire handoff before the first GPU command. Preparation
+    // establishes layout; native descriptions/device checks protect this seam.
+    auto source = candidate->images.begin();
+    std::uint64_t bytes = 0;
+    for (const auto& [key,input] : impl_->images) {
+        check(source->resource == key.first && source->generation > input.image.generation && source->width == input.image.width &&
+            source->height == input.image.height && source->texture,"Native image resource generation/dimensions differ from allocated inputs");
+        ComPtr<ID3D11Device> device;source->texture->GetDevice(&device);
+        check(device.Get() == impl_->device.Get(),"Native image handoff requires the same owned device");
+        bytes += static_cast<std::uint64_t>(source->width)*source->height*sizeof(render::Pixel);
+        ++source;
+    }
+    check(bytes <= 536870912-impl_->owned_payload_bytes,"Native image handoff exceeds combined active/candidate payload capacity");
+    source = candidate->images.begin();
+    for (auto& [key,input] : impl_->images) {
+        static_cast<void>(key);impl_->context->CopyResource(input.image.texture.Get(),source->texture.Get());
+        input.image.generation = source->generation;
+        ++impl_->image_state.gpu_copy_submissions;
+        impl_->image_state.copied_payload_bytes += static_cast<std::uint64_t>(source->width)*source->height*sizeof(render::Pixel);
+        ++source;
+    }
+    // Copies and subsequent draws use the same immediate-context command order.
+    // The event covers candidate source reads; sampled destinations stay owned.
+    impl_->context->End(impl_->image_completion.Get());
+    impl_->context->Flush(); // Submit the copy event; never wait for completion here.
+    candidate->retired_plan = std::move(impl_->plan);impl_->plan = candidate->plan;
+    impl_->applied_revision = candidate->plan->revision;impl_->image_state.generation = candidate->generation;
+    impl_->image_copy = std::move(candidate);return true;
+}
+std::unique_ptr<PreparedGeneration> CompositionRenderer::retire_images() {
+    impl_->check_owner();if (!impl_->image_copy) return {};
+    BOOL done = FALSE;const auto result = impl_->context->GetData(impl_->image_completion.Get(),&done,sizeof(done),D3D11_ASYNC_GETDATA_DONOTFLUSH);
+    require(result,"Native image copy completion failed");if (result != S_OK || !done) return {};
+    return std::move(impl_->image_copy);
+}
+ImageHandoffState CompositionRenderer::image_handoff_state() const {impl_->check_owner();return impl_->image_state;}
+std::uint64_t CompositionRenderer::resource_payload_bytes() const {impl_->check_owner();return impl_->owned_payload_bytes;}
 }

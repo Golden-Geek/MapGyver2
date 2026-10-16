@@ -64,6 +64,22 @@ That manual real-GPU experiment creates 128 image generations on a background
 thread during 120 native frames, retains at most eight/1 MiB, verifies the active
 output at tolerance 2/255 and bitwise checks a prepared float texture offline.
 It also checks invalid payload rejection and owned-device lifetime after bgfx
-shutdown. Runtime adoption/retirement of new generations, graph/window handoff
-and deadline budgets remain open; background allocation alone does not qualify
-those contracts.
+shutdown. Background allocation alone does not qualify runtime handoff or budgets.
+
+The adapter's fixed-layout image handoff now prepares an opaque generation on the
+background device and copies it into existing DEFAULT-usage sampled textures on
+the immediate-context owner. No handle, SRV, texture or query is allocated during
+application. One preallocated event query supplies nonblocking completion; a busy
+copy preserves caller ownership. Retired source textures/CPU plans return to the
+preparation caller for disposal. Generations, native device, layout/draw capacity
+and aggregate active/candidate payload are validated before any copy. A candidate
+is limited to 256 resources/128 MiB; callers must also bound other queued jobs.
+Each source update incurs a reported GPU-copy submission and logical payload
+bytes, separately from its preparation CPU upload. Copy and draw commands use
+the same immediate-context order. This does not imply synchronized scanout.
+
+The manual probe additionally exercises two live image generations, actual copy
+completion, retirement on a preparation thread, rejected old/foreign/oversized
+candidates and six fixed-tolerance freeze/unfreeze/blackout goldens. The engine
+has not connected this API to authored edits yet. Graph/window resource changes,
+engine integration and sustained deadline/recovery qualification remain open.

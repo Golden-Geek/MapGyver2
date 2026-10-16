@@ -42,8 +42,9 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
   Svelte/pipe/OSC output controls and browser-loss tests. Resource-changing edits
   retain the last applied scene with an explicit pending reason. Hot resource
   preparation now has an explicitly owned thread-safe D3D11 device and actual
-  background-allocation GPU checks. Runtime generation adoption/retirement,
-  graph/window handoff, nontrivial geometry/masks, preview and hardware
+  background-allocation GPU checks. A fixed-layout renderer image handoff has
+  native completion/retirement checks; engine integration, graph/window handoff,
+  nontrivial geometry/masks, preview and hardware
   qualification remain open.
 - Open product decisions: current NDI licensing/distribution path and exact reference hardware/workload budgets.
 - Later native targets: Windows ARM64, Linux x64/PipeWire, macOS ARM64/Syphon, Linux ARM64/Raspberry Pi.

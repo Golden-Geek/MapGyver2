@@ -27,7 +27,14 @@ assert report['backgroundCpuUploadBytes'] == 16777216 and report['backgroundGpuC
 assert report['invalidRequestsRejected'] == 5 and report['postCompositorShutdownPreparation']
 assert report['backgroundImageBitwiseFloatReadback']
 assert report['activeOutputMaxChannelError'] <= report['activeOutputTolerance'] == 2
+live = report['liveImageHandoff']
+assert live['appliedGeneration'] == live['appliedRevision'] == 3 and live['gpuCopySubmissions'] == 2
+assert live['copiedPayloadBytes'] == live['backgroundAcceptedCandidateCpuUploadBytes'] == 262144
+assert live['candidateOwnershipBackpressureVerified'] and live['actualCompletionBeforeRetirement'] and live['retirementOnPreparationThread']
+assert live['staleForeignLayoutCapacityRequestsRejected'] == 5 and live['captures'] == 6
+assert live['foreignOwnerRequestsRejected'] == 2 and live['validationRejectedCandidateCpuUploadBytes'] == 393216
+assert live['maxChannelError'] <= live['tolerance'] == 2
 report['command'] = command
 report['probeSha256'] = hashlib.sha256(args.probe.read_bytes()).hexdigest()
 args.report.write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
-print('Passed 120 actual GPU frames during 128 background image preparations and two offline readbacks')
+print('Passed concurrent preparation, two live image handoffs, completion/retirement and six live-state goldens')
