@@ -153,7 +153,8 @@ M04.C01 current working slice:
    Code 962385d02c2ba5d3739ada9cc9877b0cac9fcf8d now has clean Debug/Release
    23/23, eleven hot-engine phases/900 frames/three final alpha-content captures
    and all preparation/compositor/window regressions, dirty=false, in
-   M04-engine-image-handoff-local.json. Publish this tested slice/evidence, then
+   M04-engine-image-handoff-local.json. Published at bd8c9af; CI 38867317542 is
+   fully green on Windows Debug/Release, Linux/macOS, plan and quality-gate. Next
    implement shape-changing graph/window resource preparation and C03 mapping.
    Source-only handoff does not fulfill those remaining contracts. Keep the
    measured resource ownership/API constraints in view; do not assume bgfx's
@@ -163,8 +164,13 @@ M04.C01 current working slice:
    placeholder dimensions stayed 1x1 (max error 255, fixed tolerance 2). ADR-021
    adds a pinned bgfx #2 overlay with GPL contribution/upstream notices and a
    guarded dimension-metadata API. Debug/Release target goldens now pass at
-   tolerance 2 while old frames continue; wrappers pass 23/23. Finish regressions,
-   commit/provenance/clean evidence. Then implement prepared graph resource banks:
+   tolerance 2 while old frames continue; wrappers pass 23/23. Code
+   ac34ee68d9b244c6d88e20c1a89cd130cffe50f2 has clean Debug/Release 23/23
+   and all target/old-scene, preparation, compositor, window and 900-frame engine
+   regressions, dirty=false, in M04-native-target-binding-local.json. Its patch
+   bytes match the committed Git blob; source/notice hashes are retained in
+   docs/licenses/bgfx-native-import.json. Publish evidence, then implement prepared
+   graph resource banks:
    big native textures on preparation, bounded owner placeholder/import/FB steps,
    atomic frame-boundary swap, actual old-GPU completion, owner view destruction,
    and background native/CPU disposal. Window replacement and C03 remain required.
