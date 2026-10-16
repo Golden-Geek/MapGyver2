@@ -135,11 +135,17 @@ M04.C01 current working slice:
    foreign generations and layout/byte limits validate before GPU commands.
    Debug/Release hardware probes pass two live generations and six freeze/
    blackout goldens (maximum error 1 at tolerance 2/255). Both wrappers pass
-   23/23 and existing GPU/window/900-frame engine regressions pass. Commit this
-   tested adapter slice and retain clean-source evidence.
+   23/23 and existing GPU/window/900-frame engine regressions pass. Code
+   073175d67978ed95e1cb42449a8489d62769e6d3 has clean Debug/Release evidence,
+   dirty=false, in M04-image-handoff-local.json. Preparation foundation code
+   e83b894 and evidence a6a0fd6 precede it. Publish the tested commits/evidence.
    Next connect bounded preparation/candidate/retirement mailboxes to engine
    commands while continuing old output; stop/join preparation before bgfx
-   shutdown. Shape-changing graph/window edits and C03 mapping still remain.
+   shutdown. Tag control batches with the desired scene generation: controls for
+   an unapplied scene must not advance applied revision on the old image. Bound
+   working/pending/ready/retired ownership and aggregate candidate bytes; cancel
+   superseded work and dispose it off the render owner. Shape-changing graph/
+   window edits and C03 mapping still remain.
    C03 homography/masks/color rules, encoded preview and C04 full scenarios remain.
 
 The engine now has a static-pattern native program path and actual browser-loss
