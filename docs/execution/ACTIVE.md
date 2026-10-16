@@ -139,7 +139,8 @@ M04.C01 current working slice:
    073175d67978ed95e1cb42449a8489d62769e6d3 has clean Debug/Release evidence,
    dirty=false, in M04-image-handoff-local.json. Preparation foundation code
    e83b894 and evidence a6a0fd6 precede it. Published at
-   2b90278e29830e4b3e6dc32454746468bf24661e; CI 38862241977 is running.
+   2b90278e29830e4b3e6dc32454746468bf24661e; CI 38862241977 is fully green
+   on Windows Debug/Release, Linux/macOS, plan and quality-gate.
    Engine mailboxes now connect fixed-layout source changes. One candidate slot
    covers working/ready/copying/retired ownership plus one latest pending project;
    it disposes retirement before preparing more. Source/output batches carry the
@@ -149,9 +150,14 @@ M04.C01 current working slice:
    Local Debug/Release wrappers pass 23/23. Initial hot engine checks pass 900
    frames, pipe source bursts, unavailable source/undo, granted OSC source/output
    changes and final alpha-content GPU goldens, while retaining UI-loss phases.
-   Finish final validation, commit and retain clean-source evidence. Then implement
-   shape-changing graph/window resource preparation and C03 mapping. Source-only
-   handoff does not fulfill those remaining contracts.
+   Code 962385d02c2ba5d3739ada9cc9877b0cac9fcf8d now has clean Debug/Release
+   23/23, eleven hot-engine phases/900 frames/three final alpha-content captures
+   and all preparation/compositor/window regressions, dirty=false, in
+   M04-engine-image-handoff-local.json. Publish this tested slice/evidence, then
+   implement shape-changing graph/window resource preparation and C03 mapping.
+   Source-only handoff does not fulfill those remaining contracts. Keep the
+   measured resource ownership/API constraints in view; do not assume bgfx's
+   borrowed sampled-texture override also imports framebuffer render-target views.
    C03 homography/masks/color rules, encoded preview and C04 full scenarios remain.
 
 The engine now has a stateless-pattern native program path, fixed-layout image
