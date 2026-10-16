@@ -50,7 +50,7 @@ def main():
     def run(name, command, timeout=900):
         command = list(map(str, command))
         print("+", " ".join(command), flush=True)
-        entry = {"name": name, "command": command, "exitCode": None, "log": f"{name}.log"}
+        entry = {"name": name, "command": command, "timeoutSeconds": timeout, "exitCode": None, "log": f"{name}.log"}
         evidence["commands"].append(entry)
         save()
         log = reports / entry["log"]
@@ -81,7 +81,10 @@ def main():
         run("dependency-identity", ["git", "-C", ROOT / "out/deps/vcpkg", "rev-parse", "HEAD"])
         if (reports / "dependency-identity.log").read_text(encoding="utf-8").strip() != evidence["dependencyBaseline"]:
             raise RuntimeError("Bootstrapped dependency tool source does not match the pinned registry")
-        run("configure", ["cmake", "--preset", args.preset], timeout=1800)
+        # Cold windows-ci includes FFmpeg and the offline bgfx tools closure.
+        # CI 38843868195 spent 16m on FFmpeg and 11m on SPIR-V before the
+        # former 30m guard expired. Keep application/test guards independent.
+        run("configure", ["cmake", "--preset", args.preset], timeout=2400 if args.preset == "windows-ci" else 1800)
         run("build", ["cmake", "--build", build, "--config", args.configuration, "--parallel", "2"])
         cache = (build / "CMakeCache.txt").read_text(encoding="utf-8")
         def cached(name):
