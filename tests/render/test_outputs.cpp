@@ -30,6 +30,9 @@ void persistent_binding() {
     const auto patches = stage.patches;
     stage.outputs.at(output).desired.width = 1280;
     check(bind().reason == "output_display_mode_mismatch" && stage.patches == patches,"Mode mismatch rewrote calibration or claimed an actual display mode switch");
+    auto cloned = std::array{display()};cloned[0].reason = "output_display_source_cloned";
+    check(runtime::bind_outputs(StageSnapshot{stage,initial.instances},cloned,capabilities).front().reason == "output_display_source_cloned",
+        "Cloned display source was declared independently presentable");
     stage.outputs.at(output).adapter = "transport.ndi";
     stage.outputs.at(output).endpoint = "unsupported-configured-target";
     const auto unsupported = bind();

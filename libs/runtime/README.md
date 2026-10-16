@@ -25,8 +25,12 @@ software clock continue. Display encoding composites canonical linear content
 over black, then encodes opaque sRGB. A shared software frame never proves
 synchronized physical scanout.
 
-This is a preparation library and native-window API path. Native monitor
-enumeration, binding-to-window orchestration, render/control worker handoff,
+This is a preparation library and native-window API path. Windows native monitor
+inventory now queries active device paths, source desktop rectangles and rational
+mode rates, with three bounded retries for a topology race. Cloned sources retain
+their descriptors with an independent-output constraint; empty/ambiguous bindings
+never fall back to a primary display. These are OS-reported modes, not measured
+scanout. Binding-to-window orchestration, render/control worker handoff,
 production engine integration, hot topology recovery and patch mapping are still
 pending. The adapter currently presents a selected exported composition node
 over a whole window; callers must not treat it as implemented physical calibration.
@@ -42,3 +46,10 @@ Use the Release executable/report for the Release run. The fixture owns three
 hidden windows and validates the exact intermediate textures submitted to them
 at three distinct sizes. Its offline readback is outside frame execution. This
 is API/real-GPU evidence, not visible projector/physical scanout qualification.
+
+The inventory follows the Windows
+[QueryDisplayConfig contract](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-querydisplayconfig).
+It preserves native error codes, bounds path/mode allocation and converts bounded
+UTF-16 identity fields explicitly. It does not change display modes or substitute
+monitor names/enumeration indices for a requested device path. M12 owns hotplug,
+EDID/connector confidence and recovery when those desired paths change.

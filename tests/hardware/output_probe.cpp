@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "adapters/windows/composition_renderer.hpp"
+#include "adapters/windows/display_inventory.hpp"
 #include <mapgyver/build_info.hpp>
 #include <nlohmann/json.hpp>
 #include <algorithm>
@@ -27,6 +28,10 @@ std::shared_ptr<const render::Plan> fixture() {
     return render::compile(*controller.snapshot(),controller.revision(),images);
 }
 nlohmann::json run() {
+    nlohmann::json displays = nlohmann::json::array();
+    for (const auto& display : windows::detected_displays()) displays.push_back({{"endpoint",display.endpoint},{"name",display.name},
+        {"width",display.mode.width},{"height",display.mode.height},{"refreshNumerator",display.mode.refresh_hz.numerator},
+        {"refreshDenominator",display.mode.refresh_hz.denominator},{"x",display.x},{"y",display.y},{"reason",display.reason}});
     const auto plan = fixture();
     std::vector<windows::OutputWindow> outputs{
         {Id{"one"},"MapGyver test 1",128,64,plan->preview,true,{true,false,true}},
@@ -76,7 +81,7 @@ nlohmann::json run() {
     check(frame.sequence == 13 && renderer.held_frame(Id{"one"}) == 6 && renderer.held_frame(Id{"three"}) == 11,"Blackout/disable discarded retained frame ownership");
     const auto gpu = renderer.adapter_identity();
     return {{"schemaVersion",1},{"evidenceClass","native-hardware-GPU-hidden-output-window-API"},{"windows",outputs.size()},
-        {"framesSubmitted",frame.sequence},{"vendorId",gpu[0]},{"deviceId",gpu[1]},{"luidHigh",gpu[2]},{"luidLow",gpu[3]},
+        {"framesSubmitted",frame.sequence},{"detectedDisplays",displays},{"vendorId",gpu[0]},{"deviceId",gpu[1]},{"luidHigh",gpu[2]},{"luidLow",gpu[3]},
         {"drawSubmissions",renderer.submitted_draws()},{"foreignOwnerRejected",refused_foreign_owner},{"captures",captures},
         {"scope","Three hidden SDL native windows with independent bgfx/D3D11 swapchains. Captures validate the exact intermediate textures submitted to those windows, not physical scanout/backbuffer receipt. Static prepared content; no browser, production engine or display-topology/hotplug qualification. Software frame metadata does not establish synchronized physical scanout."}};
 }

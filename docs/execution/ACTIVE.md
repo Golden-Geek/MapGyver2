@@ -93,7 +93,12 @@ M04.C01 current working slice:
    M04-C02-local.json retains exact source, commands/JUnit, drivers, binaries,
    shader/compiler and GPU reports. Commit evidence and publish C02; inspect its
    source CI. C01 hosted Windows jobs were still running at last check.
-7. Next C02 work: actual monitor enumeration and logical binding/window orchestration,
+7. Native display inventory working slice: actual Windows active device paths,
+   desktop rectangles/rational reported modes, bounded topology retries and UTF-8
+   conversion. Clone-source constraints are retained. Focused Debug/Release native
+   window probe and portable binding checks pass; one laptop panel observed.
+   Commit inventory slice, run clean wrappers/output probe, retain evidence.
+8. Next C02 work: logical monitor binding/window orchestration,
    render/control worker handoff, engine applied-frame/status and production native
    output/browser-loss. C03 quad mapping/masks/color rules and C04 remain open.
 

@@ -8,6 +8,7 @@ struct Display {
     std::string endpoint, name; // Stable OS path, not an enumeration index.
     domain::DesiredOutputMode mode;
     std::int32_t x = 0, y = 0;
+    std::string reason{}; // Detected capability constraint, never authored intent.
 };
 struct OutputCapability {
     std::string adapter;

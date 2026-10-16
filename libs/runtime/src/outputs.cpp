@@ -35,7 +35,8 @@ std::vector<OutputBinding> bind_outputs(const domain::StageSnapshot& stage,std::
                 else if (matches != 1) binding.reason = "output_display_ambiguous";
                 else {
                     binding.display = *selected;
-                    if (selected->mode.width != desired.desired.width || selected->mode.height != desired.desired.height ||
+                    if (!selected->reason.empty()) binding.reason = selected->reason;
+                    else if (selected->mode.width != desired.desired.width || selected->mode.height != desired.desired.height ||
                         !refresh_matches(selected->mode.refresh_hz,desired.desired.refresh_hz)) binding.reason = "output_display_mode_mismatch";
                 }
             }
