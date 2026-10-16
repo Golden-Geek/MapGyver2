@@ -105,8 +105,11 @@ M04.C01 current working slice:
    Clean Debug/Release wrappers pass 23/23, dirty=false, at that code SHA. Both
    900-frame engine/three-capture runs and compositor/window API regressions pass.
    M04-C02-native-program-local.json and M04-native-program-ui.png retain actual
-   source/binary/environment/JUnit/GPU/browser evidence. Commit evidence and push;
-   CI 38847721626 for prior window/inventory/timeout code is terminal fully green.
+   source/binary/environment/JUnit/GPU/browser evidence. Evidence commit 3700aa4.
+   Install fix 00422799c7105204e15c5ea216b28b74c74cbd00 copies reviewed SDL3 shared runtime/notice
+   and GPL license; committed-source installed Release static/60-frame GPU smoke
+   passes with Node absent from child PATH. M04-native-install-local.json retained.
+   Publish tested commits/evidence; CI 38847721626 for prior code is fully green.
 8. Next: implement actual GPU resource preparation/handoff for new graphs/images,
    sizes, bindings and mapping while the old native scene keeps running. Current
    compatible flags/metadata apply; other edits remain explicitly unapplied.

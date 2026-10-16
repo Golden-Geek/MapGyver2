@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-16T05:43:11.292198+00:00",
+  "codeRevision": "00422799c7105204e15c5ea216b28b74c74cbd00",
+  "sourceDirty": false,
+  "evidenceClass": "local-installed-native-engine-static-and-GPU-smoke",
+  "commands": [
+    [
+      "cmake",
+      "--build",
+      "out/build/windows-render",
+      "--config",
+      "Release",
+      "--target",
+      "mapgyver_engine",
+      "--parallel",
+      "2"
+    ],
+    [
+      "cmake",
+      "--install",
+      "out/build/windows-render",
+      "--config",
+      "Release",
+      "--prefix",
+      "out/install/native-program-Release"
+    ],
+    [
+      "python",
+      "tools/qualification/check_static_editor.py",
+      "--prefix",
+      "out/install/native-program-Release",
+      "--report",
+      "out/reports/native-program-installed-static.json"
+    ],
+    [
+      "D:\\Projects\\Dev\\MapGyver2\\out\\install\\native-program-Release\\bin\\mapgyver-engine.exe",
+      "--serve",
+      "--pipe-name",
+      "installed-native-smoke",
+      "--render",
+      "--render-hidden",
+      "--initial-state",
+      "D:\\Projects\\Dev\\MapGyver2\\out\\reports\\native-program-project.json",
+      "--native-frames",
+      "60",
+      "--native-report",
+      "D:\\Projects\\Dev\\MapGyver2\\out\\reports\\native-program-installed-gpu.json"
+    ]
+  ],
+  "build": {
+    "build": {
+      "cmakeVersion": "4.4.1",
+      "compiler": {
+        "id": "MSVC",
+        "version": "19.50.35730.0"
+      },
+      "configuration": "Release",
+      "dirty": false,
+      "revision": "00422799c7105204e15c5ea216b28b74c74cbd00"
+    },
+    "features": {
+      "hardwareTests": {
+        "available": false,
+        "configured": false,
+        "reason": "no_hardware_suite"
+      },
+      "media": {
+        "available": false,
+        "configured": false,
+        "reason": "not_implemented"
+      },
+      "ndi": {
+        "available": false,
+        "configured": false,
+        "reason": "owner_approval_required"
+      },
+      "platform": {
+        "available": false,
+        "configured": false,
+        "reason": "not_implemented"
+      },
+      "renderer": {
+        "available": true,
+        "configured": true,
+        "reason": "provisional_native_compositor_built"
+      },
+      "ui": {
+        "available": true,
+        "configured": true,
+        "reason": "static_editor_built"
+      }
+    },
+    "gpu": {
+      "reason": "disabled_by_request",
+      "status": "not_probed"
+    },
+    "platform": {
+      "architecture": "x64",
+      "byteOrder": "little",
+      "os": "Windows",
+      "pointerBits": 64
+    },
+    "product": {
+      "name": "MapGyver",
+      "version": "0.1.0-dev"
+    },
+    "schemaVersion": 1
+  },
+  "nodeAbsentFromChildPath": true,
+  "engineSha256": "5ab19e82ff1d63ff96fc9848b0392c40564d061a83ff167655b96ef93ccea2ce",
+  "SDL3Sha256": "462fc43265bd966e85e308565af844a913710d3eb43c3d55cc3dfeb9ba2a1f2e",
+  "SDL3ReviewedNoticeSha256": "a07a67f78bbeea16b26fae318f516dc381723c714d8a3bf1329b18250477617f",
+  "staticEditor": {
+    "schemaVersion": 1,
+    "sourceRevision": "00422799c7105204e15c5ea216b28b74c74cbd00",
+    "sourceDirty": false,
+    "evidenceClass": "native-Windows-installed-static-editor-without-Node-on-child-PATH",
+    "nodeOnChildPath": false,
+    "staticAssets": true,
+    "assets": [
+      {
+        "path": "/editor/assets/index-B7KyS5W5.js",
+        "sha256": "c5042771b766ccc97444be0567dd9115ec2c3e076b6799f836d94a780f4038d3"
+      },
+      {
+        "path": "/editor/assets/index-DCHgEteG.css",
+        "sha256": "0d850dc38de40951f08c9e1b3fe686cfa4a8dd0813a05687c1682c09f8a7f1cb"
+      }
+    ],
+    "engineSha256": "5ab19e82ff1d63ff96fc9848b0392c40564d061a83ff167655b96ef93ccea2ce",
+    "scope": "Actual installed Windows engine serves compiled static assets and notices on this laptop. Node remains installed on the host; only the engine child PATH excludes it. No clean-machine/installer/GPU/rendered/durable-save qualification."
+  },
+  "nativeProgram": {
+    "appliedRevision": 0,
+    "captures": [
+      {
+        "actualPixelChecksum": "4093495296376631129",
+        "height": 64,
+        "heldSoftwareFrame": 60,
+        "maxChannelError": 1,
+        "output": "d111ac01-0cc4-4f86-b6e4-222362eb50dd",
+        "tolerance": 2,
+        "validationCpuReadbackBytes": 32768,
+        "validationGpuCopySubmissions": 1,
+        "width": 128
+      },
+      {
+        "actualPixelChecksum": "17334619850104693305",
+        "height": 53,
+        "heldSoftwareFrame": 60,
+        "maxChannelError": 2,
+        "output": "native-output-2",
+        "tolerance": 2,
+        "validationCpuReadbackBytes": 20564,
+        "validationGpuCopySubmissions": 1,
+        "width": 97
+      },
+      {
+        "actualPixelChecksum": "4787929281665225964",
+        "height": 32,
+        "heldSoftwareFrame": 60,
+        "maxChannelError": 1,
+        "output": "native-output-3",
+        "tolerance": 2,
+        "validationCpuReadbackBytes": 8192,
+        "validationGpuCopySubmissions": 1,
+        "width": 64
+      }
+    ],
+    "configuredOutputs": [
+      {
+        "configuredAdapter": "windows.window",
+        "configuredEndpoint": "",
+        "id": "d111ac01-0cc4-4f86-b6e4-222362eb50dd",
+        "reason": ""
+      },
+      {
+        "configuredAdapter": "windows.window",
+        "configuredEndpoint": "",
+        "id": "native-output-2",
+        "reason": ""
+      },
+      {
+        "configuredAdapter": "windows.window",
+        "configuredEndpoint": "",
+        "id": "native-output-3",
+        "reason": ""
+      }
+    ],
+    "deviceId": 11353,
+    "evidenceClass": "native-engine-program-static-pattern-hidden-window-API",
+    "framesSubmitted": 60,
+    "luidHigh": 0,
+    "luidLow": 89087,
+    "scope": "Actual engine native render owner. Offline final intermediate texture captures after the bounded program loop, not physical scanout or encoded preview. Graph/resource handoff and nontrivial patch mapping remain open.",
+    "showTimeTicks": "985325800",
+    "sourceCpuUploadBytes": 131072,
+    "sourceIssues": [],
+    "vendorId": 4318
+  },
+  "scope": "Installed Release on the existing laptop. Node absent from child PATH, but Node/Visual Studio remain installed on host. Not clean-machine/full installer or binary-SBOM/source-package qualification."
+}
