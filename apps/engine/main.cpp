@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include <mapgyver/build_info.hpp>
 #include <mapgyver/protocol/service.hpp>
+#include <mapgyver/assets/import.hpp>
 #include "adapters/osc/network.hpp"
 #ifdef _WIN32
 #include "adapters/windows/pipe_service.hpp"
@@ -28,6 +29,7 @@ constexpr std::string_view usage =
     "       mapgyver-engine --serve --pipe-name <stable-id> [--oscquery]\n"
     "         [--editor-dir <static-assets>] [--dev-origin http://127.0.0.1:<port>] (Windows)\n"
     "         [--render] [--initial-state <control-project.json>]\n"
+    "         [--image <PNG-or-JPEG-path>] [--media-root <directory>]\n"
     "         [--render-hidden --native-frames <count> --native-report <offline-report.json>]\n"
     "       mapgyver-engine --help\n";
 
@@ -60,14 +62,14 @@ nlohmann::json diagnose(bool no_gpu) {
 int engine_main(int argc, char** argv) {
     try {
         bool version = false, diagnostic = false, json = false, no_gpu = false, help = false, serve = false, oscquery = false, render = false, render_hidden = false;
-        std::string initial_state, native_report;
+        std::string initial_state, native_report, image, media_root;
         std::uint64_t native_frames = 0;
         std::optional<std::string> pipe_name;
         mapgyver::network::Options network_options;
         for (int index = 1; index < argc; ++index) {
             const std::string_view arg{argv[index]};
-            if (arg == "--initial-state" || arg == "--native-report") {
-                auto& value = arg == "--initial-state" ? initial_state : native_report;
+            if (arg == "--initial-state" || arg == "--native-report" || arg == "--image" || arg == "--media-root") {
+                auto& value = arg == "--initial-state" ? initial_state : arg == "--native-report" ? native_report : arg == "--image" ? image : media_root;
                 if (!value.empty() || index+1 >= argc || std::string_view{argv[index+1]}.empty() || std::string_view{argv[index+1]}.starts_with("--")) {std::cerr << "Missing or repeated native option\n";return 2;}
                 value = argv[++index];continue;
             }
@@ -110,6 +112,7 @@ int engine_main(int argc, char** argv) {
         if ((argc > 1 && modes != 1) || ((json || no_gpu) && !diagnostic) || (pipe_name.has_value() != serve) || (oscquery && !serve) ||
             ((!network_options.editor_directory.empty() || !network_options.development_origin.empty()) && (!serve || !oscquery)) ||
             ((render || !initial_state.empty()) && !serve) || ((render_hidden || native_frames || !native_report.empty()) && !render) ||
+            ((!image.empty() || !media_root.empty()) && (!serve || !render)) ||
             (!native_report.empty() && !native_frames)) {
             std::cerr << "Choose one command; --json and --no-gpu require --diagnose.\n" << usage;
             return 2;
@@ -129,10 +132,22 @@ int engine_main(int argc, char** argv) {
                 if (!input.good()) throw std::runtime_error("Could not read initial authored state");
                 controller = mapgyver::control::ProjectController{mapgyver::control::wire::decode_project(mapgyver::control::wire::parse(bytes))};
             }
+            if (media_root.empty()) {
+                const auto root = initial_state.empty() ? std::filesystem::current_path() : std::filesystem::absolute(std::filesystem::path{std::u8string{initial_state.begin(),initial_state.end()}}).parent_path();
+                const auto bytes = root.u8string();media_root.assign(bytes.begin(),bytes.end());
+            }
+            if (!image.empty()) {
+                auto imported = mapgyver::assets::import_image(*controller.snapshot(),image,"Imported image",initial_state.empty());
+                if (initial_state.empty()) {
+                    auto stage = controller.snapshot()->stage.data();for (auto& [id,output] : stage.outputs) {static_cast<void>(id);output.adapter = "windows.window";output.desired.width = 1280;output.desired.height = 720;}
+                    imported.commands.push_back(mapgyver::control::ReplaceStage{std::move(stage)});
+                }
+                static_cast<void>(mapgyver::control::ParameterRegistry{controller}.execute(controller,controller.revision(),imported.commands));
+            }
             mapgyver::protocol::ControlService service{std::move(controller)};
 #if MAPGYVER_NATIVE_RENDERER
             std::unique_ptr<mapgyver::windows::NativeProgram> program;
-            if (render) program = std::make_unique<mapgyver::windows::NativeProgram>(service,mapgyver::windows::ProgramOptions{render_hidden,native_frames,native_report});
+            if (render) program = std::make_unique<mapgyver::windows::NativeProgram>(service,mapgyver::windows::ProgramOptions{render_hidden,native_frames,native_report,media_root});
 #else
             if (render) {std::cerr << "Native compositor is not included in this build\n";return 3;}
 #endif

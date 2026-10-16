@@ -7,6 +7,7 @@ struct ProgramOptions {
     bool hidden = false;
     std::uint64_t frame_limit = 0; // Explicit bounded qualification run; zero runs continuously.
     std::string report; // Offline captures after that bounded run, never in frame().
+    std::string media_root{}; // Relative image locators resolve here; no SDK type.
 };
 // Control owner calls poll(); the native owner runs without UI/control callbacks.
 class NativeProgram {

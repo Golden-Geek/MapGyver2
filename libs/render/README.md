@@ -138,3 +138,10 @@ Optional authored settings resolve to explicit defaults when loading earlier v1
 documents; previous required/unknown-field checks stay strict. The same registry
 supplies UI/OSC/remote writes, validation and undo. See
 [ADR-023](../../docs/adr/ADR-023-visual-settings-wire-extension.md).
+
+Layers also support centred source fit/fill independently of surface content fit.
+Integer pixel-centre sampling agrees between the CPU reference and native shader
+within the 16,384 dimension profile. Missing layer fit in earlier v1 settings
+resolves to stretch. Background PNG/JPEG import supplies canonical immutable
+pixels through the existing handoff; see
+[ADR-024](../../docs/adr/ADR-024-background-image-import.md).

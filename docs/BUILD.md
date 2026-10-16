@@ -89,3 +89,16 @@ the real decode/GPU pixel and fallback-refusal contract remains manual.
 Run `python tools/validate_plan.py` for document/backlog validation and
 `python tools/show_milestone.py Mxx` for focused milestone contracts. These
 commands do not qualify playback, GPU sharing, physical output or performance.
+
+For the implemented PNG/JPEG path, build `windows-render`, then run:
+
+```powershell
+out/build/windows-render/Release/mapgyver-engine.exe --serve --pipe-name mapgyver --oscquery --render --image "images/example.png" --media-root "D:/Show"
+```
+
+The initial image prepares in the background while the native owner runs.
+Relative paths resolve against `--media-root`, otherwise the initial-state
+directory or current directory. A new project uses centred layer fit and a native
+window. With `--initial-state`, authored routing/calibration is preserved. Local
+control readiness is printed to stdout. This development entry point does not
+provide browser upload, video/audio playback or a packaged desktop application.

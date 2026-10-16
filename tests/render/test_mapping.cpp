@@ -102,6 +102,10 @@ void mappings() {
     check(std::any_of(bad_surface->output_mappings.begin(),bad_surface->output_mappings.end(),[](const auto& map){return map.reason == "surface_geometry_quad_unavailable";}),"Overlapping surface faces were silently replaced by a full quad");
 }
 void visual_rules() {
+    check(!render::layer_pixel(0,0,8,8,8,4,ContentFit::fit) && render::layer_pixel(0,2,8,8,8,4,ContentFit::fit) == std::array<std::uint32_t,2>{0,0},"Layer fit failed letterbox coverage");
+    check(render::layer_pixel(0,0,8,8,8,4,ContentFit::fill) == std::array<std::uint32_t,2>{2,0} && render::layer_pixel(7,7,8,8,8,4,ContentFit::fill) == std::array<std::uint32_t,2>{5,3},"Layer fill failed centred cropping");
+    check(!render::layer_pixel(0,0,8,8,4,8,ContentFit::fit) && render::layer_pixel(2,0,8,8,4,8,ContentFit::fit) == std::array<std::uint32_t,2>{0,0},"Portrait layer fit failed coverage");
+    check(render::layer_pixel(16383,16383,16384,16384,16384,16384,ContentFit::fill) == std::array<std::uint32_t,2>{16383,16383},"Integer layer sampling overflowed its qualified dimension profile");
     auto f = fixture();auto legacy = control::wire::encode_project(f.state);
     for (auto& [id,surface] : legacy["stage"]["surfaces"].items()) {static_cast<void>(id);surface.erase("content");}
     for (auto& [id,patch] : legacy["stage"]["patches"].items()) {static_cast<void>(id);patch.erase("visual");}

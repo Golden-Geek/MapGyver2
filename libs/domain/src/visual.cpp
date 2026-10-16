@@ -13,7 +13,10 @@ void bounds(Vec2 minimum,Vec2 maximum,const Id& owner) {
         owner,"Visual UV bounds must be finite, nonempty and within 0..1");
 }
 }
-void validate_visual(const LayerVisual& value,const Id& owner) {opacity(value.opacity,owner);blend(value.blend,owner);}
+void validate_visual(const LayerVisual& value,const Id& owner) {
+    opacity(value.opacity,owner);blend(value.blend,owner);
+    require(value.fit == ContentFit::stretch || value.fit == ContentFit::fit || value.fit == ContentFit::fill,owner,"Unknown layer fit mode");
+}
 void validate_visual(const SurfaceContent& value,const Id& owner) {
     bounds(value.crop_minimum,value.crop_maximum,owner);opacity(value.opacity,owner);
     require(value.fit == ContentFit::stretch || value.fit == ContentFit::fit || value.fit == ContentFit::fill,owner,"Unknown content fit mode");

@@ -211,6 +211,23 @@ Pixel blend(Pixel a,Pixel b,domain::BlendMode mode,float opacity) noexcept {
     if (mode == domain::BlendMode::screen) return {a.r+b.r*(1-a.r),a.g+b.g*(1-a.g),a.b+b.b*(1-a.b),a.a+b.a*(1-a.a)};
     return over(a,b);
 }
+std::optional<std::array<std::uint32_t,2>> layer_pixel(std::uint32_t x,std::uint32_t y,std::uint32_t width,std::uint32_t height,
+    std::uint32_t sw,std::uint32_t sh,domain::ContentFit fit) {
+    require(width && height && sw && sh && x < width && y < height && width <= 16384 && height <= 16384 && sw <= 16384 && sh <= 16384,"Layer sample exceeds dimension/index capacity");
+    std::array result{((x*2+1)*sw)/(width*2),((y*2+1)*sh)/(height*2)};
+    if (fit == domain::ContentFit::stretch) return result;
+    const bool wide = sw*height > sh*width;
+    if ((fit == domain::ContentFit::fit && wide) || (fit == domain::ContentFit::fill && !wide)) {
+        const auto numerator = (static_cast<std::int32_t>(y*2+1)-static_cast<std::int32_t>(height))*static_cast<std::int32_t>(sw)+static_cast<std::int32_t>(sh*width);
+        if (numerator < 0 || static_cast<std::uint32_t>(numerator) >= sh*width*2) return {};
+        result[1] = static_cast<std::uint32_t>(numerator)/(width*2);
+    } else {
+        const auto numerator = (static_cast<std::int32_t>(x*2+1)-static_cast<std::int32_t>(width))*static_cast<std::int32_t>(sh)+static_cast<std::int32_t>(sw*height);
+        if (numerator < 0 || static_cast<std::uint32_t>(numerator) >= sw*height*2) return {};
+        result[0] = static_cast<std::uint32_t>(numerator)/(height*2);
+    }
+    return result;
+}
 namespace {
 std::vector<Pixel> reference_linear(const Plan& plan,std::uint32_t result) {
     require(result < plan.nodes.size(),"Reference output node is missing");
@@ -228,9 +245,8 @@ std::vector<Pixel> reference_linear(const Plan& plan,std::uint32_t result) {
             const auto input = node.layers[layer];const auto visual = node.layer_visuals.empty() ? domain::LayerVisual{} : node.layer_visuals.at(layer);
             const auto& child = plan.nodes[input];
             for (std::uint32_t y = 0; y < node.height; ++y) for (std::uint32_t x = 0; x < node.width; ++x) {
-                const auto sx = static_cast<std::uint32_t>((static_cast<std::uint64_t>(x)*2+1)*child.width/(static_cast<std::uint64_t>(node.width)*2));
-                const auto sy = static_cast<std::uint32_t>((static_cast<std::uint64_t>(y)*2+1)*child.height/(static_cast<std::uint64_t>(node.height)*2));
-                auto& p = output[static_cast<std::size_t>(y)*node.width+x]; p = blend(pixel(input,sx,sy),p,visual.blend,static_cast<float>(visual.opacity));
+                const auto sample = layer_pixel(x,y,node.width,node.height,child.width,child.height,visual.fit);if (!sample) continue;
+                auto& p = output[static_cast<std::size_t>(y)*node.width+x]; p = blend(pixel(input,(*sample)[0],(*sample)[1]),p,visual.blend,static_cast<float>(visual.opacity));
             }
         }
     }

@@ -9,7 +9,7 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
   in progress. [M02 portable domain work](progress/M02.md) proceeds independently
   while M01 qualification stays open. [M03 control work](progress/M03.md) proceeds
   independently. [M04 composition work](progress/M04.md) is in progress;
-  M05–M19 remain planned. M02/M03/M04 cannot be
+  M05 image-import work is in progress; M06-M19 remain planned. M02/M03/M04/M05 cannot be
   completed ahead of M01. Completing M00 does not qualify the beta.
 - M01.C01 texture sampling and M01.C02 bidirectional Spout/bgfx interoperability
   have clean native Debug/Release GPU evidence and green hosted builds.
@@ -57,6 +57,10 @@ MapGyver implementation started 2026-10-15 in Golden-Geek/MapGyver2.
   preview and hardware
   qualification remain open.
 - Open product decisions: current NDI licensing/distribution path and exact reference hardware/workload budgets.
+- M05.C01 adds validated reusable-image imports and actual background Windows
+  PNG/JPEG CPU decoding, hashes, relative paths and a bounded pixel cache. Initial
+  direct CLI-to-native output works. Organized library, browser import, thumbnails,
+  complete job/readiness reporting and video/audio remain open.
 - Later native targets: Windows ARM64, Linux x64/PipeWire, macOS ARM64/Syphon, Linux ARM64/Raspberry Pi.
 - Separate optional target: 32-bit Linux armhf.
 

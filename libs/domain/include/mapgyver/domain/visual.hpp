@@ -9,6 +9,7 @@ enum class MaskShape { none, rectangle, ellipse };
 struct LayerVisual {
     double opacity = 1;
     BlendMode blend = BlendMode::over;
+    ContentFit fit = ContentFit::stretch;
     bool operator==(const LayerVisual&) const = default;
 };
 struct SurfaceContent {

@@ -89,3 +89,11 @@ The runtime is already covered by the pinned graphics inventory; system DLLs,
 MSVC redistributables, Node, shader tools and proprietary SDKs are not copied by
 this rule. M13 still requires the complete actual binary/bundle notice inventory,
 matching source/build materials and clean-machine qualification.
+
+M05 image import uses Windows system WIC and BCrypt through SDK import libraries.
+Microsoft decoder vendor selection is verified. No codec DLL, SDK file or new
+proprietary runtime is copied or redistributed. The authored loader, fixtures and
+tests are GPL-3.0-or-later. Native qualification records the actual loaded
+`windowscodecs.dll` path and SHA-256 separately from source/binary identities;
+this is local system-runtime evidence, not a redistribution permission. See
+[ADR-024](../adr/ADR-024-background-image-import.md) for format and ownership limits.

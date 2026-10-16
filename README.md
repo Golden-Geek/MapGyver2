@@ -3,8 +3,10 @@
 MapGyver is a GPL projection-mapping application under development at
 [Golden-Geek/MapGyver2](https://github.com/Golden-Geek/MapGyver2). Windows x64 is
 the first delivery target, with a native C++20 engine and static web editor.
-The current implementation is the M00 build foundation; playback and editing
-are not implemented yet. See [project status](docs/STATUS.md) for actual evidence.
+The implementation includes a validated portable model, local browser/OSC control,
+native static composition/mapping and background PNG/JPEG import. Video/audio,
+complete editor workflows and hardware qualification remain in progress. See
+[project status](docs/STATUS.md) for actual evidence.
 
 Build and run diagnostics using [the build guide](docs/BUILD.md). Track ongoing
 work in [the active execution plan](docs/execution/ACTIVE.md).

@@ -241,7 +241,7 @@
       "id": "M05",
       "title": "Media library and baseline playback",
       "track": "windows-v1",
-      "status": "planned",
+      "status": "in_progress",
       "depends_on": [
         "M04"
       ],

@@ -60,6 +60,8 @@ class Error : public std::runtime_error {public: using std::runtime_error::runti
 // SDR foreground RGB is clamped to 0..1 when consumed. Add may
 // accumulate brighter intermediates; exports/consumers use the same SDR rule.
 [[nodiscard]] Pixel blend(Pixel foreground,Pixel background,domain::BlendMode mode,float opacity = 1) noexcept;
+[[nodiscard]] std::optional<std::array<std::uint32_t,2>> layer_pixel(std::uint32_t x,std::uint32_t y,
+    std::uint32_t width,std::uint32_t height,std::uint32_t source_width,std::uint32_t source_height,domain::ContentFit fit);
 // Display reference composites linear premultiplied content over black, then
 // encodes opaque sRGB. Named canvas exports retain their declared alpha/transfer.
 [[nodiscard]] std::vector<std::uint8_t> reference(const Plan& plan,std::uint32_t node,bool display = false);

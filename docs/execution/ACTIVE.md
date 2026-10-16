@@ -8,7 +8,7 @@
 - Follow docs/backlog.json IDs/dependencies and project build/test wrappers.
   Milestone completion requires its actual evidence, not documentation alone.
 - M00 complete at 93be949919b6aedeccda365087f7b6b1781ce27f; CI 38771335741 green;
-  milestone/m00 points there. M01/M02/M03/M04 are in progress; M05-M19 remain planned.
+  milestone/m00 points there. M01-M05 are in progress; M06-M19 remain planned.
 - M01 is unqualified: missing physical two-output/scanout/hotplug, device/driver
   loss recovery and sustained reference performance evidence. Renderer remains
   provisional; do not tag M01 or complete dependent milestones from API tests.
@@ -284,6 +284,28 @@ recovery. Publish code/evidence, then implement M05.C01 asset/image import and
 the remaining M04.C04 end-to-end workflow. The C03 backend rules are implemented;
 M04 qualification, preview, complete editor, animated media and M01 physical/
 deadline/recovery gates remain open. No milestone tag or release authorization.
+
+M05.C01 image import is in progress after published baseline
+155a71be3a73b3f0231cc81773e24bc74d226b65 (CI 38895570246 green).
+Implemented: pure validated import transaction, default source layer fit, CLI
+--image/--media-root, background WIC/BCrypt loader, content-hash cache, bounded
+read/pixel/cache capacities, cooperative cancellation and native handoff. Initial
+file sources prepare while native placeholder frames run. Failures retain the
+configured asset and last applied scene with image_* reasons. Local Debug CPU
+tests and a 120-frame direct image/GPU smoke pass. Owned fixtures cover alpha,
+gamma, corrupt/missing/oversized data, unicode/long paths and JPEG EXIF 1-8.
+Next: live relink/cache/OSC/undo qualification, Debug/Release wrappers and GPU
+regressions, tested commits and clean-source evidence. Library organization,
+browser upload/thumbnails/full jobs, video/audio and prerequisite gates stay open.
+
+M05 initial image slice now passes Debug 27/27 and all native regressions. The
+image run passes six phases/480 frames/applied revision 7 plus direct Unicode
+120-frame import, with relink, cache, missing-file/undo and OSC/fit checks.
+Request read/pixel capacities and legacy layer stretch defaults have meaningful
+tests. ADR-024 records system-codec provenance and measured-path boundaries.
+Debug/Release now each pass 27/27 and all native checks, including image captures
+at maximum 1/255 within fixed 2/255. Next: commit this tested slice, rerun clean-
+source evidence, publish, then continue organized library/import jobs.
 
 - python tools/ci/check.py --preset windows-local --configuration Debug --skip-bootstrap
 - python tools/ci/check.py --preset windows-local --configuration Release --skip-bootstrap

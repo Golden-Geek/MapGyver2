@@ -141,6 +141,7 @@ ParameterRegistry::ParameterRegistry(const ProjectController& controller, Regist
             const auto visual_select = [select](Edit& edit)->auto& {auto& value = select(edit).visual;if (!value) value.emplace();return *value;};
             field(layer.id,"opacity",path+"/visual",visual.opacity,ParameterValue{1.0},"ratio","Linear premultiplied layer opacity",[visual_select](Edit& edit,auto value){visual_select(edit).opacity = value;},Persistence::authored,NumericRange{0,1});
             field(layer.id,"blend",path+"/visual",visual.blend,ParameterValue{BlendMode::over},"","Linear layer blend rule",[visual_select](Edit& edit,auto value){visual_select(edit).blend = value;});
+            field(layer.id,"fit",path+"/visual",visual.fit,ParameterValue{ContentFit::stretch},"","Fit the source frame to this composition canvas",[visual_select](Edit& edit,auto value){visual_select(edit).fit = value;});
         }
         for (const auto& [port,canvas] : composition.canvases) {
             const auto path = base+"/canvases/"+port.str();

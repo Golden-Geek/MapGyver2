@@ -5,6 +5,7 @@
 #include "prepared_graph.hpp"
 #include "prepared_windows.hpp"
 #include "display_inventory.hpp"
+#include "image_loader.hpp"
 #include <algorithm>
 #include <atomic>
 #include <charconv>
@@ -15,6 +16,7 @@
 #include <future>
 #include <iostream>
 #include <mutex>
+#include <set>
 #include <thread>
 
 namespace mapgyver::windows {
@@ -29,6 +31,7 @@ struct Routing {
     std::vector<OutputWindow> windows;
     std::vector<std::size_t> indices;
     Json reasons = Json::array();
+    Json file_assets = Json::array();
     bool unavailable = false, invalid_mapping = false;
 };
 std::shared_ptr<Routing> prepare_routing(const control::ProjectState& state,const render::Plan& plan,bool hidden) {
@@ -70,21 +73,39 @@ Json static_state(const control::ProjectState& state) {
     }
     return value;
 }
-render::Images patterns(const control::ProjectState& state,std::uint64_t generation = 1,std::uint64_t byte_limit = render::Limits{}.image_bytes) {
+render::Images source_images(const control::ProjectState& state,std::uint64_t generation = 1,std::uint64_t byte_limit = render::Limits{}.image_bytes,
+    ImageLoader* loader = nullptr,Json* files = nullptr,const std::function<bool()>& cancelled = {}) {
     render::Images images;std::map<Id,std::shared_ptr<const render::Image>> assets;
-    std::uint64_t bytes = 0;
+    std::uint64_t bytes = 0,read_bytes = 0;
     const auto active = render::compile(state,0,{});
+    std::set<Id> required;
+    for (const auto& node : active->nodes) {
+        const auto& asset = state.instances.definitions().asset(state.instances.instance(node.source.first).asset);
+        const auto* external = std::get_if<ExternalSource>(&asset.source);
+        if (external && (external->adapter == "mapgyver.pattern" || external->adapter == "mapgyver.image")) required.insert(asset.id);
+    }
+    if (required.size() > 256) throw render::Error("image_source_definition_capacity");
     for (const auto& node : active->nodes) {
         const auto& source = state.instances.instance(node.source.first);
         const auto& asset = state.instances.definitions().asset(source.asset);
         const auto* external = std::get_if<ExternalSource>(&asset.source);
-        if (!external || external->adapter != "mapgyver.pattern") continue;
-        if (external->locator != "bars" && external->locator != "checker" && external->locator != "alpha" && external->locator != "gradient") continue;
+        if (!external || (external->adapter != "mapgyver.pattern" && external->adapter != "mapgyver.image")) continue;
         auto found = assets.find(asset.id);
         if (found == assets.end()) {
-            constexpr std::uint64_t size = 128*64*16;
-            if (size > byte_limit-bytes) throw render::Error("Prepared test patterns exceed bounded image capacity");
-            auto image = render::pattern(asset.id,generation,128,64,external->locator);bytes += size;found = assets.emplace(asset.id,std::move(image)).first;
+            std::shared_ptr<const render::Image> image;
+            if (external->adapter == "mapgyver.image") {
+                if (!loader) continue; // Initial placeholder; file work starts on preparation.
+                auto file = loader->load(asset.id,generation,external->locator,byte_limit-bytes,cancelled,268435456-read_bytes);image = file.image;read_bytes += file.encoded_bytes;
+                if (files) files->push_back({{"asset",asset.id.str()},{"locator",file.locator},{"sha256",file.sha256},{"encodedBytes",file.encoded_bytes},
+                    {"width",image->width},{"height",image->height},{"container",file.container},{"colourPolicy",file.colour_policy},
+                    {"orientation",file.orientation},{"decodePath","windows_wic_microsoft_software"}});
+            } else {
+                if (external->locator != "bars" && external->locator != "checker" && external->locator != "alpha" && external->locator != "gradient") continue;
+                constexpr std::uint64_t size = 128*64*16;
+                if (size > byte_limit-bytes) throw render::Error("Prepared test patterns exceed bounded image capacity");
+                image = render::pattern(asset.id,generation,128,64,external->locator);
+            }
+            bytes += static_cast<std::uint64_t>(image->width)*image->height*16;found = assets.emplace(asset.id,std::move(image)).first;
         }
         images.emplace(node.source,found->second);
     }
@@ -101,6 +122,7 @@ struct NativeProgram::Impl {
     std::promise<void> exited;
     std::future<void> completion = exited.get_future();
     std::atomic<bool> stopping{false};
+    std::atomic<std::uint64_t> requested_generation{1};ImageLoadCounters image_counters;
     std::mutex input_mutex, status_mutex;
     Update pending{};bool has_pending = false;
     Request request{};
@@ -124,6 +146,16 @@ struct NativeProgram::Impl {
     explicit Impl(protocol::ControlService& source,ProgramOptions settings)
         : service(source),options(std::move(settings)),initial(service.snapshot()),initial_revision(service.revision()),baseline(static_state(*initial)) {
         if (!options.report.empty() && !options.frame_limit) throw render::Error("Offline native report requires a bounded frame run");
+        const auto active = render::compile(*initial,initial_revision,{});
+        for (const auto& node : active->nodes) {
+            const auto& asset = initial->instances.definitions().asset(initial->instances.instance(node.source.first).asset);
+            const auto* external = std::get_if<ExternalSource>(&asset.source);
+            if (external && external->adapter == "mapgyver.image") {desired_generation = 2;break;}
+        }
+        if (desired_generation == 2) {
+            request = {2,initial_revision,initial};pending.generation = 2;pending.revision = initial_revision;has_pending = true;requested_generation.store(2);
+            std::size_t index = 0;for (const auto& [id,output] : initial->stage.data().outputs) {static_cast<void>(id);if (index < max_outputs) pending.outputs[index++] = {output.enabled,output.blackout,output.freeze};}
+        }
         service.begin_renderer(1);
         worker = std::thread([this] {
             try {run();} catch (const std::exception& error) {
@@ -144,7 +176,7 @@ struct NativeProgram::Impl {
     }
     void run() {
         if (initial->stage.data().outputs.size() > max_outputs) throw render::Error("Native output inventory exceeds bounded control capacity");
-        auto plan = render::compile(*initial,initial_revision,patterns(*initial));
+        auto plan = render::compile(*initial,initial_revision,source_images(*initial));
         active_routing = prepare_routing(*initial,*plan,options.hidden);
         auto device = std::make_shared<PreparationDevice>();
         CompositionRenderer renderer{plan,active_routing->windows,device};
@@ -153,6 +185,7 @@ struct NativeProgram::Impl {
         // allocation starts until retired ownership is disposed on preparation.
         std::jthread preparer{[&](std::stop_token stop) {
             std::uint64_t attempted = 1;
+            std::unique_ptr<ImageLoader> loader; // Created and destroyed on this preparation/COM owner.
             while (!stop.stop_requested()) {
                 Request work;std::unique_ptr<PreparedGeneration> dispose;std::unique_ptr<PreparedGraph> dispose_graph;
                 std::unique_ptr<PreparedWindows> dispose_windows;std::shared_ptr<Routing> routing,dispose_routing;
@@ -170,9 +203,16 @@ struct NativeProgram::Impl {
                 dispose_windows.reset();dispose_routing.reset();
                 if (!work.state) {std::this_thread::sleep_for(std::chrono::milliseconds{2});continue;}
                 try {
-                    auto next_plan = render::compile(*work.state,work.revision,patterns(*work.state,work.generation,134217728));
+                    const auto cancelled = [&]{return stop.stop_requested() || requested_generation.load() != work.generation;};
+                    if (!loader) for (const auto& [id,source] : work.state->instances.instances()) {
+                        static_cast<void>(id);const auto* external = std::get_if<ExternalSource>(&work.state->instances.definitions().asset(source.asset).source);
+                        if (external && external->adapter == "mapgyver.image") {loader = std::make_unique<ImageLoader>(options.media_root,image_counters);break;}
+                    }
+                    Json files = Json::array();
+                    auto next_plan = render::compile(*work.state,work.revision,source_images(*work.state,work.generation,134217728,loader.get(),&files,cancelled));
                     if (!next_plan->issues.empty()) throw render::Error("Configured source frames/encoding are unavailable");
                     auto next_routing = prepare_routing(*work.state,*next_plan,options.hidden);
+                    next_routing->file_assets = std::move(files);
                     if (next_routing->invalid_mapping) throw render::Error("Configured projection mapping is unavailable");
                     {
                         std::lock_guard lock{input_mutex};
@@ -193,7 +233,9 @@ struct NativeProgram::Impl {
                     candidate = std::move(next_candidate);graph_candidate = std::move(next_graph);window_candidate = std::move(next_windows);prepared_plan = std::move(next_plan);
                     prepared_routing = std::move(next_routing);ready_generation = work.generation;phase = Phase::ready;
                 } catch (const std::exception& error) {
-                    std::lock_guard lock{input_mutex};failed_generation = work.generation;preparation_error = std::string{error.what()}.substr(0,512);
+                    std::lock_guard lock{input_mutex};
+                    if (stop.stop_requested() || pending.generation != work.generation) ++discarded_generations;
+                    else {failed_generation = work.generation;preparation_error = std::string{error.what()}.substr(0,512);}
                 }
             }
         }};
@@ -306,6 +348,10 @@ struct NativeProgram::Impl {
                 {"sourceGpuCopySubmissions",renderer.image_handoff_state().gpu_copy_submissions},
                 {"sourceCopiedPayloadBytes",renderer.image_handoff_state().copied_payload_bytes},
                 {"lastPreparationError",preparation_error},
+                {"fileAssets",active_routing->file_assets},{"fileReadCpuBytes",image_counters.read_bytes.load()},
+                {"decodedRgba8CpuBytes",image_counters.decoded_rgba8_bytes.load()},{"decodedFiles",image_counters.decoded_files.load()},
+                {"imageCacheHits",image_counters.cache_hits.load()},{"imageCacheEvictions",image_counters.cache_evictions.load()},
+                {"peakImageCachePayloadBytes",image_counters.peak_cache_bytes.load()},
                 {"deviceId",gpu[1]},{"luidHigh",gpu[2]},{"luidLow",gpu[3]},{"configuredOutputs",active_routing->reasons},{"captures",captures},
                 {"scope","Actual engine native owner, source-image/graph/window handoffs, projective quad/shared-chart mapping, crop/fit/fill, masks, opacity and over/add/screen blends. Offline final intermediate captures, not physical scanout, encoded preview, HDR output or sustained deadlines. Mesh warps and remaining media/editor/recovery qualification stay open."}};
             report["sourceIssues"] = Json::array();
@@ -330,7 +376,7 @@ struct NativeProgram::Impl {
                     static_cast<void>(id);if (index < max_outputs) update.outputs[index++] = {output.enabled,output.blackout,output.freeze};
                 }
                 std::lock_guard lock{input_mutex};pending = update;has_pending = true;
-                if (changed) request = Request{desired_generation,checked_revision,current};
+                if (changed) {request = Request{desired_generation,checked_revision,current};requested_generation.store(desired_generation);}
             }
         }
         Status observed;{std::lock_guard lock{status_mutex};observed = status;}
@@ -339,7 +385,8 @@ struct NativeProgram::Impl {
         } else if (observed.frame.sequence > observed_frame) {
             std::string reason = observed.source_unavailable ? "source_frames_unavailable" : observed.target_unavailable ? "output_targets_unavailable" : "";
             if (observed.scene_generation != desired_generation) {
-                std::lock_guard lock{input_mutex};reason = failed_generation == desired_generation ? "render_state_requires_preparation" : "render_state_preparing";
+                std::lock_guard lock{input_mutex};reason = failed_generation == desired_generation ?
+                    (preparation_error.starts_with("image_") ? preparation_error : "render_state_requires_preparation") : "render_state_preparing";
             }
             service.report_rendered({1,observed.frame.revision,observed.frame.sequence,observed.frame.show_time},
                 std::move(reason));observed_frame = observed.frame.sequence;

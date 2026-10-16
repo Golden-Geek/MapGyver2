@@ -440,7 +440,7 @@ struct CompositionRenderer::Impl : GraphResources {
             bgfx::setViewClear(view,BGFX_CLEAR_COLOR,0);bgfx::touch(view);
             for (std::size_t layer = 0; layer < node.layers.size(); ++layer) {
                 const auto input = node.layers[layer];const auto visual = node.layer_visuals.empty() ? domain::LayerVisual{} : node.layer_visuals.at(layer);
-                const std::array<float,4> parameters{static_cast<float>(visual.opacity),0,0,0};bgfx::setUniform(layer_visual,parameters.data());
+                const std::array<float,4> parameters{static_cast<float>(visual.opacity),static_cast<float>(visual.fit),0,0};bgfx::setUniform(layer_visual,parameters.data());
                 sampling_size(plan->nodes[input].width,plan->nodes[input].height,node.width,node.height);
                 bgfx::setVertexBuffer(0,vertices);bgfx::setTexture(0,sampler,inputs[input]);
                 bgfx::setState(visual_state(visual.blend));

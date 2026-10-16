@@ -744,6 +744,14 @@
           ],
           "type": "string"
         },
+        "fit": {
+          "enum": [
+            "stretch",
+            "fit",
+            "fill"
+          ],
+          "type": "string"
+        },
         "opacity": {
           "type": "number"
         }

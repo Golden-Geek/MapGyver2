@@ -215,7 +215,7 @@ template<> auto fields<CompositionSource>() {return object<CompositionSource,&Co
 template<> auto fields<Asset>() {return object<Asset,&Asset::id,&Asset::name,&Asset::source>("Asset",{"id","name","source"});}
 template<> auto fields<AssetPort>() {return object<AssetPort,&AssetPort::asset,&AssetPort::port>("AssetPort",{"asset","port"});}
 template<> auto fields<InputPort>() {return object<InputPort,&InputPort::port>("InputPort",{"port"});}
-template<> auto fields<LayerVisual>() {return object<LayerVisual,&LayerVisual::opacity,&LayerVisual::blend>("LayerVisual",{"opacity","blend"});}
+template<> auto fields<LayerVisual>() {return object<LayerVisual,&LayerVisual::opacity,&LayerVisual::blend,&LayerVisual::fit>("LayerVisual",{"opacity","blend","fit"},{false,false,true});}
 template<> auto fields<SurfaceContent>() {return object<SurfaceContent,&SurfaceContent::crop_minimum,&SurfaceContent::crop_maximum,&SurfaceContent::fit,&SurfaceContent::opacity>("SurfaceContent",{"cropMinimum","cropMaximum","fit","opacity"});}
 template<> auto fields<Mask>() {return object<Mask,&Mask::shape,&Mask::minimum,&Mask::maximum,&Mask::feather,&Mask::inverted>("Mask",{"shape","minimum","maximum","feather","inverted"});}
 template<> auto fields<PatchVisual>() {return object<PatchVisual,&PatchVisual::opacity,&PatchVisual::blend,&PatchVisual::mask>("PatchVisual",{"opacity","blend","mask"});}

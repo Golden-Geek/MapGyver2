@@ -36,3 +36,6 @@ atomic invalid edits, undo, persistence, chart-aware fit, mask coverage and blen
 equations. GPU qualification adds six visual phases over three windows, with the
 existing fixed 2/255 tolerance. Engine qualification checks registry and granted
 OSC application without changing source instances, placements or calibration.
+
+M05 adds optional `LayerVisual.fit` with legacy stretch, recorded separately in
+[ADR-024](ADR-024-background-image-import.md). Other settings fields remain required.
