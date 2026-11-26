@@ -22,6 +22,10 @@ on:
 permissions:
   contents: read
 
+env:
+  MAPGYVER_PROFILE: ${{ (github.ref_type == 'tag' || github.ref_name == 'migration/repository-split') && 'release' || 'debug' }}
+  MAPGYVER_PACKAGE_ID: ${{ github.ref_type == 'tag' && github.ref_name || github.sha }}
+
 concurrency:
   group: mapgyver-platform-${{ github.ref }}
   # Let a running platform qualification finish before the next mapgyver milestone starts.
@@ -40,8 +44,6 @@ jobs:
           - runner: macos-15-intel
             architecture: x86_64
     timeout-minutes: 60
-    env:
-      MAPGYVER_PROFILE: ${{ github.ref_type == 'tag' && 'release' || 'debug' }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -113,16 +115,16 @@ jobs:
         run: node apps/mapgyver/tests/browser/portable-rectangle.mjs
 
       - name: Archive the release app bundle
-        if: github.ref_type == 'tag'
+        if: env.MAPGYVER_PROFILE == 'release'
         env:
           ARCHITECTURE: ${{ matrix.architecture }}
         run: |
           ditto -c -k --sequesterRsrc --keepParent \
             'target/release/bundle/macos/MapGyver 2.app' \
-            "target/MapGyver2-$GITHUB_REF_NAME-macos-$ARCHITECTURE.zip"
+            "target/MapGyver2-$MAPGYVER_PACKAGE_ID-macos-$ARCHITECTURE.zip"
 
       - uses: actions/upload-artifact@v7
-        if: github.ref_type == 'tag'
+        if: env.MAPGYVER_PROFILE == 'release'
         with:
           name: mapgyver2-macos-${{ matrix.architecture }}-release
           path: target/MapGyver2-*-macos-${{ matrix.architecture }}.zip
@@ -132,8 +134,6 @@ jobs:
     name: MapGyver Debian package, desktop and preview (Linux x86_64)
     runs-on: ubuntu-24.04
     timeout-minutes: 45
-    env:
-      MAPGYVER_PROFILE: ${{ github.ref_type == 'tag' && 'release' || 'debug' }}
 
     steps:
       - uses: actions/checkout@v6
@@ -187,7 +187,7 @@ jobs:
 
   windows-x64-release:
     name: MapGyver Windows x64 installer
-    if: github.ref_type == 'tag'
+    if: github.ref_type == 'tag' || github.ref_name == 'migration/repository-split'
     runs-on: windows-latest
     timeout-minutes: 75
     steps:
@@ -209,13 +209,9 @@ jobs:
         with:
           arch: x64
 
-      - name: Set up Rust and ASIO build inputs
+      - name: Install the pinned Rust toolchain
         shell: pwsh
-        run: |
-          ./tools/bootstrap/install-rust-toolchain.ps1
-          $asio = ./tools/asio.ps1 -CacheRoot (Join-Path $env:RUNNER_TEMP 'mapgyver-asio-sdk') -SetupOnly -PassThru
-          "CPAL_ASIO_DIR=$($asio.sdk_path)" >> $env:GITHUB_ENV
-          "LIBCLANG_PATH=$($asio.libclang_path)" >> $env:GITHUB_ENV
+        run: ./tools/bootstrap/install-rust-toolchain.ps1
 
       - name: Build the Windows NSIS package
         shell: pwsh
@@ -236,8 +232,8 @@ jobs:
           $installers = @(Get-ChildItem target/release/bundle/nsis/*-setup.exe)
           if ($installers.Count -ne 1) { throw 'Expected one MapGyver Windows x64 installer.' }
           ./apps/mapgyver/tests/package/silent-install.ps1 -Installer $installers[0].FullName
-          Copy-Item -LiteralPath $installers[0].FullName -Destination "target/MapGyver2-$env:GITHUB_REF_NAME-windows-x64-setup.exe"
-          tar -czf "target/MapGyver2-$env:GITHUB_REF_NAME-ffmpeg-source.tar.gz" -C target/ffmpeg-source/source-kit .
+          Copy-Item -LiteralPath $installers[0].FullName -Destination "target/MapGyver2-$env:MAPGYVER_PACKAGE_ID-windows-x64-setup.exe"
+          tar -czf "target/MapGyver2-$env:MAPGYVER_PACKAGE_ID-ffmpeg-source.tar.gz" -C target/ffmpeg-source/source-kit .
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
       - uses: actions/upload-artifact@v7

@@ -79,7 +79,14 @@ jobs:
           mkdir -p "$output"
           node=$(dirname "$(dirname "$(realpath "$(command -v node)")")")
           rust=$(rustc --print sysroot)
-          git archive HEAD | docker run --rm -i \
+          golden_pin=$(git rev-parse HEAD:golden)
+          test "$(git -C golden rev-parse HEAD)" = "$golden_pin"
+          source_tar="$RUNNER_TEMP/mapgyver-$MAPGYVER_ARCHITECTURE-source.tar"
+          golden_tar="$RUNNER_TEMP/mapgyver-$MAPGYVER_ARCHITECTURE-golden.tar"
+          git archive --format=tar --output="$source_tar" HEAD
+          git -C golden archive --format=tar --prefix=golden/ --output="$golden_tar" "$golden_pin"
+          tar --concatenate --file="$source_tar" "$golden_tar"
+          docker run --rm -i \
             -e MAPGYVER_PACKAGE_OPTION \
             -e RUSTUP_HOME=/opt/rustup \
             -e "RUSTUP_TOOLCHAIN=$(basename "$rust")" \
@@ -104,7 +111,7 @@ jobs:
               packages=(target/release/bundle/deb/*.deb target/*/release/bundle/deb/*.deb)
               test "${#packages[@]}" -eq 1
               install -m 0644 "${packages[0]}" /artifacts/
-            '
+            ' < "$source_tar"
           shopt -s nullglob
           packages=("$output"/*.deb)
           test "${#packages[@]}" -eq 1

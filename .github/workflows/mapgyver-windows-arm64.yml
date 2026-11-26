@@ -103,14 +103,9 @@ jobs:
         with:
           arch: arm64
 
-      - name: Set up repository Rust and ASIO build inputs
+      - name: Install the pinned Rust toolchain
         shell: pwsh
-        run: |
-          ./tools/bootstrap/install-rust-toolchain.ps1
-          $cache = Join-Path $env:RUNNER_TEMP 'mapgyver-asio-sdk'
-          $asio = ./tools/asio.ps1 -CacheRoot $cache -SetupOnly -PassThru
-          "CPAL_ASIO_DIR=$($asio.sdk_path)" >> $env:GITHUB_ENV
-          "LIBCLANG_PATH=$($asio.libclang_path)" >> $env:GITHUB_ENV
+        run: ./tools/bootstrap/install-rust-toolchain.ps1
 
       - uses: Swatinem/rust-cache@v2
         with:
