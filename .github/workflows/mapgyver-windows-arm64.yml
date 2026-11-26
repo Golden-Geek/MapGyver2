@@ -9,6 +9,7 @@ on:
       - 'golden'
       - '.gitmodules'
       - 'tools/mapgyver/**'
+      - 'tools/release/**'
       - 'Cargo.lock'
       - 'package-lock.json'
   workflow_dispatch:
