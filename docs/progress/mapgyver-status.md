@@ -30,8 +30,10 @@ Physical Linux display recovery and cadence need an external monitor. The native
 Debian 13 ARM64 package also passed clean install, authoring, workbench, media and
 virtual display recovery. On-device build and Screen output still need a Raspberry Pi.
 The armhf package built and passed clean install and project authoring in emulated
-Debian 13. Hosted WebKit did not load the workbench, and local emulated Solid Color
-preview aborted. Desktop, media and output qualification requires a 32-bit Pi.
+Debian 13, including in the [standalone repository](https://github.com/Golden-Geek/MapGyver2/actions/runs/45798526146/job/139835340893).
+Hosted WebKit did not load the workbench, and local emulated Solid Color preview aborted.
+Run the Linux ARM workflow manually to repeat the QEMU desktop check. Desktop, media and
+output qualification requires a 32-bit Pi.
 The Windows ARM64 app and FFmpeg SDK built natively. The installer passed silent
 install, embedded-workbench startup in headless mode and silent uninstall. Installed
 headless authoring, history, Save/New/Load and release WebView2 startup passed.

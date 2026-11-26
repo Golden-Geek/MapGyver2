@@ -131,7 +131,8 @@ jobs:
           if-no-files-found: error
 
       - name: Verify workbench, media and display output in clean Debian 13
-        if: github.ref_type != 'tag' || matrix.architecture != 'armhf'
+        # Armhf install and headless authoring run above. Use a manual run for the QEMU desktop probe.
+        if: matrix.architecture != 'armhf' || github.event_name == 'workflow_dispatch'
         env:
           MAPGYVER_TEST_PACKAGE: ${{ steps.package.outputs.path }}
         run: |
