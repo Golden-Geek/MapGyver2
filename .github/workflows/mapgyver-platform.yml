@@ -2,14 +2,14 @@ name: MapGyver platform checks
 
 on:
   push:
-    branches: [mapgyver, main]
+    branches: [main, migration/repository-split]
   pull_request:
     paths:
       - '.cargo/**'
       - '.github/workflows/mapgyver-platform.yml'
       - 'apps/mapgyver/**'
-      - 'crates/**'
-      - 'packages/**'
+      - 'golden'
+      - '.gitmodules'
       - 'tools/bootstrap/**'
       - 'tools/mapgyver/**'
       - 'tools/product-gate/hooks/**'
@@ -25,7 +25,7 @@ permissions:
 concurrency:
   group: mapgyver-platform-${{ github.ref }}
   # Let a running platform qualification finish before the next mapgyver milestone starts.
-  cancel-in-progress: ${{ github.ref != 'refs/heads/mapgyver' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/migration/repository-split' }}
 
 jobs:
   macos-workbench:
@@ -44,6 +44,8 @@ jobs:
       MAPGYVER_PROFILE: ${{ github.ref_type == 'tag' && 'release' || 'debug' }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
       - uses: actions/setup-node@v6
         with:
@@ -135,6 +137,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
       - uses: actions/setup-node@v6
         with:
@@ -188,6 +192,8 @@ jobs:
     timeout-minutes: 75
     steps:
       - uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
       - uses: actions/setup-node@v6
         with:

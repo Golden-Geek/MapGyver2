@@ -46,7 +46,7 @@ fn control(engine: &AppEngine, reference: ChannelReference) -> Arc<VideoControl>
     node.video_control().unwrap()
 }
 fn root() -> std::path::PathBuf {
-    std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../crates/golden_video/src/decode/tests/fixtures")
+    std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../golden/crates/golden_video/src/decode/tests/fixtures")
 }
 fn probe(engine: &AppEngine) -> Probe {
     let source = Source::capture(engine).unwrap();

@@ -45,8 +45,8 @@ $licenses = @{
     'ffmpeg-source-build.json' = $sdkPin
     'LLVM-MinGW.txt' = (Join-Path $Install 'compiler-notices/LICENSE.TXT')
     'VIDEO-NOTICE.txt' = (Join-Path $PSScriptRoot 'NOTICE-WINDOWS-ARM64.txt')
-    'HAP-reference-header.h' = (Join-Path $root 'crates/golden_video/vendor/hap/hap.h')
-    'Snappy-C-header.h' = (Join-Path $root 'crates/golden_video/vendor/hap/snappy-c.h')
+    'HAP-reference-header.h' = (Join-Path $root 'golden/crates/golden_video/vendor/hap/hap.h')
+    'Snappy-C-header.h' = (Join-Path $root 'golden/crates/golden_video/vendor/hap/snappy-c.h')
 }
 foreach ($notice in $licenses.Values) {
     if (!(Test-Path -LiteralPath $notice -PathType Leaf)) { throw "Missing video notice: $notice" }

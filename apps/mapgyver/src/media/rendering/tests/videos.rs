@@ -12,7 +12,7 @@ mod submissions;
 use crate::media::video::protocol::VideoEdit;
 
 fn fixture_root() -> std::path::PathBuf {
-    std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../crates/golden_video/src/decode/tests/fixtures")
+    std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../golden/crates/golden_video/src/decode/tests/fixtures")
 }
 fn source(engine: &mut AppEngine, name: &str) -> ChannelReference {
     let reference = create(engine, MediaKind::Video);

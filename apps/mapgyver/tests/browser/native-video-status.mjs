@@ -60,7 +60,7 @@ try {
 	await page.waitForURL(`${native.base}/**`);
 	const label = 'Video runtime status';
 	const { reference } = await edit({ kind: 'CreateMedia', media_kind: 'Video', label });
-	const fixture = (name) => path.resolve('crates/golden_video/src/decode/tests/fixtures', name);
+	const fixture = (name) => path.resolve('golden/crates/golden_video/src/decode/tests/fixtures', name);
 	await page
 		.getByRole('tab')
 		.filter({ hasText: /^Medias(?::|$)/ })

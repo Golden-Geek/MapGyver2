@@ -168,8 +168,6 @@ foreach ($directory in Get-ChildItem -LiteralPath $repositoryRoot -Directory -Fo
 $dependencyCleanable = -not $KeepDependencies
 Add-Candidate -Path (Join-Path $repositoryRoot ".venv") -Category "local-toolchain" -Cleanable $dependencyCleanable
 Add-GeneratedChildren -Parent $repositoryRoot -Cleanable $true -DependencyCleanable $dependencyCleanable
-Add-GeneratedChildren -Parent (Join-Path $repositoryRoot "apps\chataigne\ui") -Cleanable $true -DependencyCleanable $dependencyCleanable
-Add-Candidate -Path (Join-Path $repositoryRoot "apps\chataigne\gen") -Category "generated" -Cleanable $true
 Add-GeneratedChildren -Parent (Join-Path $repositoryRoot "apps/mapgyver/ui") -Cleanable $true -DependencyCleanable $dependencyCleanable
 Add-Candidate -Path (Join-Path $repositoryRoot "apps/mapgyver/gen") -Category "generated" -Cleanable $true
 Add-GeneratedChildren -Parent (Join-Path $repositoryRoot "tools/mapgyver/native-probe/ui") -Cleanable $true -DependencyCleanable $dependencyCleanable
@@ -223,7 +221,7 @@ if (Test-Path -LiteralPath $worktreeRoot -PathType Container) {
         }
         Add-Candidate -Path (Join-Path $worktree.FullName ".kilo\node_modules") -Category "agent-dependency" -Cleanable ([bool]$IncludeAgentWorktrees)
         Add-GeneratedChildren -Parent $worktree.FullName -Cleanable ([bool]$IncludeAgentWorktrees)
-        Add-GeneratedChildren -Parent (Join-Path $worktree.FullName "apps\chataigne\ui") -Cleanable ([bool]$IncludeAgentWorktrees)
+        Add-GeneratedChildren -Parent (Join-Path $worktree.FullName "apps/mapgyver/ui") -Cleanable ([bool]$IncludeAgentWorktrees)
     }
 }
 

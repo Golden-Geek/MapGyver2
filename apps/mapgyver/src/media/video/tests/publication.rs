@@ -9,8 +9,8 @@ use golden_video::{
 use std::time::Instant;
 
 fn open(name: &str) -> Decoder {
-    let root =
-        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../crates/golden_video/src/decode/tests/fixtures");
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../golden/crates/golden_video/src/decode/tests/fixtures");
     Decoder::open(
         &root.join(name),
         DecodeLimits {

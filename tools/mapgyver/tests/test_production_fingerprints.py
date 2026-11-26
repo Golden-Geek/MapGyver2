@@ -22,7 +22,7 @@ class NativeSourceIdentityTests(unittest.TestCase):
             module = root / "tools/mapgyver/production_qualification.py"
             module.parent.mkdir(parents=True)
             module.write_text("fixture identity", encoding="utf-8")
-            vendor = root / "vendor/spout2-sys-0.1.1"
+            vendor = root / "golden/vendor/spout2-sys-0.1.1"
             sdk = vendor / "vendor/Spout2/SPOUTSDK/SpoutDirectX/SpoutDX"
             sdk.mkdir(parents=True)
             source = sdk / "SpoutDX.cpp"

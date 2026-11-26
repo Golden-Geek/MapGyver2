@@ -132,7 +132,7 @@ header identities. Browser qualification with `MAPGYVER_VIDEO_LOCAL_DLLS=1` insp
 loaded module paths, sizes and hashes; an explicit fixture pin can qualify a candidate before
 promotion.
 
-HAP uses the same demux libraries and the [reference codec](../../../crates/golden_video/vendor/hap/README.md)
+HAP uses the same demux libraries and the [reference codec](https://github.com/Golden-Geek/GoldenCore/blob/main/crates/golden_video/vendor/hap/README.md)
 with Rust Snappy. BC blocks, YCoCg conversion and alpha stay on the GPU. The ignored fixture
 generator uses reference HAP encoding and libavformat MOV muxing; ordinary tests read fixtures.
 [M10/2](../../../docs/progress/evidence/mapgyver-m10-hap-acceptance-2026-11-09.json) owns its

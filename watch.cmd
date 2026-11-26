@@ -1,3 +1,3 @@
 @echo off
-cargo xtask watch %*
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0watch.ps1" %*
 exit /b %ERRORLEVEL%

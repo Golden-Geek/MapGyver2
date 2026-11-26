@@ -4,5 +4,5 @@ param(
     [string[]] $WatchArguments
 )
 
-& cargo xtask watch @WatchArguments
+& (Join-Path $PSScriptRoot 'tools/mapgyver/ffmpeg/with-ffmpeg.ps1') xtask watch @WatchArguments
 exit $LASTEXITCODE

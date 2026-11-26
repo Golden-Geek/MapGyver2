@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn software_source_admission_rejects_in_band_growth_before_oversized_conversion() {
     let path = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../crates/golden_video/src/decode/tests/fixtures/h264-growing.mp4");
+        .join("../../golden/crates/golden_video/src/decode/tests/fixtures/h264-growing.mp4");
     let mut decoder = Decoder::open(
         &path,
         DecodeLimits {

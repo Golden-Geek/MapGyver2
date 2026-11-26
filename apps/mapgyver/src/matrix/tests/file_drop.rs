@@ -22,7 +22,7 @@ fn imports_replace_only_the_cell_media_and_create_columns_in_the_same_history_st
         MatrixEdit::ConfigureCell {
             layer,
             column,
-            settings: settings.clone(),
+            settings,
         },
     );
     let initial = inspect(&mut engine, matrix);

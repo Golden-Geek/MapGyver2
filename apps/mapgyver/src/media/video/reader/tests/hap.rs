@@ -21,8 +21,8 @@ fn select(reader: &mut Reader, position: Duration, expected: &[u8]) {
 
 #[test]
 fn hap_reader_seeks_and_previous_probes_fit_three_blocks_while_an_upload_clone_is_held() {
-    let root =
-        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../crates/golden_video/src/decode/tests/fixtures");
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../golden/crates/golden_video/src/decode/tests/fixtures");
     for name in ["hap.mov", "hap-alpha.mov", "hap-q.mov"] {
         let open = || {
             Decoder::open(

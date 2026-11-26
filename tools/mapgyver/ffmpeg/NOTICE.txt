@@ -26,7 +26,7 @@ BSD-2-Clause; the complete original notice and disclaimer accompany the supplied
 HAP-reference-header.h. Reference commit d847f6bbd3be88575dd4ef33a877243780e3be76.
 Project: https://github.com/Vidvox/hap
 Local bounded-input changes are documented in the repository's
-crates/golden_video/vendor/hap/README.md and retained source.
+golden/crates/golden_video/vendor/hap/README.md and retained source.
 
 Snappy C interface header
 Copyright 2011 Martin Gieseking <martin.gieseking@uos.de>.

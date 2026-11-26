@@ -6,10 +6,7 @@ fn main() {
     if std::env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc") {
         let compiler = cc::Build::new().cpp(true).get_compiler();
         println!("cargo:rustc-env=PROBE_CXX={}", compiler.path().display());
-        let includes = compiler
-            .env()
-            .iter()
-            .find(|(key, _)| key.eq_ignore_ascii_case("INCLUDE"));
+        let includes = compiler.get_envs().find(|(key, _)| key.eq_ignore_ascii_case("INCLUDE"));
         let sdk = includes
             .map(|(_, value)| value.to_string_lossy().into_owned())
             .unwrap_or_default();

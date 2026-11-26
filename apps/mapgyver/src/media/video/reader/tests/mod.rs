@@ -74,8 +74,8 @@ fn animated_webp_forward_catch_up_progresses_and_held_seeks_remain_exact() {
 #[cfg(all(windows, feature = "native-video"))]
 fn prepared_lookahead_is_reused_once_and_invalidated_by_seek_eof_and_previous_probe() {
     use golden_video::decode::{DecodeLimits, SoftwareDecodeThreads};
-    let root =
-        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../crates/golden_video/src/decode/tests/fixtures");
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../golden/crates/golden_video/src/decode/tests/fixtures");
     for name in ["h264.mp4", "hevc.mp4", "prores.mov", "prores-alpha.mov"] {
         let open = || {
             Decoder::open(

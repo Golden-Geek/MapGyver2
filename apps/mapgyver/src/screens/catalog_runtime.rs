@@ -1,6 +1,6 @@
 //! Latest-only native metadata handoff through Golden's lifetime-fenced worker wake contract.
 use super::{
-    display_matching::match_displays,
+    display_matching::{DisplayMatch, match_displays},
     protocol::{DisplayIdentityHint, DisplayInfo, ScreenId, ScreenTarget},
 };
 use crate::app::{AppEngine, AppNode};
@@ -16,6 +16,8 @@ use std::{
     collections::HashMap,
     sync::{Arc, Mutex, Weak},
 };
+
+type MatchDisplays = fn(&[(ScreenId, DisplayIdentityHint)], &[DisplayInfo]) -> HashMap<ScreenId, DisplayMatch>;
 
 #[derive(Default)]
 struct InboxState {
@@ -175,10 +177,7 @@ impl Source {
         &self,
         displays: Arc<[DisplayInfo]>,
         options: &ParameterEnumOptions,
-        allocate: fn(
-            &[(ScreenId, DisplayIdentityHint)],
-            &[DisplayInfo],
-        ) -> HashMap<ScreenId, super::display_matching::DisplayMatch>,
+        allocate: MatchDisplays,
     ) -> Update {
         let mut entries = options.as_slice().to_vec();
         let mut identities = entries

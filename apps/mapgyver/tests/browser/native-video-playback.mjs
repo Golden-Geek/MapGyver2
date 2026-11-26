@@ -61,7 +61,7 @@ const moving = [];
 const seekBursts = [];
 const fileRecovery = [];
 let localRuntimeLibraries = null;
-const fixtures = path.resolve('crates/golden_video/src/decode/tests/fixtures');
+const fixtures = path.resolve('golden/crates/golden_video/src/decode/tests/fixtures');
 let token, screen, surface, surfaceDefinition, observedDisplay;
 async function post(route, body) {
 	const response = await fetch(`${native.base}${route}`, {

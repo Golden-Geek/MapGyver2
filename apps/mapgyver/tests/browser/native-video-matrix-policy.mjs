@@ -278,7 +278,7 @@ try {
 	await edit({
 		kind: 'ConfigureVideoFile',
 		reference: source,
-		file: path.resolve('crates/golden_video/src/decode/tests/fixtures/h264.mp4')
+		file: path.resolve('golden/crates/golden_video/src/decode/tests/fixtures/h264.mp4')
 	});
 	primary = await create('Matrix', 'Matrix policy target');
 	const { rows, columns } = await shape(primary);

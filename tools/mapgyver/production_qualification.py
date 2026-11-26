@@ -13,7 +13,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-CAPTURE_SCHEMA_FILE = "packages/golden-video-ui/tests/native/generated/capture-schema.json"
+CAPTURE_SCHEMA_FILE = "golden/packages/golden-video-ui/tests/native/generated/capture-schema.json"
 CAPTURE_CONTRACT = json.loads((ROOT / CAPTURE_SCHEMA_FILE).read_text(encoding="utf-8"))
 CAPTURE_SCHEMA_VERSION = CAPTURE_CONTRACT["capture_schema_version"]
 SOURCE_SEND_ACCESS_TIMEOUT_MS = CAPTURE_CONTRACT["source_send_access_timeout_ms"]
@@ -721,15 +721,15 @@ def fingerprints(executable):
               Path(__file__).with_name("production_allocations.py"),
               Path(__file__).with_name("production_environment.py"),
               Path(__file__).with_name("collect-baseline.ps1"),
-              ROOT / "crates/golden_time/Cargo.toml", ROOT / "crates/golden_video/Cargo.toml",
-              ROOT / "crates/golden_core/runtime/io/Cargo.toml",
-              ROOT / "crates/golden_video/build.rs",
+              ROOT / "golden/crates/golden_time/Cargo.toml", ROOT / "golden/crates/golden_video/Cargo.toml",
+              ROOT / "golden/crates/golden_core/runtime/io/Cargo.toml",
+              ROOT / "golden/crates/golden_video/build.rs",
               ROOT / "apps/mapgyver/build.rs"]
-    for directory in ("crates/golden_time/src", "crates/golden_video/src", "crates/golden_core/hosts/desktop/src",
-                      "crates/golden_core/runtime/io/src",
-                      "apps/mapgyver/tests/native_qualification", "packages/golden-video-ui"):
+    for directory in ("golden/crates/golden_time/src", "golden/crates/golden_video/src", "golden/crates/golden_core/hosts/desktop/src",
+                      "golden/crates/golden_core/runtime/io/src",
+                      "apps/mapgyver/tests/native_qualification", "golden/packages/golden-video-ui"):
         paths += [path for path in (ROOT / directory).rglob("*") if path.suffix in (".rs", ".hlsl", ".ts", ".svelte", ".html")]
-    vendor = ROOT / "vendor/spout2-sys-0.1.1"
+    vendor = ROOT / "golden/vendor/spout2-sys-0.1.1"
     paths += [path for path in vendor.rglob("*") if path.suffix in (".rs", ".cpp", ".h", ".toml")]
     paths += [vendor / "UPSTREAM.json", vendor / "PATCHES.json"]
     def git(*arguments):

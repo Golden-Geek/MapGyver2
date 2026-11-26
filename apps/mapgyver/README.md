@@ -528,7 +528,7 @@ or `-- --headless` for the shared transport without a window. The packaging comm
 retain the workspace signing prerequisite.
 MapGyver defaults to backend port `7011` and frontend development port `5174`;
 `GC_UI_BIND` and `GC_UI_FRONTEND_URL` retain the shared host's explicit overrides.
-Unqualified root commands continue to select Chataigne.
+Unqualified build and development commands select MapGyver.
 
 ### Windows installer
 

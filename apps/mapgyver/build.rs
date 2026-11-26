@@ -13,8 +13,9 @@ fn main() -> std::io::Result<()> {
     }
     let out_dir = PathBuf::from(std::env::var("OUT_DIR").expect("OUT_DIR is not set"));
     let workspace_root = Path::new("../..");
-    let shared_input_roots = ["golden-ui", "golden-graph-ui", "golden-video-ui"]
-        .map(|package| workspace_root.join("packages").join(package));
+    let golden_packages = workspace_root.join("golden/packages");
+    let shared_input_roots =
+        ["golden-ui", "golden-graph-ui", "golden-video-ui"].map(|package| golden_packages.join(package));
     ui_bundle::prepare(&UiBundleConfig {
         workspace_root,
         ui_root: Path::new("ui"),
@@ -24,11 +25,12 @@ fn main() -> std::io::Result<()> {
         dependency_cache_namespace: "mapgyver",
     })?;
     if std::env::var_os("CARGO_FEATURE_NATIVE_PREVIEW_SMOKE").is_some() {
-        let preview_root = workspace_root.join("packages/golden-video-ui");
+        let preview_root = golden_packages.join("golden-video-ui");
         let preview_inputs = [
             preview_root.clone(),
             preview_root.join("tests/native"),
-            workspace_root.join("packages/golden-ui"),
+            golden_packages.join("golden-graph-ui"),
+            golden_packages.join("golden-ui"),
         ];
         ui_bundle::prepare(&UiBundleConfig {
             workspace_root,

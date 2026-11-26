@@ -51,21 +51,11 @@ per-user cache and returns the directory expected by `asio-sys`:
 
 ```powershell
 $env:CPAL_ASIO_DIR = ./tools/bootstrap/configure-asio-sdk.ps1 -PassThru
-cargo test -p golden_audio --features asio
+cargo test --manifest-path golden/Cargo.toml --locked -p golden_audio --features asio
 ```
 
-For a complete local build environment, `./tools/asio.ps1` also validates Visual C++ and
-LLVM/Clang, configures both native build variables for its child command, and runs the backend probe
-by default. Pass a custom command after PowerShell's `--` parameter terminator:
-
-```powershell
-./tools/asio.ps1 -- cargo test -p golden_audio --features asio
-```
-
-Ordinary Windows Chataigne builds include ASIO, dynamically loaded JACK, and realtime scheduling,
-so `./tools/dev.ps1` performs the ASIO build setup by default. No SDK files are written into the
-checkout. Native PipeWire remains an explicit Linux qualification feature rather than an ordinary
-application default.
+MapGyver's ordinary Windows build uses the [pinned FFmpeg SDK](../mapgyver/ffmpeg/README.md).
+Install LLVM/Clang when building the SDK bindings.
 
 CI and the product gate also use `-CheckInstalled`/`--check-installed`, which rejects a different Rust, Cargo, Node, npm, or Python version instead of silently testing another toolchain.
 

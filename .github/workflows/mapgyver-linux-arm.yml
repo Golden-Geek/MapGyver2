@@ -2,13 +2,13 @@ name: MapGyver Linux ARM packages
 
 on:
   push:
-    branches: [mapgyver, main]
+    branches: [main, migration/repository-split]
     paths:
       - '.github/workflows/mapgyver-linux-arm.yml'
       - '.cargo/**'
       - 'apps/mapgyver/**'
-      - 'crates/**'
-      - 'packages/**'
+      - 'golden'
+      - '.gitmodules'
       - 'tools/bootstrap/**'
       - 'tools/mapgyver/**'
       - 'tools/product-gate/hooks/**'
@@ -45,6 +45,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
       - uses: actions/setup-node@v6
         with:

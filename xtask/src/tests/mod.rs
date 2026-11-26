@@ -1,8 +1,6 @@
 use crate::watch::is_parent_cargo_package_variable;
 use std::ffi::OsStr;
 
-mod app_selection;
-
 #[cfg(not(target_os = "windows"))]
 use crate::cli::WatchConfig;
 #[cfg(not(target_os = "windows"))]
@@ -19,7 +17,7 @@ fn nested_cargo_drops_parent_package_context_but_keeps_user_configuration() {
         "CARGO_MANIFEST_PATH",
         "CARGO_PRIMARY_PACKAGE",
         "CARGO_TARGET_TMPDIR",
-        "CARGO_BIN_EXE_Chataigne2",
+        "CARGO_BIN_EXE_MapGyver",
         "CARGO_PKG_VERSION",
     ] {
         assert!(
@@ -47,9 +45,8 @@ fn nested_cargo_drops_parent_package_context_but_keeps_user_configuration() {
 #[test]
 fn shutdown_file_is_rejected_where_signal_shutdown_is_authoritative() {
     let config = WatchConfig {
-        app: crate::AppTarget::Chataigne,
-        frontend_port: 5173,
-        backend_port: 7010,
+        frontend_port: 5174,
+        backend_port: 7011,
         frontend_timeout: Duration::from_secs(30),
         backend_timeout: Duration::from_secs(30),
         engine_timeout: Duration::from_secs(30),

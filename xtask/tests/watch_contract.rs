@@ -12,8 +12,8 @@ fn watch_defaults_match_the_checked_in_development_contract() {
         panic!("watch should not return help");
     };
 
-    assert_eq!(config.frontend_port, 5173);
-    assert_eq!(config.backend_port, 7010);
+    assert_eq!(config.frontend_port, 5174);
+    assert_eq!(config.backend_port, 7011);
     assert_eq!(config.frontend_timeout, Duration::from_secs(60));
     assert_eq!(config.backend_timeout, Duration::from_secs(300));
     assert_eq!(config.engine_timeout, Duration::from_secs(30));
@@ -62,14 +62,14 @@ fn watch_parses_overrides_and_forwards_explicit_app_arguments() {
 
 #[test]
 fn watch_rejects_ambiguous_or_unbounded_configuration() {
-    assert!(WatchConfig::parse(["watch", "--frontend-port", "7010"]).is_err());
+    assert!(WatchConfig::parse(["watch", "--frontend-port", "7011"]).is_err());
     assert!(WatchConfig::parse(["watch", "--poll-ms", "0"]).is_err());
     assert!(WatchConfig::parse(["watch", "--backend-timeout-secs", "0"]).is_err());
 }
 
 #[test]
 fn readiness_probes_distinguish_frontend_backend_and_engine_contracts() {
-    let frontend = serve_once("200 OK", "text/html", "<main>Chataigne</main>");
+    let frontend = serve_once("200 OK", "text/html", "<main>MapGyver</main>");
     readiness::probe_frontend(frontend).expect("frontend root should be ready");
 
     let backend = serve_once("200 OK", "application/json", readiness_json(0));

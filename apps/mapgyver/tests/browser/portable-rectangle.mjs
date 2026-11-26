@@ -314,7 +314,7 @@ async function fullscreenGeometry() {
 async function verifyH264Output(surface, pixels) {
 	const { reference } = await edit('media', { kind: 'CreateMedia', media_kind: 'Video' });
 	const file = fileURLToPath(
-		new URL('../../../../crates/golden_video/src/decode/tests/fixtures/h264.mp4', import.meta.url)
+		new URL('../../../../golden/crates/golden_video/src/decode/tests/fixtures/h264.mp4', import.meta.url)
 	);
 	await edit('media', { kind: 'ConfigureVideoFile', reference, file });
 	await edit('media', {

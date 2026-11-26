@@ -27,10 +27,6 @@ target
 /target-*/
 /node_modules
 /.venv/
-/apps/chataigne/gen/
-/apps/chataigne/ui/.svelte-kit/
-/apps/chataigne/ui/artifacts/
-/apps/chataigne/ui/build/
 /apps/mapgyver/gen/
 /apps/mapgyver/ui/.svelte-kit/
 /apps/mapgyver/ui/build/
@@ -51,9 +47,3 @@ target
 **/coverage/
 **/playwright-report/
 **/test-results/
-
-# Retired gitlink checkouts may remain locally for reference; they are not workspace inputs.
-/src-ui/src/lib/golden_alchemist_ui/
-/src-ui/src/lib/golden_ui/
-/submodules/golden_alchemist_core/
-/submodules/golden_core/

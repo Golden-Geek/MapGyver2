@@ -2,13 +2,13 @@ name: MapGyver Windows ARM64
 
 on:
   push:
-    branches: [mapgyver, main]
+    branches: [main, migration/repository-split]
     paths:
       - '.github/workflows/mapgyver-windows-arm64.yml'
       - 'apps/mapgyver/**'
-      - 'crates/golden_video/**'
+      - 'golden'
+      - '.gitmodules'
       - 'tools/mapgyver/**'
-      - 'vendor/spout2-sys-0.1.1/**'
       - 'Cargo.lock'
       - 'package-lock.json'
   workflow_dispatch:
@@ -28,6 +28,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
       - name: Build FFmpeg DLLs and MSVC import libraries
         run: bash tools/mapgyver/ffmpeg/build-windows-arm64.sh "$RUNNER_TEMP/mapgyver-ffmpeg-arm64"
@@ -45,6 +47,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
       - uses: actions/download-artifact@v8
         with:
@@ -82,6 +86,8 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
       - uses: actions/download-artifact@v8
         with:
@@ -135,7 +141,7 @@ jobs:
           MAPGYVER_FFMPEG_ARM64_SDK: ${{ runner.temp }}/mapgyver-ffmpeg-arm64
           GC_UI_ASSUME_BUILT: '1'
         run: |
-          $env:GC_UI_OUT_DIR = Join-Path $env:GITHUB_WORKSPACE 'packages/golden-video-ui/build'
+          $env:GC_UI_OUT_DIR = Join-Path $env:GITHUB_WORKSPACE 'golden/packages/golden-video-ui/build'
           npm run build --workspace golden_video_ui
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           powershell -NoProfile -ExecutionPolicy Bypass -File tools/mapgyver/ffmpeg/with-ffmpeg.ps1 `
